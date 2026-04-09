@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 
 const navLinks = [
   { label: "소식", to: "/news" },
@@ -49,12 +49,12 @@ export default function Navbar() {
             search
           </button>
           <div className="hidden sm:flex gap-2">
-            <button className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+            <Link to="/login" className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
               로그인
-            </button>
-            <button className="px-4 py-1.5 rounded-full text-sm font-bold bg-linear-to-br from-primary to-primary-container text-white shadow-lg hover:opacity-90 active:scale-95 transition-all">
+            </Link>
+            <Link to="/signup" className="px-4 py-1.5 rounded-full text-sm font-bold bg-linear-to-br from-primary to-primary-container text-white shadow-lg hover:opacity-90 active:scale-95 transition-all">
               회원가입
-            </button>
+            </Link>
           </div>
         </div>
       </div>

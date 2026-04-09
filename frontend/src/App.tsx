@@ -8,6 +8,8 @@ import NoticePage from "./pages/NoticePage";
 import BoardPage from "./pages/BoardPage";
 import AlumniPage from "./pages/AlumniPage";
 import GalleryPage from "./pages/GalleryPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
             <Route path="/board" element={<BoardPage />} />
             <Route path="/alumni" element={<AlumniPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
           </Routes>
         </div>
         <Footer />
