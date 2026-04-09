@@ -10,6 +10,7 @@ import AlumniPage from "./pages/AlumniPage";
 import GalleryPage from "./pages/GalleryPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import OnboardingPage from "./pages/OnboardingPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
           </Routes>
         </div>
         <Footer />
