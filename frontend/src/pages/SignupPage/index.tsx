@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@lib/supabase";
 
 const VERIFY_TIMEOUT = 180;
 
@@ -49,31 +50,40 @@ export default function SignupPage() {
   const formatTime = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-  const handleSendCode = () => {
+  const handleSendCode = async () => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setVerifyError("올바른 이메일 주소를 입력하세요.");
       return;
     }
     setVerifyError("");
+    const { error } = await supabase.functions.invoke("send-otp", {
+      body: { email },
+    });
+    if (error) {
+      setVerifyError("인증번호 발송에 실패했습니다. 다시 시도해 주세요.");
+      return;
+    }
     setCodeSent(true);
     setVerifyCode("");
     setIsVerified(false);
     startTimer();
   };
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     if (verifyCode.length !== 6) {
       setVerifyError("인증번호 6자리를 입력하세요.");
       return;
     }
-    // TODO: 실제 서버 검증으로 교체
-    if (verifyCode === "123456") {
-      setIsVerified(true);
-      setVerifyError("");
-      if (timerRef.current) clearInterval(timerRef.current);
-    } else {
+    const { error } = await supabase.functions.invoke("verify-otp", {
+      body: { email, code: verifyCode },
+    });
+    if (error) {
       setVerifyError("인증번호가 올바르지 않습니다.");
+      return;
     }
+    setIsVerified(true);
+    setVerifyError("");
+    if (timerRef.current) clearInterval(timerRef.current);
   };
 
   const handleAgreedAll = (checked: boolean) => {
