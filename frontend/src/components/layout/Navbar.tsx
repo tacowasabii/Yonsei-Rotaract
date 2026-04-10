@@ -3,9 +3,13 @@ import { NavLink, Link } from "react-router-dom";
 const navLinks = [
   { label: "소식", to: "/news" },
   { label: "공지사항", to: "/notice" },
-  { label: "자유게시판", to: "/board" },
   { label: "선배님", to: "/alumni" },
   { label: "사진첩", to: "/gallery" },
+];
+
+const boardLinks = [
+  { label: "자유게시판", to: "/board/free" },
+  { label: "홍보게시판", to: "/board/promo" },
 ];
 
 export default function Navbar() {
@@ -24,7 +28,7 @@ export default function Navbar() {
               연세 로타랙트
             </span>
           </NavLink>
-          <div className="hidden md:flex gap-6">
+          <div className="hidden md:flex gap-6 items-center">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
@@ -40,6 +44,34 @@ export default function Navbar() {
                 {link.label}
               </NavLink>
             ))}
+
+            {/* 게시판 드롭다운 */}
+            <div className="relative group">
+              <button
+                className="font-headline font-bold tracking-tight transition-colors text-slate-500 hover:text-primary-container group-hover:text-primary-container"
+              >
+                게시판
+              </button>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 hidden group-hover:block">
+                <div className="bg-white rounded-2xl shadow-lg border border-slate-100 py-1.5 min-w-30 overflow-hidden">
+                  {boardLinks.map((link) => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      className={({ isActive }) =>
+                        `block px-4 py-2 text-sm font-semibold transition-colors ${
+                          isActive
+                            ? "text-primary-container bg-primary-fixed/50"
+                            : "text-slate-600 hover:text-primary-container hover:bg-surface-container"
+                        }`
+                      }
+                    >
+                      {link.label}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

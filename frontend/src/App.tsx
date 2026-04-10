@@ -24,6 +24,8 @@ function App() {
             <Route path="/news" element={<NewsPage />} />
             <Route path="/notice" element={<NoticePage />} />
             <Route path="/board" element={<BoardPage />} />
+            <Route path="/board/free" element={<BoardPage />} />
+            <Route path="/board/promo" element={<BoardPage />} />
             <Route path="/alumni" element={<AlumniPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/login" element={<LoginPage />} />
