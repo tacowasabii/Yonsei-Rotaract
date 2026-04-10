@@ -77,9 +77,9 @@ export default function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-3">
-          <button className="material-symbols-outlined text-slate-500 p-2 hover:bg-surface-container rounded-full transition-colors">
-            search
-          </button>
+          <Link to="/login" className="sm:hidden px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+            로그인
+          </Link>
           <div className="hidden sm:flex items-center gap-2">
             {/* 관리자 로그인 상태일 때만 표시 — 실제 구현 시 auth 상태로 조건부 렌더링 */}
             <Link
