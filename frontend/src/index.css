@@ -84,3 +84,7 @@ h1, h2, h3, h4 {
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
+
+button, [role="button"], a {
+  cursor: pointer;
+}
