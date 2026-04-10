@@ -69,21 +69,16 @@ export default function SignupPage() {
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
               <h2 className="text-lg font-bold font-headline text-on-surface mb-4">기본 정보 입력</h2>
 
-              {/* ID */}
+              {/* Email */}
               <div>
-                <label className="block text-sm font-semibold text-on-surface mb-1.5">아이디</label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">person</span>
-                    <input
-                      type="text"
-                      placeholder="영문, 숫자 6~20자"
-                      className="w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
-                    />
-                  </div>
-                  <button type="button" className="px-4 py-3 bg-primary-fixed text-primary-container text-sm font-bold rounded-xl hover:bg-primary-fixed/70 transition-all shrink-0">
-                    중복확인
-                  </button>
+                <label className="block text-sm font-semibold text-on-surface mb-1.5">이메일</label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">mail</span>
+                  <input
+                    type="email"
+                    placeholder="이메일 주소를 입력하세요"
+                    className="w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
+                  />
                 </div>
               </div>
 
