@@ -6,6 +6,7 @@ import { supabase } from "@lib/supabase";
 const VERIFY_TIMEOUT = 180;
 
 type SignupFormValues = {
+  email: string;
   password: string;
   passwordConfirm: string;
   name: string;
@@ -21,6 +22,7 @@ export default function SignupPage() {
     register,
     handleSubmit,
     getValues,
+    trigger,
     formState: { errors },
   } = useForm<SignupFormValues>({ mode: "onBlur" });
 
@@ -31,7 +33,6 @@ export default function SignupPage() {
   const [agreedAll, setAgreedAll] = useState(false);
   const [agreements, setAgreements] = useState({ terms: false, privacy: false, optional: false });
 
-  const [email, setEmail] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [verifyCode, setVerifyCode] = useState("");
   const [isVerified, setIsVerified] = useState(false);
@@ -56,11 +57,10 @@ export default function SignupPage() {
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   const handleSendCode = async () => {
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setVerifyError("올바른 이메일 주소를 입력하세요.");
-      return;
-    }
+    const valid = await trigger("email");
+    if (!valid) return;
     setVerifyError("");
+    const email = getValues("email");
     const { error } = await supabase.functions.invoke("send-otp", { body: { email } });
     if (error) { setVerifyError("인증번호 발송에 실패했습니다. 다시 시도해 주세요."); return; }
     setCodeSent(true);
@@ -71,6 +71,7 @@ export default function SignupPage() {
 
   const handleVerifyCode = async () => {
     if (verifyCode.length !== 6) { setVerifyError("인증번호 6자리를 입력하세요."); return; }
+    const email = getValues("email");
     const { error } = await supabase.functions.invoke("verify-otp", { body: { email, code: verifyCode } });
     if (error) { setVerifyError("인증번호가 올바르지 않습니다."); return; }
     setIsVerified(true);
@@ -91,7 +92,7 @@ export default function SignupPage() {
 
   const onSubmit = (data: SignupFormValues) => {
     if (!isVerified) return;
-    console.log({ email, ...data, memberType, joinInputType, agreements });
+    console.log({ ...data, memberType, joinInputType, agreements });
     // TODO: supabase.auth.signUp() 연동
   };
 
@@ -119,11 +120,13 @@ export default function SignupPage() {
                   <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">mail</span>
                   <input
                     type="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setVerifyError(""); }}
                     placeholder="이메일 주소를 입력하세요"
                     disabled={isVerified}
                     className={`${inputClass} disabled:opacity-60`}
+                    {...register("email", {
+                      required: "이메일을 입력하세요.",
+                      pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "올바른 이메일 주소를 입력하세요." },
+                    })}
                   />
                 </div>
                 <button
@@ -135,6 +138,18 @@ export default function SignupPage() {
                   {codeSent ? "재발송" : "인증번호 발송"}
                 </button>
               </div>
+              {errors.email && (
+                <p className={`mt-1.5 ${errorClass}`}>
+                  <span className="material-symbols-outlined text-sm">error</span>
+                  {errors.email.message}
+                </p>
+              )}
+              {verifyError && !errors.email && (
+                <p className={`mt-1.5 ${errorClass}`}>
+                  <span className="material-symbols-outlined text-sm">error</span>
+                  {verifyError}
+                </p>
+              )}
               {codeSent && !isVerified && (
                 <div className="mt-2 space-y-2">
                   <div className="flex gap-2">
@@ -162,12 +177,6 @@ export default function SignupPage() {
                       확인
                     </button>
                   </div>
-                  {verifyError && (
-                    <p className={errorClass}>
-                      <span className="material-symbols-outlined text-sm">error</span>
-                      {verifyError}
-                    </p>
-                  )}
                   <p className="text-xs text-on-surface-variant">인증번호가 오지 않으면 스팸함을 확인하거나 재발송해 주세요.</p>
                 </div>
               )}
