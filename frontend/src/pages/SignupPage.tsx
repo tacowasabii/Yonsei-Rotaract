@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
 const steps = ["기본 정보", "동아리 정보", "약관 동의"];
+const VERIFY_TIMEOUT = 180; // 3분
 
 export default function SignupPage() {
   const [step, setStep] = useState(0);
@@ -9,6 +10,60 @@ export default function SignupPage() {
   const [memberType, setMemberType] = useState<"active" | "alumni">("active");
   const [agreedAll, setAgreedAll] = useState(false);
   const [agreements, setAgreements] = useState({ terms: false, privacy: false, optional: false });
+
+  // 이메일 인증 상태
+  const [email, setEmail] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [verifyCode, setVerifyCode] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [verifyError, setVerifyError] = useState("");
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setTimeLeft(VERIFY_TIMEOUT);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(timerRef.current!);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+  };
+
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+
+  const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  const handleSendCode = () => {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setVerifyError("올바른 이메일 주소를 입력하세요.");
+      return;
+    }
+    setVerifyError("");
+    setCodeSent(true);
+    setVerifyCode("");
+    setIsVerified(false);
+    startTimer();
+  };
+
+  const handleVerifyCode = () => {
+    if (verifyCode.length !== 6) {
+      setVerifyError("인증번호 6자리를 입력하세요.");
+      return;
+    }
+    // TODO: 실제 서버 검증으로 교체
+    if (verifyCode === "123456") {
+      setIsVerified(true);
+      setVerifyError("");
+      if (timerRef.current) clearInterval(timerRef.current);
+    } else {
+      setVerifyError("인증번호가 올바르지 않습니다.");
+    }
+  };
 
   const handleAgreedAll = (checked: boolean) => {
     setAgreedAll(checked);
@@ -72,14 +127,73 @@ export default function SignupPage() {
               {/* Email */}
               <div>
                 <label className="block text-sm font-semibold text-on-surface mb-1.5">이메일</label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">mail</span>
-                  <input
-                    type="email"
-                    placeholder="이메일 주소를 입력하세요"
-                    className="w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
-                  />
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">mail</span>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); setVerifyError(""); }}
+                      placeholder="이메일 주소를 입력하세요"
+                      disabled={isVerified}
+                      className="w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 transition-all disabled:opacity-60"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSendCode}
+                    disabled={isVerified}
+                    className="px-4 py-3 bg-primary-fixed text-primary-container text-sm font-bold rounded-xl hover:bg-primary-fixed/70 transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {codeSent ? "재발송" : "인증번호 발송"}
+                  </button>
                 </div>
+
+                {/* 인증번호 입력 */}
+                {codeSent && !isVerified && (
+                  <div className="mt-2 space-y-2">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">pin</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={6}
+                          value={verifyCode}
+                          onChange={(e) => { setVerifyCode(e.target.value.replace(/\D/g, "")); setVerifyError(""); }}
+                          placeholder="인증번호 6자리"
+                          className="w-full pl-11 pr-20 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
+                        />
+                        <span className={`absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-bold tabular-nums ${timeLeft <= 30 ? "text-error" : "text-on-surface-variant"}`}>
+                          {timeLeft > 0 ? formatTime(timeLeft) : "만료"}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleVerifyCode}
+                        disabled={timeLeft === 0}
+                        className="px-4 py-3 bg-primary-container text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        확인
+                      </button>
+                    </div>
+                    {verifyError && (
+                      <p className="text-xs text-error flex items-center gap-1">
+                        <span className="material-symbols-outlined text-sm">error</span>
+                        {verifyError}
+                      </p>
+                    )}
+                    <p className="text-xs text-on-surface-variant">인증번호가 오지 않으면 스팸함을 확인하거나 재발송해 주세요.</p>
+                  </div>
+                )}
+
+                {/* 인증 완료 */}
+                {isVerified && (
+                  <p className="mt-2 text-xs text-primary-container flex items-center gap-1 font-semibold">
+                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                    이메일 인증이 완료되었습니다.
+                  </p>
+                )}
               </div>
 
               {/* Password */}
@@ -133,7 +247,8 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="w-full py-3.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all mt-2"
+                disabled={!isVerified}
+                className="w-full py-3.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all mt-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 다음
               </button>
