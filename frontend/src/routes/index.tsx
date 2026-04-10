@@ -1,7 +1,5 @@
-import { createBrowserRouter, Outlet } from "react-router-dom";
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
-import MobileNav from "../components/layout/MobileNav";
+import { createBrowserRouter } from "react-router-dom";
+import Layout from "./Layout";
 import HomePage from "../pages/HomePage";
 import NewsPage from "../pages/NewsPage";
 import NoticePage from "../pages/NoticePage";
@@ -13,19 +11,6 @@ import SignupPage from "../pages/SignupPage";
 import OnboardingPage from "../pages/OnboardingPage";
 import AdminPage from "../pages/AdminPage";
 import { PATHS } from "./paths";
-
-function Layout() {
-  return (
-    <div className="bg-background text-on-surface flex flex-col min-h-screen pb-20 md:pb-0">
-      <Navbar />
-      <div className="flex-1 flex flex-col">
-        <Outlet />
-      </div>
-      <Footer />
-      <MobileNav />
-    </div>
-  );
-}
 
 export const router = createBrowserRouter([
   {
