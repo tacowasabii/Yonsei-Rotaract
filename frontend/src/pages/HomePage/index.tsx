@@ -1,7 +1,7 @@
-import LeftSidebar from "../components/home/LeftSidebar";
-import MainFeed from "../components/home/MainFeed";
-import RightSidebar from "../components/home/RightSidebar";
-import PageLayout from "../components/layout/PageLayout";
+import LeftSidebar from "@components/home/LeftSidebar";
+import MainFeed from "@components/home/MainFeed";
+import RightSidebar from "@components/home/RightSidebar";
+import PageLayout from "@components/layout/PageLayout";
 
 export default function HomePage() {
   return (

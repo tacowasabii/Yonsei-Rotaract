@@ -1,6 +1,6 @@
 import { useState } from "react";
-import PageLayout from "../components/layout/PageLayout";
-import PageHeader from "../components/layout/PageHeader";
+import PageLayout from "@components/layout/PageLayout";
+import PageHeader from "@components/layout/PageHeader";
 
 const albums = [
   {

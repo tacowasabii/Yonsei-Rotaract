@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
-import PageLayout from "../components/layout/PageLayout";
-import PageHeader from "../components/layout/PageHeader";
+import PageLayout from "@components/layout/PageLayout";
+import PageHeader from "@components/layout/PageHeader";
 
 const noticePosts = [
   { id: "notice", num: null, title: "[필독] 2025년도 2학기 동아리 활동 가이드라인 안내", author: "관리자", date: "25.01.10", views: 1240, comments: 0, pinned: true },

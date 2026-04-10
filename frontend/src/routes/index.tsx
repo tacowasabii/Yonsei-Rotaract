@@ -1,15 +1,15 @@
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "./Layout";
-import HomePage from "../pages/HomePage";
-import NewsPage from "../pages/NewsPage";
-import NoticePage from "../pages/NoticePage";
-import BoardPage from "../pages/BoardPage";
-import AlumniPage from "../pages/AlumniPage";
-import GalleryPage from "../pages/GalleryPage";
-import LoginPage from "../pages/LoginPage";
-import SignupPage from "../pages/SignupPage";
-import OnboardingPage from "../pages/OnboardingPage";
-import AdminPage from "../pages/AdminPage";
+import HomePage from "@pages/HomePage";
+import NewsPage from "@pages/NewsPage";
+import NoticePage from "@pages/NoticePage";
+import BoardPage from "@pages/BoardPage";
+import AlumniPage from "@pages/AlumniPage";
+import GalleryPage from "@pages/GalleryPage";
+import LoginPage from "@pages/LoginPage";
+import SignupPage from "@pages/SignupPage";
+import OnboardingPage from "@pages/OnboardingPage";
+import AdminPage from "@pages/AdminPage";
 import { PATHS } from "./paths";
 
 export const router = createBrowserRouter([

@@ -5,6 +5,7 @@ const VERIFY_TIMEOUT = 180;
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [memberType, setMemberType] = useState<"active" | "alumni">("active");
   const [joinInputType, setJoinInputType] = useState<"generation" | "semester">(
     "generation",
@@ -199,19 +200,19 @@ export default function SignupPage() {
               <label className="block text-sm font-semibold text-on-surface mb-1.5">
                 비밀번호
               </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+              <div className="flex items-center bg-surface-container rounded-xl px-3.5 focus-within:ring-2 focus-within:ring-primary-container/30 transition-all">
+                <span className="material-symbols-outlined text-on-surface-variant text-xl shrink-0">
                   lock
                 </span>
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="영문, 숫자, 특수문자 포함 8자 이상"
-                  className="w-full pl-11 pr-11 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
+                  className="flex-1 px-2.5 py-3 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
+                  className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0"
                 >
                   <span className="material-symbols-outlined text-xl">
                     {showPassword ? "visibility_off" : "visibility"}
@@ -225,15 +226,24 @@ export default function SignupPage() {
               <label className="block text-sm font-semibold text-on-surface mb-1.5">
                 비밀번호 확인
               </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+              <div className="flex items-center bg-surface-container rounded-xl px-3.5 focus-within:ring-2 focus-within:ring-primary-container/30 transition-all">
+                <span className="material-symbols-outlined text-on-surface-variant text-xl shrink-0">
                   lock
                 </span>
                 <input
-                  type="password"
+                  type={showPasswordConfirm ? "text" : "password"}
                   placeholder="비밀번호를 다시 입력하세요"
-                  className="w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
+                  className="flex-1 px-2.5 py-3 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                  className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0"
+                >
+                  <span className="material-symbols-outlined text-xl">
+                    {showPasswordConfirm ? "visibility_off" : "visibility"}
+                  </span>
+                </button>
               </div>
             </div>
 
