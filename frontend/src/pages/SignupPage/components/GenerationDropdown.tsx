@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { UseFormRegister, UseFormSetValue, FieldError } from "react-hook-form";
-import { SignupFormValues, GENERATION_OPTIONS } from "../types";
+import type { UseFormRegister, UseFormSetValue, FieldError } from "react-hook-form";
+import type { SignupFormValues } from "../types";
+import { GENERATION_OPTIONS } from "../types";
 
 const errorClass = "mt-1 text-xs text-error";
 

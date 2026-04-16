@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { UseFormRegister, UseFormTrigger, FieldErrors } from "react-hook-form";
-import { SignupFormValues } from "../types";
+import type {
+  UseFormRegister,
+  UseFormTrigger,
+  FieldErrors,
+} from "react-hook-form";
+import type { SignupFormValues } from "../types";
 
 const inputClass = (hasError: boolean) =>
   `w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none transition-all ${
-    hasError ? "ring-2 ring-error" : "focus:ring-2 focus:ring-primary-container/30"
+    hasError
+      ? "ring-2 ring-error"
+      : "focus:ring-2 focus:ring-primary-container/30"
   }`;
 
-const errorClass = "mt-1 text-xs text-error";
+const errorClass = "mt-2 text-xs text-error";
 
 type Props = {
   register: UseFormRegister<SignupFormValues>;
@@ -40,7 +46,9 @@ export function UsernameField({
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-on-surface mb-1.5">아이디</label>
+      <label className="block text-sm font-semibold text-on-surface mb-1.5">
+        아이디
+      </label>
       <div className="flex gap-2">
         <div className="relative flex-1">
           <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
@@ -77,19 +85,26 @@ export function UsernameField({
           {isChecking ? "확인 중..." : "중복확인"}
         </button>
       </div>
-      {errors.username && <p className={errorClass}>{errors.username.message}</p>}
+      {errors.username && (
+        <p className={errorClass}>{errors.username.message}</p>
+      )}
       {usernameChecked === true && (
         <p className="mt-2 text-xs text-primary-container flex items-center gap-1 font-semibold">
-          <span className="material-symbols-outlined text-sm">check_circle</span>
+          <span className="material-symbols-outlined text-sm">
+            check_circle
+          </span>
           사용 가능한 아이디입니다.
         </p>
       )}
       {usernameChecked === false && (
         <p className={errorClass}>이미 사용 중인 아이디입니다.</p>
       )}
-      {submitAttempted && !errors.username && usernameChecked !== true && usernameChecked !== false && (
-        <p className={errorClass}>아이디 중복확인을 해주세요.</p>
-      )}
+      {submitAttempted &&
+        !errors.username &&
+        usernameChecked !== true &&
+        usernameChecked !== false && (
+          <p className={errorClass}>아이디 중복확인을 해주세요.</p>
+        )}
     </div>
   );
 }
