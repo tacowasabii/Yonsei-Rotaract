@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 
@@ -15,8 +15,13 @@ type SignupFormValues = {
 };
 
 const GENERATION_OPTIONS = [
-  ...Array.from({ length: 50 }, (_, i) => String(i + 1)),
-  ...Array.from({ length: 15 }, (_, i) => String(50.5 + i * 0.5)),
+  ...Array.from({ length: 15 }, (_, i) => `${57.5 - i * 0.5}기`),
+  "46~50기",
+  "41~45기",
+  "31~40기",
+  "21~30기",
+  "11~20기",
+  "1~10기",
 ];
 
 export default function SignupPage() {
@@ -25,6 +30,7 @@ export default function SignupPage() {
     handleSubmit,
     getValues,
     trigger,
+    setValue,
     formState: { errors },
   } = useForm<SignupFormValues>({ mode: "onBlur" });
 
@@ -42,13 +48,33 @@ export default function SignupPage() {
   const [usernameChecked, setUsernameChecked] = useState<boolean | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
+  const [generationOpen, setGenerationOpen] = useState(false);
+  const [selectedGeneration, setSelectedGeneration] = useState("");
+  const generationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (generationRef.current && !generationRef.current.contains(e.target as Node)) {
+        setGenerationOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectGeneration = (value: string) => {
+    setSelectedGeneration(value);
+    setValue("generation", value, { shouldValidate: true });
+    setGenerationOpen(false);
+  };
+
   const handleCheckUsername = async () => {
     const valid = await trigger("username");
     if (!valid) return;
     setIsCheckingUsername(true);
     // TODO: 실제 중복 확인 API 연동
     await new Promise((r) => setTimeout(r, 600));
-    setUsernameChecked(true); // 임시: 항상 사용 가능
+    setUsernameChecked(true);
     setIsCheckingUsername(false);
   };
 
@@ -346,86 +372,88 @@ export default function SignupPage() {
 
             {/* 학과 (졸업생만) */}
             {memberType === "alumni" && (
-            <div>
-              <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                학과
-              </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
-                  menu_book
-                </span>
-                <input
-                  type="text"
-                  placeholder="예) 경영학과"
-                  className={inputClass}
-                  {...register("department", {
-                    required: memberType === "alumni" ? "학과를 입력하세요." : false,
-                  })}
-                />
+              <div>
+                <label className="block text-sm font-semibold text-on-surface mb-1.5">
+                  학과
+                </label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+                    menu_book
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="예) 경영학과"
+                    className={inputClass}
+                    {...register("department", {
+                      required: "학과를 입력하세요.",
+                    })}
+                  />
+                </div>
+                {errors.department && (
+                  <p className={errorClass}>
+                    <span className="material-symbols-outlined text-sm">error</span>
+                    {errors.department.message}
+                  </p>
+                )}
               </div>
-              {errors.department && (
-                <p className={errorClass}>
-                  <span className="material-symbols-outlined text-sm">error</span>
-                  {errors.department.message}
-                </p>
-              )}
-            </div>
             )}
 
-            {/* 동아리 기수 (졸업생만, 선택) */}
+            {/* 동아리 기수 (졸업생만) - 커스텀 드롭다운 */}
             {memberType === "alumni" && (
-            <div>
-              <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                동아리 기수{" "}
-                <span className="text-xs font-normal text-on-surface-variant">(선택)</span>
-              </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
-                  tag
-                </span>
-                <select
-                  className="w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-container/30 transition-all appearance-none"
-                  {...register("generation")}
-                >
-                  <option value="">기수 선택</option>
-                  <optgroup label="1기 ~ 10기">
-                    {GENERATION_OPTIONS.slice(0, 10).map((g) => (
-                      <option key={g} value={g}>{g}기</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="11기 ~ 20기">
-                    {GENERATION_OPTIONS.slice(10, 20).map((g) => (
-                      <option key={g} value={g}>{g}기</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="21기 ~ 30기">
-                    {GENERATION_OPTIONS.slice(20, 30).map((g) => (
-                      <option key={g} value={g}>{g}기</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="31기 ~ 40기">
-                    {GENERATION_OPTIONS.slice(30, 40).map((g) => (
-                      <option key={g} value={g}>{g}기</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="41기 ~ 45기">
-                    {GENERATION_OPTIONS.slice(40, 45).map((g) => (
-                      <option key={g} value={g}>{g}기</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="46기 ~ 50기">
-                    {GENERATION_OPTIONS.slice(45, 50).map((g) => (
-                      <option key={g} value={g}>{g}기</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="50.5기 ~ 57.5기">
-                    {GENERATION_OPTIONS.slice(50).map((g) => (
-                      <option key={g} value={g}>{g}기</option>
-                    ))}
-                  </optgroup>
-                </select>
+              <div>
+                <label className="block text-sm font-semibold text-on-surface mb-1.5">
+                  동아리 기수
+                </label>
+                {/* hidden input for react-hook-form */}
+                <input
+                  type="hidden"
+                  {...register("generation", { required: "기수를 선택하세요." })}
+                />
+                <div className="relative" ref={generationRef}>
+                  <button
+                    type="button"
+                    onClick={() => setGenerationOpen((o) => !o)}
+                    className={`w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-left transition-all flex items-center justify-between ${
+                      generationOpen ? "ring-2 ring-primary-container/30" : ""
+                    } ${selectedGeneration ? "text-on-surface" : "text-on-surface-variant"}`}
+                  >
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+                      tag
+                    </span>
+                    <span>{selectedGeneration || "기수 선택"}</span>
+                    <span className={`material-symbols-outlined text-xl text-on-surface-variant transition-transform ${generationOpen ? "rotate-180" : ""}`}>
+                      expand_more
+                    </span>
+                  </button>
+
+                  {generationOpen && (
+                    <div className="absolute z-50 mt-1.5 w-full bg-surface-container-lowest rounded-2xl shadow-lg border border-outline-variant/20 overflow-hidden">
+                      <div className="max-h-64 overflow-y-auto">
+                        {GENERATION_OPTIONS.map((g) => (
+                          <button
+                            key={g}
+                            type="button"
+                            onClick={() => handleSelectGeneration(g)}
+                            className={`w-full px-4 py-2.5 text-sm text-left transition-colors ${
+                              selectedGeneration === g
+                                ? "bg-primary-fixed text-primary-container font-bold"
+                                : "text-on-surface hover:bg-surface-container"
+                            }`}
+                          >
+                            {g}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {errors.generation && (
+                  <p className={errorClass}>
+                    <span className="material-symbols-outlined text-sm">error</span>
+                    {errors.generation.message}
+                  </p>
+                )}
               </div>
-            </div>
             )}
 
             {/* 직장 (졸업생) */}
@@ -463,26 +491,11 @@ export default function SignupPage() {
               </label>
               <div className="space-y-3 pl-2">
                 {[
-                  {
-                    key: "terms" as const,
-                    label: "이용약관 동의",
-                    required: true,
-                  },
-                  {
-                    key: "privacy" as const,
-                    label: "개인정보 수집 및 이용 동의",
-                    required: true,
-                  },
-                  {
-                    key: "optional" as const,
-                    label: "마케팅 정보 수신 동의 (선택)",
-                    required: false,
-                  },
+                  { key: "terms" as const, label: "이용약관 동의", required: true },
+                  { key: "privacy" as const, label: "개인정보 수집 및 이용 동의", required: true },
+                  { key: "optional" as const, label: "마케팅 정보 수신 동의 (선택)", required: false },
                 ].map(({ key, label, required }) => (
-                  <label
-                    key={key}
-                    className="flex items-center justify-between cursor-pointer"
-                  >
+                  <label key={key} className="flex items-center justify-between cursor-pointer">
                     <div className="flex items-center gap-3">
                       <input
                         type="checkbox"
@@ -492,9 +505,7 @@ export default function SignupPage() {
                       />
                       <span className="text-sm text-on-surface">{label}</span>
                       {required && (
-                        <span className="text-[10px] font-bold text-error">
-                          [필수]
-                        </span>
+                        <span className="text-[10px] font-bold text-error">[필수]</span>
                       )}
                     </div>
                     <span className="material-symbols-outlined text-on-surface-variant text-sm">
@@ -514,12 +525,7 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              disabled={
-                !usernameChecked ||
-                !agreements.terms ||
-                !agreements.privacy ||
-                isSubmitting
-              }
+              disabled={!usernameChecked || !agreements.terms || !agreements.privacy || isSubmitting}
               className="w-full py-3.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting && (
@@ -533,10 +539,7 @@ export default function SignupPage() {
 
           <p className="text-center text-sm text-on-surface-variant mt-6">
             이미 회원이신가요?{" "}
-            <Link
-              to="/login"
-              className="text-primary-container font-bold hover:underline"
-            >
+            <Link to="/login" className="text-primary-container font-bold hover:underline">
               로그인
             </Link>
           </p>
