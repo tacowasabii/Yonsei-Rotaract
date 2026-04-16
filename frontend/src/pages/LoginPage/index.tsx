@@ -36,19 +36,16 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex-1 flex items-center justify-center px-4 py-8">
+    <main className="flex-1 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-10">
-          <img src="/logo.png" alt="연세 로타랙트 로고" className="h-16 w-16 object-contain mb-4" />
-          <h1 className="text-2xl font-extrabold font-headline text-primary-container">연세 로타랙트</h1>
+        <div className="flex flex-col items-center mb-8 mt-12">
+          <img src="/logo.png" alt="연세 로타랙트 로고" className="h-14 w-14 object-contain mb-3" />
+          <h1 className="text-2xl font-extrabold font-headline text-primary-container">로그인</h1>
           <p className="text-sm text-on-surface-variant mt-1">커뮤니티에 오신 것을 환영합니다</p>
         </div>
 
         {/* Card */}
         <div className="bg-surface-container-lowest rounded-3xl shadow-card p-8">
-          <h2 className="text-xl font-bold font-headline text-on-surface mb-6">로그인</h2>
-
           <form className="space-y-4" onSubmit={handleSubmit}>
             {/* Email */}
             <div>
