@@ -97,12 +97,6 @@ export default function LoginPage() {
 
           {/* Social Login */}
           <div className="space-y-3">
-            <button onClick={handleKakaoLogin} className="w-full flex items-center justify-center gap-3 py-3 bg-[#FEE500] text-[#3C1E1E] font-bold rounded-xl hover:opacity-90 transition-all text-sm">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M9 1C4.58 1 1 3.91 1 7.5c0 2.32 1.52 4.36 3.83 5.54L4 16l3.64-1.9C8.08 14.17 8.54 14.2 9 14.2c4.42 0 8-2.91 8-6.7C17 3.91 13.42 1 9 1z" fill="#3C1E1E"/>
-              </svg>
-              카카오로 로그인
-            </button>
             <button onClick={handleKakaoLogin} className="w-full flex items-center justify-center gap-3 py-3 bg-[#03C75A] text-white font-bold rounded-xl hover:opacity-90 transition-all text-sm">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z" fill="white"/>

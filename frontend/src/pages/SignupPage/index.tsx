@@ -1,21 +1,23 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { supabase } from "@lib/supabase";
-
-const VERIFY_TIMEOUT = 180;
 
 type SignupFormValues = {
+  username: string;
   email: string;
+  phone: string;
   password: string;
   passwordConfirm: string;
   name: string;
   department: string;
-  generation: number;
-  joinYear: string;
-  joinSemester: string;
+  generation: string;
   workplace: string;
 };
+
+const GENERATION_OPTIONS = [
+  ...Array.from({ length: 50 }, (_, i) => String(i + 1)),
+  ...Array.from({ length: 15 }, (_, i) => String(50.5 + i * 0.5)),
+];
 
 export default function SignupPage() {
   const {
@@ -29,88 +31,25 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [memberType, setMemberType] = useState<"active" | "alumni">("active");
-  const [joinInputType, setJoinInputType] = useState<"generation" | "semester">(
-    "generation",
-  );
   const [agreedAll, setAgreedAll] = useState(false);
   const [agreements, setAgreements] = useState({
     terms: false,
     privacy: false,
     optional: false,
   });
-
-  const [codeSent, setCodeSent] = useState(false);
-  const [verifyCode, setVerifyCode] = useState("");
-  const [isVerified, setIsVerified] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [verifyError, setVerifyError] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const startTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setTimeLeft(VERIFY_TIMEOUT);
-    timerRef.current = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) {
-          clearInterval(timerRef.current!);
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-  };
+  const [usernameChecked, setUsernameChecked] = useState<boolean | null>(null);
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
-  useEffect(
-    () => () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    },
-    [],
-  );
-
-  const formatTime = (s: number) =>
-    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
-
-  const handleSendCode = async () => {
-    const valid = await trigger("email");
+  const handleCheckUsername = async () => {
+    const valid = await trigger("username");
     if (!valid) return;
-    setVerifyError("");
-    setIsSending(true);
-    const email = getValues("email");
-    const { error } = await supabase.functions.invoke("send-otp", {
-      body: { email },
-    });
-    setIsSending(false);
-    if (error) {
-      setVerifyError("인증번호 발송에 실패했습니다. 다시 시도해 주세요.");
-      return;
-    }
-    setCodeSent(true);
-    setVerifyCode("");
-    setIsVerified(false);
-    startTimer();
-  };
-
-  const handleVerifyCode = async () => {
-    if (verifyCode.length !== 6) {
-      setVerifyError("인증번호 6자리를 입력하세요.");
-      return;
-    }
-    setIsVerifying(true);
-    const email = getValues("email");
-    const { error } = await supabase.functions.invoke("verify-otp", {
-      body: { email, code: verifyCode },
-    });
-    setIsVerifying(false);
-    if (error) {
-      setVerifyError("인증번호가 올바르지 않습니다.");
-      return;
-    }
-    setIsVerified(true);
-    setVerifyError("");
-    if (timerRef.current) clearInterval(timerRef.current);
+    setIsCheckingUsername(true);
+    // TODO: 실제 중복 확인 API 연동
+    await new Promise((r) => setTimeout(r, 600));
+    setUsernameChecked(true); // 임시: 항상 사용 가능
+    setIsCheckingUsername(false);
   };
 
   const handleAgreedAll = (checked: boolean) => {
@@ -125,10 +64,10 @@ export default function SignupPage() {
   };
 
   const onSubmit = async (data: SignupFormValues) => {
-    if (!isVerified) return;
+    if (!usernameChecked) return;
     setIsSubmitting(true);
-    console.log({ ...data, memberType, joinInputType, agreements });
-    // TODO: supabase.auth.signUp() 연동
+    console.log({ ...data, memberType, agreements });
+    // TODO: 회원가입 API 연동
     setIsSubmitting(false);
   };
 
@@ -156,114 +95,63 @@ export default function SignupPage() {
 
         <div className="bg-surface-container-lowest rounded-3xl shadow-card p-8">
           <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-            {/* 이메일 */}
+            {/* 아이디 */}
             <div>
               <label className="block text-sm font-semibold text-on-surface mb-1.5">
-                이메일
+                아이디
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
-                    mail
+                    person
                   </span>
                   <input
-                    type="email"
-                    placeholder="이메일 주소를 입력하세요"
-                    disabled={isVerified}
+                    type="text"
+                    placeholder="사용할 아이디를 입력하세요"
+                    disabled={usernameChecked === true}
                     className={`${inputClass} disabled:opacity-60`}
-                    {...register("email", {
-                      required: "이메일을 입력하세요.",
+                    {...register("username", {
+                      required: "아이디를 입력하세요.",
+                      minLength: { value: 4, message: "4자 이상 입력하세요." },
+                      maxLength: { value: 20, message: "20자 이하로 입력하세요." },
                       pattern: {
-                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: "올바른 이메일 주소를 입력하세요.",
+                        value: /^[a-zA-Z0-9_]+$/,
+                        message: "영문, 숫자, 밑줄(_)만 사용 가능합니다.",
                       },
+                      onChange: () => setUsernameChecked(null),
                     })}
                   />
                 </div>
                 <button
                   type="button"
-                  onClick={handleSendCode}
-                  disabled={isVerified || isSending}
+                  onClick={handleCheckUsername}
+                  disabled={usernameChecked === true || isCheckingUsername}
                   className="px-4 py-3 bg-primary-fixed text-primary-container text-sm font-bold rounded-xl hover:bg-primary-fixed/70 transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                 >
-                  {isSending && (
+                  {isCheckingUsername && (
                     <span className="material-symbols-outlined text-sm animate-spin">
                       progress_activity
                     </span>
                   )}
-                  {isSending
-                    ? "발송 중..."
-                    : codeSent
-                      ? "재발송"
-                      : "인증번호 발송"}
+                  {isCheckingUsername ? "확인 중..." : "중복확인"}
                 </button>
               </div>
-              {errors.email && (
-                <p className={`mt-1.5 ${errorClass}`}>
-                  <span className="material-symbols-outlined text-sm">
-                    error
-                  </span>
-                  {errors.email.message}
+              {errors.username && (
+                <p className={errorClass}>
+                  <span className="material-symbols-outlined text-sm">error</span>
+                  {errors.username.message}
                 </p>
               )}
-              {verifyError && !errors.email && (
-                <p className={`mt-1.5 ${errorClass}`}>
-                  <span className="material-symbols-outlined text-sm">
-                    error
-                  </span>
-                  {verifyError}
-                </p>
-              )}
-              {codeSent && !isVerified && (
-                <div className="mt-2 space-y-2">
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
-                        pin
-                      </span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={6}
-                        value={verifyCode}
-                        onChange={(e) => {
-                          setVerifyCode(e.target.value.replace(/\D/g, ""));
-                          setVerifyError("");
-                        }}
-                        placeholder="인증번호 6자리"
-                        className="w-full pl-11 pr-20 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
-                      />
-                      <span
-                        className={`absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-bold tabular-nums ${timeLeft <= 30 ? "text-error" : "text-on-surface-variant"}`}
-                      >
-                        {timeLeft > 0 ? formatTime(timeLeft) : "만료"}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleVerifyCode}
-                      disabled={timeLeft === 0 || isVerifying}
-                      className="px-4 py-3 bg-primary-container text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-                    >
-                      {isVerifying && (
-                        <span className="material-symbols-outlined text-sm animate-spin">
-                          progress_activity
-                        </span>
-                      )}
-                      {isVerifying ? "확인 중..." : "확인"}
-                    </button>
-                  </div>
-                  <p className="text-xs text-on-surface-variant">
-                    인증번호가 오지 않으면 스팸함을 확인하거나 재발송해 주세요.
-                  </p>
-                </div>
-              )}
-              {isVerified && (
+              {usernameChecked === true && (
                 <p className="mt-2 text-xs text-primary-container flex items-center gap-1 font-semibold">
-                  <span className="material-symbols-outlined text-sm">
-                    check_circle
-                  </span>
-                  이메일 인증이 완료되었습니다.
+                  <span className="material-symbols-outlined text-sm">check_circle</span>
+                  사용 가능한 아이디입니다.
+                </p>
+              )}
+              {usernameChecked === false && (
+                <p className={errorClass}>
+                  <span className="material-symbols-outlined text-sm">error</span>
+                  이미 사용 중인 아이디입니다.
                 </p>
               )}
             </div>
@@ -302,9 +190,7 @@ export default function SignupPage() {
               </div>
               {errors.password && (
                 <p className={errorClass}>
-                  <span className="material-symbols-outlined text-sm">
-                    error
-                  </span>
+                  <span className="material-symbols-outlined text-sm">error</span>
                   {errors.password.message}
                 </p>
               )}
@@ -342,9 +228,7 @@ export default function SignupPage() {
               </div>
               {errors.passwordConfirm && (
                 <p className={errorClass}>
-                  <span className="material-symbols-outlined text-sm">
-                    error
-                  </span>
+                  <span className="material-symbols-outlined text-sm">error</span>
                   {errors.passwordConfirm.message}
                 </p>
               )}
@@ -368,10 +252,68 @@ export default function SignupPage() {
               </div>
               {errors.name && (
                 <p className={errorClass}>
-                  <span className="material-symbols-outlined text-sm">
-                    error
-                  </span>
+                  <span className="material-symbols-outlined text-sm">error</span>
                   {errors.name.message}
+                </p>
+              )}
+            </div>
+
+            {/* 이메일 */}
+            <div>
+              <label className="block text-sm font-semibold text-on-surface mb-1.5">
+                이메일
+              </label>
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+                  mail
+                </span>
+                <input
+                  type="email"
+                  placeholder="이메일 주소를 입력하세요"
+                  className={inputClass}
+                  {...register("email", {
+                    required: "이메일을 입력하세요.",
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: "올바른 이메일 주소를 입력하세요.",
+                    },
+                  })}
+                />
+              </div>
+              {errors.email && (
+                <p className={errorClass}>
+                  <span className="material-symbols-outlined text-sm">error</span>
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            {/* 휴대폰 번호 */}
+            <div>
+              <label className="block text-sm font-semibold text-on-surface mb-1.5">
+                휴대폰 번호
+              </label>
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+                  smartphone
+                </span>
+                <input
+                  type="tel"
+                  placeholder="010-0000-0000"
+                  className={inputClass}
+                  {...register("phone", {
+                    required: "휴대폰 번호를 입력하세요.",
+                    pattern: {
+                      value: /^01[0-9]-?\d{3,4}-?\d{4}$/,
+                      message: "올바른 휴대폰 번호를 입력하세요.",
+                    },
+                  })}
+                />
+              </div>
+              {errors.phone && (
+                <p className={errorClass}>
+                  <span className="material-symbols-outlined text-sm">error</span>
+                  {errors.phone.message}
                 </p>
               )}
             </div>
@@ -402,7 +344,8 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* 학과 */}
+            {/* 학과 (졸업생만) */}
+            {memberType === "alumni" && (
             <div>
               <label className="block text-sm font-semibold text-on-surface mb-1.5">
                 학과
@@ -416,106 +359,74 @@ export default function SignupPage() {
                   placeholder="예) 경영학과"
                   className={inputClass}
                   {...register("department", {
-                    required: "학과를 입력하세요.",
+                    required: memberType === "alumni" ? "학과를 입력하세요." : false,
                   })}
                 />
               </div>
               {errors.department && (
                 <p className={errorClass}>
-                  <span className="material-symbols-outlined text-sm">
-                    error
-                  </span>
+                  <span className="material-symbols-outlined text-sm">error</span>
                   {errors.department.message}
                 </p>
               )}
             </div>
+            )}
 
-            {/* 기수 / 가입 학기 */}
+            {/* 동아리 기수 (졸업생만, 선택) */}
+            {memberType === "alumni" && (
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-sm font-semibold text-on-surface">
-                  {joinInputType === "generation" ? "동아리 기수" : "가입 학기"}
-                </label>
-                <div className="flex bg-surface-container rounded-lg p-0.5 text-xs font-bold">
-                  {(["generation", "semester"] as const).map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setJoinInputType(type)}
-                      className={`px-3 py-1 rounded-md transition-all ${joinInputType === type ? "bg-primary-container text-white" : "text-on-surface-variant"}`}
-                    >
-                      {type === "generation" ? "기수" : "학기"}
-                    </button>
-                  ))}
-                </div>
+              <label className="block text-sm font-semibold text-on-surface mb-1.5">
+                동아리 기수{" "}
+                <span className="text-xs font-normal text-on-surface-variant">(선택)</span>
+              </label>
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+                  tag
+                </span>
+                <select
+                  className="w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-container/30 transition-all appearance-none"
+                  {...register("generation")}
+                >
+                  <option value="">기수 선택</option>
+                  <optgroup label="1기 ~ 10기">
+                    {GENERATION_OPTIONS.slice(0, 10).map((g) => (
+                      <option key={g} value={g}>{g}기</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="11기 ~ 20기">
+                    {GENERATION_OPTIONS.slice(10, 20).map((g) => (
+                      <option key={g} value={g}>{g}기</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="21기 ~ 30기">
+                    {GENERATION_OPTIONS.slice(20, 30).map((g) => (
+                      <option key={g} value={g}>{g}기</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="31기 ~ 40기">
+                    {GENERATION_OPTIONS.slice(30, 40).map((g) => (
+                      <option key={g} value={g}>{g}기</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="41기 ~ 45기">
+                    {GENERATION_OPTIONS.slice(40, 45).map((g) => (
+                      <option key={g} value={g}>{g}기</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="46기 ~ 50기">
+                    {GENERATION_OPTIONS.slice(45, 50).map((g) => (
+                      <option key={g} value={g}>{g}기</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="50.5기 ~ 57.5기">
+                    {GENERATION_OPTIONS.slice(50).map((g) => (
+                      <option key={g} value={g}>{g}기</option>
+                    ))}
+                  </optgroup>
+                </select>
               </div>
-              {joinInputType === "generation" ? (
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
-                    tag
-                  </span>
-                  <input
-                    type="number"
-                    min={1}
-                    placeholder="예) 35"
-                    className="w-full pl-11 pr-10 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
-                    {...register("generation", {
-                      required: "기수를 입력하세요.",
-                      min: { value: 1, message: "올바른 기수를 입력하세요." },
-                    })}
-                  />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-on-surface-variant font-semibold">
-                    기
-                  </span>
-                  {errors.generation && (
-                    <p className={errorClass}>
-                      <span className="material-symbols-outlined text-sm">
-                        error
-                      </span>
-                      {errors.generation.message}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
-                      calendar_today
-                    </span>
-                    <select
-                      className="w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-container/30 transition-all appearance-none"
-                      {...register("joinYear", {
-                        required: "년도를 선택하세요.",
-                      })}
-                    >
-                      <option value="">년도 선택</option>
-                      {Array.from({ length: 15 }, (_, i) => 2025 - i).map(
-                        (y) => (
-                          <option key={y} value={y}>
-                            {y}년
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </div>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
-                      event
-                    </span>
-                    <select
-                      className="w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-container/30 transition-all appearance-none"
-                      {...register("joinSemester", {
-                        required: "학기를 선택하세요.",
-                      })}
-                    >
-                      <option value="">학기 선택</option>
-                      <option value="1">1학기</option>
-                      <option value="2">2학기</option>
-                    </select>
-                  </div>
-                </div>
-              )}
             </div>
+            )}
 
             {/* 직장 (졸업생) */}
             {memberType === "alumni" && (
@@ -604,7 +515,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={
-                !isVerified ||
+                !usernameChecked ||
                 !agreements.terms ||
                 !agreements.privacy ||
                 isSubmitting
