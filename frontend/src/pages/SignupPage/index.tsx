@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
+import { supabase } from "@/lib/supabase";
+import { PATHS } from "@/routes/paths";
 import type { SignupFormValues } from "./types";
-import { UsernameField } from "./components/UsernameField";
+import { EmailField } from "./components/EmailField";
 import { PasswordField } from "./components/PasswordField";
 import { FormInput } from "./components/FormInput";
 import { MemberTypeSelector } from "./components/MemberTypeSelector";
@@ -10,6 +12,7 @@ import { GenerationDropdown } from "./components/GenerationDropdown";
 import { AgreementsSection } from "./components/AgreementsSection";
 
 export default function SignupPage() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -25,7 +28,8 @@ export default function SignupPage() {
   const [agreements, setAgreements] = useState({ terms: false, privacy: false, optional: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
-  const [usernameChecked, setUsernameChecked] = useState<boolean | null>(null);
+  const [emailChecked, setEmailChecked] = useState<boolean | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleAgreedAll = (checked: boolean) => {
     setAgreedAll(checked);
@@ -40,11 +44,28 @@ export default function SignupPage() {
 
   const onSubmit = async (data: SignupFormValues) => {
     setSubmitAttempted(true);
-    if (!usernameChecked || !agreements.terms || !agreements.privacy) return;
+    if (!emailChecked || !agreements.terms || !agreements.privacy) return;
     setIsSubmitting(true);
-    console.log({ ...data, memberType, agreements });
-    // TODO: 회원가입 API 연동
-    setIsSubmitting(false);
+    setSubmitError(null);
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          name: data.name,
+          phone: data.phone,
+          member_type: memberType,
+          department: memberType === "alumni" ? data.department : null,
+          generation: memberType === "alumni" ? data.generation : null,
+        },
+      },
+    });
+    if (error) {
+      setSubmitError(error.message);
+      setIsSubmitting(false);
+      return;
+    }
+    navigate(PATHS.LOGIN);
   };
 
   const handleSubmitClick = () => {
@@ -52,23 +73,22 @@ export default function SignupPage() {
     trigger();
   };
 
-  const [username, password, passwordConfirm, name, email, phone, department, generation] = useWatch({
+  const [email, password, passwordConfirm, name, phone, department, generation] = useWatch({
     control,
-    name: ["username", "password", "passwordConfirm", "name", "email", "phone", "department", "generation"],
+    name: ["email", "password", "passwordConfirm", "name", "phone", "department", "generation"],
   });
 
   const canSubmit = (() => {
     const base =
-      usernameChecked === true &&
-      !!username &&
+      emailChecked === true &&
+      !!email &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
       !!password &&
       password.length >= 8 &&
       /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])/.test(password) &&
       !!passwordConfirm &&
       passwordConfirm === password &&
       !!name &&
-      !!email &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
       !!phone &&
       /^01[0-9]-?\d{3,4}-?\d{4}$/.test(phone) &&
       agreements.terms &&
@@ -88,12 +108,13 @@ export default function SignupPage() {
 
         <div className="bg-surface-container-lowest rounded-3xl shadow-card p-8">
           <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-            <UsernameField
+            <EmailField
               register={register}
               trigger={trigger}
               errors={errors}
-              usernameChecked={usernameChecked}
-              onCheckedChange={setUsernameChecked}
+              emailValue={email ?? ""}
+              emailChecked={emailChecked}
+              onCheckedChange={setEmailChecked}
               submitAttempted={submitAttempted}
             />
 
@@ -130,22 +151,6 @@ export default function SignupPage() {
               hasError={!!errors.name}
               errorMessage={errors.name?.message}
               inputProps={register("name", { required: "이름을 입력하세요." })}
-            />
-
-            <FormInput
-              label="이메일"
-              icon="mail"
-              type="email"
-              placeholder="이메일 주소를 입력하세요"
-              hasError={!!errors.email}
-              errorMessage={errors.email?.message}
-              inputProps={register("email", {
-                required: "이메일을 입력하세요.",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "올바른 이메일 주소를 입력하세요.",
-                },
-              })}
             />
 
             <FormInput
@@ -200,6 +205,10 @@ export default function SignupPage() {
               onSingle={handleAgreement}
               submitAttempted={submitAttempted}
             />
+
+            {submitError && (
+              <p className="text-xs text-error text-center">{submitError}</p>
+            )}
 
             <button
               type="submit"

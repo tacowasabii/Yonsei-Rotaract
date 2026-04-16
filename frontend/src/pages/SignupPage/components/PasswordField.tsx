@@ -40,9 +40,9 @@ export function PasswordField({
         <button
           type="button"
           onClick={() => setShow((s) => !s)}
-          className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0"
+          className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0 flex items-center"
         >
-          <span className="material-symbols-outlined text-xl">
+          <span className="material-symbols-outlined text-xl leading-none">
             {show ? "visibility_off" : "visibility"}
           </span>
         </button>

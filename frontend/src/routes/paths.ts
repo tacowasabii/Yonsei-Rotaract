@@ -9,6 +9,7 @@ export const PATHS = {
   GALLERY: "/gallery",
   LOGIN: "/login",
   SIGNUP: "/signup",
+  SIGNUP_COMPLETE: "/signup/complete",
   ONBOARDING: "/onboarding",
   ADMIN: "/admin",
 } as const;
