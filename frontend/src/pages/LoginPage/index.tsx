@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [saveEmail, setSaveEmail] = useState(() => !!localStorage.getItem("saved_email"));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [showForgotModal, setShowForgotModal] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -105,7 +106,7 @@ export default function LoginPage() {
                 />
                 <span className="text-sm text-on-surface-variant">이메일 저장</span>
               </label>
-              <button type="button" className="text-sm text-primary-container font-semibold hover:underline">
+              <button type="button" onClick={() => setShowForgotModal(true)} className="text-sm text-primary-container font-semibold hover:underline">
                 비밀번호 찾기
               </button>
             </div>
@@ -142,6 +143,35 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4"
+          onClick={() => setShowForgotModal(false)}
+        >
+          <div
+            className="bg-surface-container-lowest rounded-3xl shadow-card p-8 w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center">
+              <span className="material-symbols-outlined text-4xl text-primary-container mb-4">
+                lock_reset
+              </span>
+              <h2 className="text-lg font-bold font-headline text-on-surface mb-2">비밀번호 찾기</h2>
+              <p className="text-sm text-on-surface-variant leading-relaxed">
+                비밀번호 재설정은 운영진에게 직접 문의해 주세요.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowForgotModal(false)}
+              className="w-full mt-6 py-3 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 transition-all"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
