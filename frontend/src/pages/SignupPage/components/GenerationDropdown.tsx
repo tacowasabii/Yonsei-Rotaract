@@ -2,8 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import type { UseFormRegister, UseFormSetValue, FieldError } from "react-hook-form";
 import type { SignupFormValues } from "../types";
 import { GENERATION_OPTIONS } from "../types";
-
-const errorClass = "mt-1 text-xs text-error";
+import { errorClass } from "./fieldStyles";
 
 type Props = {
   register: UseFormRegister<SignupFormValues>;

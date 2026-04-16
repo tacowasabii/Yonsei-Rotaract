@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
-
-const errorClass = "mt-2 text-xs text-error";
+import { FieldWrapper } from "./FieldWrapper";
 
 type Props = {
   label: string;
@@ -21,12 +20,9 @@ export function PasswordField({
   const [show, setShow] = useState(false);
 
   return (
-    <div>
-      <label className="block text-sm font-semibold text-on-surface mb-1.5">
-        {label}
-      </label>
+    <FieldWrapper label={label} hasError={hasError} errorMessage={errorMessage}>
       <div
-        className={`flex items-center bg-surface-container rounded-xl px-3.5 transition-all ${
+        className={`flex items-center bg-surface-container rounded-xl px-3.5 transition-all mb-1 ${
           hasError
             ? "ring-2 ring-error"
             : "focus-within:ring-2 focus-within:ring-primary-container/30"
@@ -51,7 +47,6 @@ export function PasswordField({
           </span>
         </button>
       </div>
-      {hasError && errorMessage && <p className={errorClass}>{errorMessage}</p>}
-    </div>
+    </FieldWrapper>
   );
 }

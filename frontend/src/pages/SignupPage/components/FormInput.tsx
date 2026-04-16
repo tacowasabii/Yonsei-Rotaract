@@ -1,13 +1,6 @@
 import type { UseFormRegisterReturn } from "react-hook-form";
-
-const inputClass = (hasError: boolean) =>
-  `w-full pl-11 pr-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none transition-all ${
-    hasError
-      ? "ring-2 ring-error"
-      : "focus:ring-2 focus:ring-primary-container/30"
-  }`;
-
-const errorClass = "mt-2 text-xs text-error";
+import { FieldWrapper } from "./FieldWrapper";
+import { inputClass } from "./fieldStyles";
 
 type Props = {
   label: string;
@@ -29,10 +22,7 @@ export function FormInput({
   inputProps,
 }: Props) {
   return (
-    <div>
-      <label className="block text-sm font-semibold text-on-surface mb-1.5">
-        {label}
-      </label>
+    <FieldWrapper label={label} hasError={hasError} errorMessage={errorMessage}>
       <div className="relative">
         <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
           {icon}
@@ -44,7 +34,6 @@ export function FormInput({
           {...inputProps}
         />
       </div>
-      {hasError && errorMessage && <p className={errorClass}>{errorMessage}</p>}
-    </div>
+    </FieldWrapper>
   );
 }
