@@ -1,18 +1,21 @@
--- app_role ENUM 타입 생성
+-- ENUM 타입 생성
 CREATE TYPE public.app_role AS ENUM ('user', 'staff', 'admin', 'super_admin');
+CREATE TYPE public.member_type AS ENUM ('current', 'alumni');
+CREATE TYPE public.member_status AS ENUM ('pending', 'active', 'inactive');
 
 -- profiles 테이블 생성
 CREATE TABLE public.profiles (
-  id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  name        TEXT NOT NULL DEFAULT '',
-  phone       TEXT,
-  member_type TEXT CHECK (member_type IN ('active', 'alumni')),
-  department  TEXT,
-  generation  TEXT,
-  role        public.app_role NOT NULL DEFAULT 'user',
-  status      TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'inactive')),
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  name           TEXT NOT NULL DEFAULT '',
+  phone          TEXT,
+  member_type    public.member_type,
+  admission_year INTEGER,
+  department     TEXT,
+  generation     TEXT,
+  role           public.app_role NOT NULL DEFAULT 'user',
+  status         public.member_status NOT NULL DEFAULT 'pending',
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- updated_at 자동 갱신 트리거 함수
@@ -32,12 +35,13 @@ CREATE TRIGGER on_profiles_updated
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, name, phone, member_type, department, generation)
+  INSERT INTO public.profiles (id, name, phone, member_type, admission_year, department, generation)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'name', ''),
     NEW.raw_user_meta_data->>'phone',
-    NEW.raw_user_meta_data->>'member_type',
+    (NEW.raw_user_meta_data->>'member_type')::public.member_type,
+    (NEW.raw_user_meta_data->>'admission_year')::integer,
     NEW.raw_user_meta_data->>'department',
     NEW.raw_user_meta_data->>'generation'
   );
