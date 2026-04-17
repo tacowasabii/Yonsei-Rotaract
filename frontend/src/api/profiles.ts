@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { Member, AppRole } from "./types/member";
+import type { Member, PendingMember, AppRole } from "./types/member";
 
 export async function fetchMembers(): Promise<Member[]> {
   const { data, error } = await supabase
@@ -20,6 +20,14 @@ export async function updateMemberRole(memberId: string, newRole: AppRole): Prom
   if (error) throw error;
 }
 
+export async function updateMemberStatus(memberId: string, newStatus: "active" | "inactive"): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ status: newStatus })
+    .eq("id", memberId);
+  if (error) throw error;
+}
+
 export async function fetchProfile(userId: string) {
   const { data, error } = await supabase
     .from("profiles")
@@ -28,6 +36,40 @@ export async function fetchProfile(userId: string) {
     .single();
   if (error) throw error;
   return data;
+}
+
+export async function fetchPendingMembers(): Promise<PendingMember[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as PendingMember[];
+}
+
+export async function approveMember(memberId: string): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ status: "active" })
+    .eq("id", memberId);
+  if (error) throw error;
+}
+
+export async function rejectMember(memberId: string): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ status: "rejected" })
+    .eq("id", memberId);
+  if (error) throw error;
+}
+
+export async function approveAllPendingMembers(): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ status: "active" })
+    .eq("status", "pending");
+  if (error) throw error;
 }
 
 export async function upsertProfile(profile: {

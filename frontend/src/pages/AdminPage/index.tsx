@@ -3,11 +3,11 @@ import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole, Member } from "@/api/types/member";
-import { useMembers, useUpdateMemberRole } from "@/api/hooks/useMembers";
+import { useMembers, useUpdateMemberRole, useUpdateMemberStatus } from "@/api/hooks/useMembers";
+import { usePendingMembers, useApproveMember, useRejectMember, useApproveAllPending } from "@/api/hooks/usePendingMembers";
 import { ManageAccountsIcon } from "@assets/icons";
 
 type Tab = "dashboard" | "pending" | "members";
-type PendingStatus = "pending" | "approved" | "rejected";
 
 // ── 상수 ──────────────────────────────────────────────────────────────────────
 
@@ -48,20 +48,6 @@ const MOCK_MEMBERS: Member[] = [
   { id: "m10", name: "이수진", email: "test_leesujin@rotaract.test",   phone: "01011110010", member_type: "alumni",  admission_year: 2017, department: "사회학과",     generation: "30기", role: "user",   status: "active",   created_at: "2024-01-15T00:00:00" },
 ];
 
-const pendingSignups = [
-  { id: 1, name: "정다은", userId: "daeun_j",    major: "심리학과",     year: "2024년", memberType: "current", provider: "kakao",  appliedAt: "2025. 04. 09 14:32", status: "pending" as PendingStatus },
-  { id: 2, name: "오현우", userId: "hyunwoo_oh", major: "기계공학과",   year: "2023년", memberType: "current", provider: "email",  appliedAt: "2025. 04. 09 11:18", status: "pending" as PendingStatus },
-  { id: 3, name: "강민지", userId: "minji_k",    major: "경제학과",     year: "2019년", memberType: "alumni",  provider: "google", appliedAt: "2025. 04. 08 20:05", status: "pending" as PendingStatus },
-  { id: 4, name: "윤서준", userId: "sjyoon",     major: "컴퓨터과학과", year: "2022년", memberType: "current", provider: "naver",  appliedAt: "2025. 04. 08 09:41", status: "pending" as PendingStatus },
-];
-
-const providerLabel: Record<string, { label: string; color: string }> = {
-  kakao:  { label: "카카오", color: "bg-[#FEE500]/40 text-[#3C1E1E]" },
-  naver:  { label: "네이버", color: "bg-[#03C75A]/15 text-[#03C75A]" },
-  google: { label: "구글",   color: "bg-slate-100 text-slate-600" },
-  email:  { label: "이메일", color: "bg-primary-fixed text-primary-container" },
-};
-
 // ── 컴포넌트 ──────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -69,25 +55,28 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [memberSearch, setMemberSearch] = useState("");
   const [filterType, setFilterType] = useState("전체");
-  const [statuses, setStatuses] = useState<Record<number, PendingStatus>>(
-    Object.fromEntries(pendingSignups.map((p) => [p.id, p.status]))
-  );
 
   const { data: fetchedMembers, isLoading: membersLoading } = useMembers();
+  const { data: pendingMembers = [], isLoading: pendingLoading } = usePendingMembers();
+  const approveMember = useApproveMember();
+  const rejectMember = useRejectMember();
+  const approveAll = useApproveAllPending();
   const updateRole = useUpdateMemberRole();
+  const updateStatus = useUpdateMemberStatus();
 
   const isMockData = !fetchedMembers || fetchedMembers.length === 0;
   const members = isMockData ? MOCK_MEMBERS : fetchedMembers;
+  const pendingCount = pendingMembers.length;
 
   const handleRoleChange = (memberId: string, newRole: AppRole) => {
     if (isMockData) return;
     updateRole.mutate({ memberId, newRole });
   };
 
-  const handleApprove = (id: number) => setStatuses((prev) => ({ ...prev, [id]: "approved" }));
-  const handleReject  = (id: number) => setStatuses((prev) => ({ ...prev, [id]: "rejected" }));
-
-  const pendingCount = Object.values(statuses).filter((s) => s === "pending").length;
+  const handleStatusToggle = (memberId: string, currentStatus: "active" | "inactive") => {
+    if (isMockData) return;
+    updateStatus.mutate({ memberId, newStatus: currentStatus === "active" ? "inactive" : "active" });
+  };
 
   const filteredMembers = members.filter((m) => {
     if (m.role === "super_admin") return false;
@@ -179,34 +168,44 @@ export default function AdminPage() {
               </button>
             </div>
             <div className="space-y-3">
-              {pendingSignups.slice(0, 3).map((p) => (
-                <div key={p.id} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center">
-                      <span className="material-symbols-outlined text-base text-on-secondary-fixed-variant">person</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-on-surface">{p.name}</p>
-                      <p className="text-xs text-on-surface-variant">{p.major} · {p.year}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${providerLabel[p.provider].color}`}>
-                      {providerLabel[p.provider].label}
-                    </span>
-                    {statuses[p.id] === "pending" ? (
-                      <div className="flex gap-1">
-                        <button onClick={() => handleApprove(p.id)} className="px-3 py-1 bg-primary-container text-white text-xs font-bold rounded-full hover:opacity-80">승인</button>
-                        <button onClick={() => handleReject(p.id)}  className="px-3 py-1 bg-error/10 text-error text-xs font-bold rounded-full hover:opacity-80">거절</button>
-                      </div>
-                    ) : (
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statuses[p.id] === "approved" ? "bg-primary-fixed text-primary-container" : "bg-error/10 text-error"}`}>
-                        {statuses[p.id] === "approved" ? "승인됨" : "거절됨"}
-                      </span>
-                    )}
-                  </div>
+              {pendingLoading ? (
+                <div className="flex items-center justify-center py-6 text-on-surface-variant">
+                  <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+                  불러오는 중...
                 </div>
-              ))}
+              ) : pendingMembers.length === 0 ? (
+                <p className="text-sm text-on-surface-variant text-center py-6">대기 중인 가입 신청이 없습니다.</p>
+              ) : (
+                pendingMembers.slice(0, 3).map((p) => (
+                  <div key={p.id} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center">
+                        <span className="material-symbols-outlined text-base text-on-secondary-fixed-variant">person</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-on-surface">{p.name}</p>
+                        <p className="text-xs text-on-surface-variant">
+                          {p.department ?? "-"}{p.admission_year ? ` · ${p.admission_year}년 입학` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => approveMember.mutate(p.id)}
+                        className="px-3 py-1 bg-primary-container text-white text-xs font-bold rounded-full hover:opacity-80"
+                      >
+                        승인
+                      </button>
+                      <button
+                        onClick={() => rejectMember.mutate(p.id)}
+                        className="px-3 py-1 bg-error/10 text-error text-xs font-bold rounded-full hover:opacity-80"
+                      >
+                        거절
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -232,64 +231,71 @@ export default function AdminPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm text-on-surface-variant">
-              총 <span className="font-bold text-on-surface">{pendingSignups.length}건</span> 중{" "}
               <span className="font-bold text-error">{pendingCount}건</span> 대기 중
             </p>
-            <button
-              onClick={() => pendingSignups.forEach((p) => statuses[p.id] === "pending" && handleApprove(p.id))}
-              className="px-4 py-1.5 bg-primary-container text-white text-sm font-bold rounded-full hover:opacity-80"
-            >
-              전체 승인
-            </button>
+            {pendingCount > 0 && (
+              <button
+                onClick={() => approveAll.mutate()}
+                disabled={approveAll.isPending}
+                className="px-4 py-1.5 bg-primary-container text-white text-sm font-bold rounded-full hover:opacity-80 disabled:opacity-50"
+              >
+                전체 승인
+              </button>
+            )}
           </div>
 
-          {pendingSignups.map((p) => (
-            <div key={p.id} className={`bg-surface-container-lowest rounded-2xl p-5 shadow-card transition-all ${statuses[p.id] !== "pending" ? "opacity-60" : ""}`}>
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-2xl text-on-secondary-fixed-variant">person</span>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-bold text-on-surface">{p.name}</p>
-                      <span className="text-xs text-on-surface-variant">@{p.userId}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${providerLabel[p.provider].color}`}>
-                        {providerLabel[p.provider].label}
-                      </span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.memberType === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
-                        {p.memberType === "current" ? "현역" : "졸업생"}
-                      </span>
+          {pendingLoading ? (
+            <div className="flex items-center justify-center py-16 text-on-surface-variant">
+              <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+              불러오는 중...
+            </div>
+          ) : pendingMembers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
+              <span className="material-symbols-outlined text-4xl">check_circle</span>
+              <p className="text-sm">대기 중인 가입 신청이 없습니다.</p>
+            </div>
+          ) : (
+            pendingMembers.map((p) => (
+              <div key={p.id} className="bg-surface-container-lowest rounded-2xl p-5 shadow-card">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-2xl text-on-secondary-fixed-variant">person</span>
                     </div>
-                    <p className="text-sm text-on-surface-variant mt-0.5">{p.major} · {p.year} 입학</p>
-                    <p className="text-xs text-on-surface-variant mt-0.5">신청일시: {p.appliedAt}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {statuses[p.id] === "pending" ? (
-                    <>
-                      <button onClick={() => handleApprove(p.id)} className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-white text-sm font-bold rounded-full hover:opacity-80 active:scale-95 transition-all">
-                        <span className="material-symbols-outlined text-base">check_circle</span>승인
-                      </button>
-                      <button onClick={() => handleReject(p.id)} className="flex items-center gap-1.5 px-4 py-2 bg-error/10 text-error text-sm font-bold rounded-full hover:opacity-80 active:scale-95 transition-all">
-                        <span className="material-symbols-outlined text-base">cancel</span>거절
-                      </button>
-                    </>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <span className={`flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full ${statuses[p.id] === "approved" ? "bg-primary-fixed text-primary-container" : "bg-error/10 text-error"}`}>
-                        <span className="material-symbols-outlined text-base">{statuses[p.id] === "approved" ? "check_circle" : "cancel"}</span>
-                        {statuses[p.id] === "approved" ? "승인됨" : "거절됨"}
-                      </span>
-                      <button onClick={() => setStatuses((prev) => ({ ...prev, [p.id]: "pending" }))} className="text-xs text-on-surface-variant hover:text-on-surface underline">
-                        되돌리기
-                      </button>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-bold text-on-surface">{p.name}</p>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.member_type === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
+                          {p.member_type === "current" ? "현역" : "졸업생"}
+                        </span>
+                      </div>
+                      <p className="text-sm text-on-surface-variant mt-0.5">
+                        {p.department ?? "-"}{p.admission_year ? ` · ${p.admission_year}년 입학` : ""}
+                      </p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">{p.email}</p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">신청일시: {formatDate(p.created_at)}</p>
                     </div>
-                  )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => approveMember.mutate(p.id)}
+                      disabled={approveMember.isPending}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-white text-sm font-bold rounded-full hover:opacity-80 active:scale-95 transition-all disabled:opacity-50"
+                    >
+                      <span className="material-symbols-outlined text-base">check_circle</span>승인
+                    </button>
+                    <button
+                      onClick={() => rejectMember.mutate(p.id)}
+                      disabled={rejectMember.isPending}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-error/10 text-error text-sm font-bold rounded-full hover:opacity-80 active:scale-95 transition-all disabled:opacity-50"
+                    >
+                      <span className="material-symbols-outlined text-base">cancel</span>거절
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
 
@@ -410,9 +416,13 @@ export default function AdminPage() {
                             )}
                           </td>
                           <td className="px-4 py-3 text-center">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}>
+                            <button
+                              onClick={() => handleStatusToggle(member.id, member.status as "active" | "inactive")}
+                              disabled={isMockData || updateStatus.isPending}
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-70 disabled:cursor-not-allowed ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}
+                            >
                               {member.status === "active" ? "활성" : "비활성"}
-                            </span>
+                            </button>
                           </td>
                         </tr>
                       );
