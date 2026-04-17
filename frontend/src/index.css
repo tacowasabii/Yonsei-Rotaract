@@ -75,6 +75,7 @@ body {
   background-color: var(--color-background);
   color: var(--color-on-surface);
   margin: 0;
+  min-width: 1280px;
 }
 
 h1, h2, h3, h4 {
