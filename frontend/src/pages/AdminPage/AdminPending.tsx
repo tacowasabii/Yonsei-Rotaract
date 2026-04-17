@@ -46,7 +46,7 @@ export default function AdminPending() {
                     </span>
                   </div>
                   <p className="text-sm text-on-surface-variant mt-0.5">
-                    {p.department ?? "-"}{p.admission_year ? ` · ${p.admission_year}년 입학` : ""}
+                    {p.department ?? "-"}{p.admission_year ? ` · ${String(p.admission_year).slice(-2)}학번` : ""}
                   </p>
                   <p className="text-xs text-on-surface-variant mt-0.5">{p.email}</p>
                   <p className="text-xs text-on-surface-variant mt-0.5">신청일시: {formatDate(p.created_at)}</p>
@@ -104,7 +104,7 @@ export default function AdminPending() {
                       )}
                     </div>
                     <p className="text-sm text-on-surface-variant mt-0.5">
-                      {p.department ?? "-"}{p.admission_year ? ` · ${p.admission_year}년 입학` : ""}
+                      {p.department ?? "-"}{p.admission_year ? ` · ${String(p.admission_year).slice(-2)}학번` : ""}
                     </p>
                     <p className="text-xs text-on-surface-variant mt-0.5">{p.email}</p>
                     <p className="text-xs text-on-surface-variant mt-0.5">신청일시: {formatDate(p.created_at)}</p>

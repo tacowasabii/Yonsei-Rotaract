@@ -66,7 +66,7 @@ export default function AdminDashboard() {
                   <div>
                     <p className="text-sm font-semibold text-on-surface">{p.name}</p>
                     <p className="text-xs text-on-surface-variant">
-                      {p.department ?? "-"}{p.admission_year ? ` · ${p.admission_year}년 입학` : ""}
+                      {p.department ?? "-"}{p.admission_year ? ` · ${String(p.admission_year).slice(-2)}학번` : ""}
                     </p>
                   </div>
                 </div>
