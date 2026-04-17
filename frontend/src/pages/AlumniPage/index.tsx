@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
+import { SchoolIcon } from "@assets/icons";
 
 const alumni = [
   {
@@ -112,7 +113,7 @@ export default function AlumniPage() {
 
   return (
     <PageLayout>
-      <PageHeader icon="school" title="선배님 정보" subtitle="다양한 분야에서 활약 중인 로타랙트 선배님들을 만나보세요." />
+      <PageHeader iconNode={<SchoolIcon />} title="선배님 정보" subtitle="다양한 분야에서 활약 중인 로타랙트 선배님들을 만나보세요." />
 
       {/* Search */}
       <div className="relative mb-6">

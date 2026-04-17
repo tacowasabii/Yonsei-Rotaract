@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
+import { PhotoLibraryIcon } from "@assets/icons";
 
 const albums = [
   {
@@ -70,7 +71,7 @@ export default function GalleryPage() {
 
   return (
     <PageLayout>
-      <PageHeader icon="photo_library" title="사진첩" subtitle="로타랙트의 소중한 추억들을 사진으로 만나보세요." />
+      <PageHeader iconNode={<PhotoLibraryIcon />} title="사진첩" subtitle="로타랙트의 소중한 추억들을 사진으로 만나보세요." />
 
       {/* Tab Toggle */}
       <div className="flex gap-2 mb-6">

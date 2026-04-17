@@ -1,5 +1,6 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth, useIsAdmin } from "@/contexts/AuthContext";
+import { ManageAccountsIcon } from "@assets/icons";
 
 const navLinks = [
   { label: "소식", to: "/news" },
@@ -103,7 +104,7 @@ export default function Navbar() {
                     to="/admin"
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all"
                   >
-                    <span className="material-symbols-outlined text-sm">manage_accounts</span>
+                    <ManageAccountsIcon className="w-4 h-4" />
                     관리자
                   </Link>
                 )}

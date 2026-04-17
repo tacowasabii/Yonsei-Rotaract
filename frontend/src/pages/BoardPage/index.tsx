@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
+import { ForumIcon } from "@assets/icons";
 
 const noticePosts = [
   { id: "notice", num: null, title: "[필독] 2025년도 2학기 동아리 활동 가이드라인 안내", author: "관리자", date: "25.01.10", views: 1240, comments: 0, pinned: true },
@@ -30,6 +31,7 @@ const promoPosts = [
 export default function BoardPage() {
   const location = useLocation();
   const isPromo = location.pathname === "/board/promo";
+  const boardType = isPromo ? "promo" : "free";
   const boardLabel = isPromo ? "홍보게시판" : "자유게시판";
   const boardDesc = isPromo
     ? "모집·홍보·나눔 등 공유하고 싶은 소식을 올려보세요."
@@ -37,13 +39,14 @@ export default function BoardPage() {
 
   const regularPosts = isPromo ? promoPosts : freePosts;
 
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
   return (
     <PageLayout>
       {/* Hero Header */}
-      <PageHeader title={boardLabel} subtitle={boardDesc} />
+      <PageHeader iconNode={<ForumIcon />} title={boardLabel} subtitle={boardDesc} />
 
       {/* Search bar + Write button */}
       <div className="flex items-center justify-between gap-4 mb-5">
@@ -59,7 +62,10 @@ export default function BoardPage() {
             className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-container/30 transition-all placeholder:text-on-surface-variant shadow-card"
           />
         </div>
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm shrink-0">
+        <button
+          onClick={() => navigate(`/board/${boardType}/write`)}
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm shrink-0"
+        >
           <span className="material-symbols-outlined text-[18px]">edit</span>
           글쓰기
         </button>
@@ -125,6 +131,7 @@ export default function BoardPage() {
               {regularPosts.map((post) => (
                 <tr
                   key={post.id}
+                  onClick={() => navigate(`/board/${boardType}/${post.id}`)}
                   className="hover:bg-surface-container-lowest transition-colors cursor-pointer group bg-white"
                 >
                   <td className="py-4 px-4 text-center text-on-surface-variant">{post.num}</td>

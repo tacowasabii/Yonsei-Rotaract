@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
+import { CampaignIcon } from "@assets/icons";
 
 const notices = [
   {
@@ -84,7 +85,7 @@ export default function NoticePage() {
 
   return (
     <PageLayout>
-      <PageHeader icon="campaign" title="공지사항" subtitle="중요한 공지와 안내사항을 확인하세요." />
+      <PageHeader iconNode={<CampaignIcon />} title="공지사항" subtitle="중요한 공지와 안내사항을 확인하세요." />
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-6">

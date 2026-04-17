@@ -1,0 +1,6 @@
+export { default as ManageAccountsIcon } from './manage_accounts.svg?react';
+export { default as SchoolIcon } from './school.svg?react';
+export { default as PhotoLibraryIcon } from './photo_library.svg?react';
+export { default as CampaignIcon } from './campaign.svg?react';
+export { default as ForumIcon } from './forum.svg?react';
+export { default as NewspaperIcon } from './newspaper.svg?react';

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
+import { NewspaperIcon } from "@assets/icons";
 
 const categories = ["전체", "동아리 소식", "봉사활동", "이벤트", "공지"];
 
@@ -99,7 +100,7 @@ export default function NewsPage() {
 
   return (
     <PageLayout>
-            <PageHeader title="소식" subtitle="연세 로타랙트의 활동 소식과 이벤트를 확인하세요." />
+            <PageHeader iconNode={<NewspaperIcon />} title="소식" subtitle="연세 로타랙트의 활동 소식과 이벤트를 확인하세요." />
 
       {/* Category Filter */}
       <div className="flex gap-2 flex-wrap mb-8">
