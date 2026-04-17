@@ -156,14 +156,14 @@ export default function SignupPage() {
             <FormInput
               label="휴대폰 번호"
               icon="smartphone"
-              type="tel"
-              placeholder="010-0000-0000"
+              type="number"
+              placeholder="01012345678"
               hasError={!!errors.phone}
               errorMessage={errors.phone?.message}
               inputProps={register("phone", {
                 required: "휴대폰 번호를 입력하세요.",
                 pattern: {
-                  value: /^01[0-9]-?\d{3,4}-?\d{4}$/,
+                  value: /^01[0-9]\d{7,8}$/,
                   message: "올바른 휴대폰 번호를 입력하세요.",
                 },
               })}
