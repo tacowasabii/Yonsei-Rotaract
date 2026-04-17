@@ -7,15 +7,16 @@ CREATE TYPE public.member_status AS ENUM ('pending', 'active', 'inactive');
 CREATE TABLE public.profiles (
   id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   name           TEXT NOT NULL DEFAULT '',
-  phone          TEXT,
-  member_type    public.member_type,
+  email          TEXT NOT NULL DEFAULT '',
+  phone          TEXT NOT NULL DEFAULT '',
+  member_type    public.member_type NOT NULL,
   admission_year INTEGER,
   department     TEXT,
   generation     TEXT,
   role           public.app_role NOT NULL DEFAULT 'user',
   status         public.member_status NOT NULL DEFAULT 'pending',
-  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at     TIMESTAMPTZ DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- updated_at 자동 갱신 트리거 함수
@@ -35,11 +36,12 @@ CREATE TRIGGER on_profiles_updated
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, name, phone, member_type, admission_year, department, generation)
+  INSERT INTO public.profiles (id, name, email, phone, member_type, admission_year, department, generation)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'name', ''),
-    NEW.raw_user_meta_data->>'phone',
+    COALESCE(NEW.email, ''),
+    COALESCE(NEW.raw_user_meta_data->>'phone', ''),
     (NEW.raw_user_meta_data->>'member_type')::public.member_type,
     (NEW.raw_user_meta_data->>'admission_year')::integer,
     NEW.raw_user_meta_data->>'department',

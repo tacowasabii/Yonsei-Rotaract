@@ -5,6 +5,8 @@ import HomePage from "@pages/HomePage";
 import NewsPage from "@pages/NewsPage";
 import NoticePage from "@pages/NoticePage";
 import BoardPage from "@pages/BoardPage";
+import BoardPostPage from "@pages/BoardPostPage";
+import BoardWritePage from "@pages/BoardWritePage";
 import AlumniPage from "@pages/AlumniPage";
 import GalleryPage from "@pages/GalleryPage";
 import LoginPage from "@pages/LoginPage";
@@ -24,7 +26,11 @@ export const router = createBrowserRouter([
       { path: PATHS.NOTICE, element: <NoticePage /> },
       { path: PATHS.BOARD, element: <BoardPage /> },
       { path: PATHS.BOARD_FREE, element: <BoardPage /> },
+      { path: PATHS.BOARD_FREE_WRITE, element: <BoardWritePage /> },
+      { path: PATHS.BOARD_FREE_POST, element: <BoardPostPage /> },
       { path: PATHS.BOARD_PROMO, element: <BoardPage /> },
+      { path: PATHS.BOARD_PROMO_WRITE, element: <BoardWritePage /> },
+      { path: PATHS.BOARD_PROMO_POST, element: <BoardPostPage /> },
       { path: PATHS.ALUMNI, element: <AlumniPage /> },
       { path: PATHS.GALLERY, element: <GalleryPage /> },
       { path: PATHS.LOGIN, element: <LoginPage /> },

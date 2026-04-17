@@ -1,27 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
-import type { AppRole } from "@/contexts/AuthContext";
+import type { AppRole, Member } from "@/api/types/member";
+import { useMembers, useUpdateMemberRole } from "@/api/hooks/useMembers";
 import { ManageAccountsIcon } from "@assets/icons";
 
 type Tab = "dashboard" | "pending" | "members";
 type PendingStatus = "pending" | "approved" | "rejected";
-
-interface Member {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  member_type: "current" | "alumni" | null;
-  admission_year: number | null;
-  department: string | null;
-  generation: string | null;
-  role: AppRole;
-  status: "active" | "inactive";
-  created_at: string;
-}
 
 // ── 상수 ──────────────────────────────────────────────────────────────────────
 
@@ -63,17 +49,17 @@ const MOCK_MEMBERS: Member[] = [
 ];
 
 const pendingSignups = [
-  { id: 1, name: "정다은", userId: "daeun_j",   major: "심리학과",    year: "2024년", memberType: "current", provider: "kakao",  appliedAt: "2025. 04. 09 14:32", status: "pending" as PendingStatus },
-  { id: 2, name: "오현우", userId: "hyunwoo_oh", major: "기계공학과",  year: "2023년", memberType: "current", provider: "email",  appliedAt: "2025. 04. 09 11:18", status: "pending" as PendingStatus },
-  { id: 3, name: "강민지", userId: "minji_k",   major: "경제학과",    year: "2019년", memberType: "alumni",  provider: "google", appliedAt: "2025. 04. 08 20:05", status: "pending" as PendingStatus },
-  { id: 4, name: "윤서준", userId: "sjyoon",    major: "컴퓨터과학과", year: "2022년", memberType: "current", provider: "naver",  appliedAt: "2025. 04. 08 09:41", status: "pending" as PendingStatus },
+  { id: 1, name: "정다은", userId: "daeun_j",    major: "심리학과",     year: "2024년", memberType: "current", provider: "kakao",  appliedAt: "2025. 04. 09 14:32", status: "pending" as PendingStatus },
+  { id: 2, name: "오현우", userId: "hyunwoo_oh", major: "기계공학과",   year: "2023년", memberType: "current", provider: "email",  appliedAt: "2025. 04. 09 11:18", status: "pending" as PendingStatus },
+  { id: 3, name: "강민지", userId: "minji_k",    major: "경제학과",     year: "2019년", memberType: "alumni",  provider: "google", appliedAt: "2025. 04. 08 20:05", status: "pending" as PendingStatus },
+  { id: 4, name: "윤서준", userId: "sjyoon",     major: "컴퓨터과학과", year: "2022년", memberType: "current", provider: "naver",  appliedAt: "2025. 04. 08 09:41", status: "pending" as PendingStatus },
 ];
 
 const providerLabel: Record<string, { label: string; color: string }> = {
-  kakao:  { label: "카카오",   color: "bg-[#FEE500]/40 text-[#3C1E1E]" },
-  naver:  { label: "네이버",   color: "bg-[#03C75A]/15 text-[#03C75A]" },
-  google: { label: "구글",     color: "bg-slate-100 text-slate-600" },
-  email:  { label: "이메일",   color: "bg-primary-fixed text-primary-container" },
+  kakao:  { label: "카카오", color: "bg-[#FEE500]/40 text-[#3C1E1E]" },
+  naver:  { label: "네이버", color: "bg-[#03C75A]/15 text-[#03C75A]" },
+  google: { label: "구글",   color: "bg-slate-100 text-slate-600" },
+  email:  { label: "이메일", color: "bg-primary-fixed text-primary-container" },
 };
 
 // ── 컴포넌트 ──────────────────────────────────────────────────────────────────
@@ -81,41 +67,21 @@ const providerLabel: Record<string, { label: string; color: string }> = {
 export default function AdminPage() {
   const { role: viewerRole } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
-
-  // Members
-  const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS);
-  const [membersLoading, setMembersLoading] = useState(true);
-  const [isMockData, setIsMockData] = useState(true);
   const [memberSearch, setMemberSearch] = useState("");
   const [filterType, setFilterType] = useState("전체");
-
-  // Pending (기존 유지)
   const [statuses, setStatuses] = useState<Record<number, PendingStatus>>(
     Object.fromEntries(pendingSignups.map((p) => [p.id, p.status]))
   );
 
-  useEffect(() => {
-    async function fetchMembers() {
-      setMembersLoading(true);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at")
-        .neq("status", "pending")
-        .neq("role", "super_admin")
-        .order("created_at", { ascending: false });
-      if (!error && data && data.length > 0) {
-        setMembers(data as Member[]);
-        setIsMockData(false);
-      }
-      setMembersLoading(false);
-    }
-    fetchMembers();
-  }, []);
+  const { data: fetchedMembers, isLoading: membersLoading } = useMembers();
+  const updateRole = useUpdateMemberRole();
 
-  const handleRoleChange = async (memberId: string, newRole: AppRole) => {
-    setMembers((prev) => prev.map((m) => (m.id === memberId ? { ...m, role: newRole } : m)));
+  const isMockData = !fetchedMembers || fetchedMembers.length === 0;
+  const members = isMockData ? MOCK_MEMBERS : fetchedMembers;
+
+  const handleRoleChange = (memberId: string, newRole: AppRole) => {
     if (isMockData) return;
-    await supabase.from("profiles").update({ role: newRole }).eq("id", memberId);
+    updateRole.mutate({ memberId, newRole });
   };
 
   const handleApprove = (id: number) => setStatuses((prev) => ({ ...prev, [id]: "approved" }));
@@ -190,10 +156,10 @@ export default function AdminPage() {
         <div className="space-y-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "전체 회원", value: members.length,                                            icon: "group",   color: "bg-primary-fixed text-primary-container" },
-              { label: "가입 대기", value: pendingCount,                                               icon: "pending", color: "bg-error/10 text-error" },
-              { label: "현역 회원", value: members.filter((m) => m.member_type === "current").length,  icon: "school",  color: "bg-secondary-fixed text-on-secondary-fixed" },
-              { label: "졸업생",   value: members.filter((m) => m.member_type === "alumni").length,    icon: "work",    color: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
+              { label: "전체 회원", value: members.length,                                           icon: "group",   color: "bg-primary-fixed text-primary-container" },
+              { label: "가입 대기", value: pendingCount,                                              icon: "pending", color: "bg-error/10 text-error" },
+              { label: "현역 회원", value: members.filter((m) => m.member_type === "current").length, icon: "school",  color: "bg-secondary-fixed text-on-secondary-fixed" },
+              { label: "졸업생",   value: members.filter((m) => m.member_type === "alumni").length,   icon: "work",    color: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
             ].map((stat) => (
               <div key={stat.label} className="bg-surface-container-lowest rounded-2xl p-5 shadow-card">
                 <div className={`w-10 h-10 rounded-full ${stat.color} flex items-center justify-center mb-3`}>
@@ -261,7 +227,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ── PENDING (기존 유지) ── */}
+      {/* ── PENDING ── */}
       {activeTab === "pending" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-2">
@@ -330,14 +296,13 @@ export default function AdminPage() {
       {/* ── MEMBERS ── */}
       {activeTab === "members" && (
         <div className="space-y-4">
-          {isMockData && (
+          {isMockData && !membersLoading && (
             <div className="px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 flex items-center gap-2">
               <span className="material-symbols-outlined text-base">info</span>
               미리보기 데이터입니다. 실제 회원이 가입하면 자동으로 전환됩니다.
             </div>
           )}
 
-          {/* Search & Filter */}
           <div className="flex gap-3 flex-wrap">
             <div className="relative flex-1 min-w-48">
               <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">search</span>

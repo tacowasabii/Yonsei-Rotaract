@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+import { useLogin } from "@/api/hooks/useLogin";
 import { PATHS } from "@/routes/paths";
 
 export default function LoginPage() {
@@ -8,32 +8,33 @@ export default function LoginPage() {
   const [email, setEmail] = useState(() => localStorage.getItem("saved_email") ?? "");
   const [password, setPassword] = useState("");
   const [saveEmail, setSaveEmail] = useState(() => !!localStorage.getItem("saved_email"));
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [showForgotModal, setShowForgotModal] = useState(false);
   const navigate = useNavigate();
+  const loginMutation = useLogin();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!email || !password) return;
-    setIsSubmitting(true);
     setLoginError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      if (error.code === "email_not_confirmed") {
-        setLoginError("이메일 인증이 필요합니다. 받은편지함을 확인해주세요.");
-      } else {
-        setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.");
-      }
-      setIsSubmitting(false);
-      return;
-    }
-    if (saveEmail) {
-      localStorage.setItem("saved_email", email);
-    } else {
-      localStorage.removeItem("saved_email");
-    }
-    navigate(PATHS.HOME);
+    loginMutation.mutate({ email, password }, {
+      onSuccess: () => {
+        if (saveEmail) {
+          localStorage.setItem("saved_email", email);
+        } else {
+          localStorage.removeItem("saved_email");
+        }
+        navigate(PATHS.HOME);
+      },
+      onError: (error: unknown) => {
+        const code = (error as { code?: string }).code;
+        if (code === "email_not_confirmed") {
+          setLoginError("이메일 인증이 필요합니다. 받은편지함을 확인해주세요.");
+        } else {
+          setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+      },
+    });
   };
 
   return (
@@ -118,19 +119,19 @@ export default function LoginPage() {
             {/* Submit */}
             <button
               type="submit"
-              disabled={isSubmitting || !email || !password}
+              disabled={loginMutation.isPending || !email || !password}
               className={`w-full py-3.5 bg-primary-container text-white font-bold rounded-xl transition-all mt-2 flex items-center justify-center gap-2 ${
-                isSubmitting || !email || !password
+                loginMutation.isPending || !email || !password
                   ? "opacity-40 cursor-not-allowed"
                   : "hover:opacity-90 active:scale-[0.98]"
               }`}
             >
-              {isSubmitting && (
+              {loginMutation.isPending && (
                 <span className="material-symbols-outlined text-sm animate-spin">
                   progress_activity
                 </span>
               )}
-              {isSubmitting ? "로그인 중..." : "로그인"}
+              {loginMutation.isPending ? "로그인 중..." : "로그인"}
             </button>
           </form>
 

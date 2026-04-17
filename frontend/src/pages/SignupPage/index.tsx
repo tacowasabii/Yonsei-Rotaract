@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
-import { supabase } from "@/lib/supabase";
+import { useSignup } from "@/api/hooks/useSignup";
 import { PATHS } from "@/routes/paths";
 import type { SignupFormValues } from "./types";
 import { EmailField } from "./components/EmailField";
@@ -26,10 +26,10 @@ export default function SignupPage() {
   const [memberType, setMemberType] = useState<"current" | "alumni">("current");
   const [agreedAll, setAgreedAll] = useState(false);
   const [agreements, setAgreements] = useState({ terms: false, privacy: false, optional: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [emailChecked, setEmailChecked] = useState<boolean | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const signupMutation = useSignup();
 
   const handleAgreedAll = (checked: boolean) => {
     setAgreedAll(checked);
@@ -42,45 +42,28 @@ export default function SignupPage() {
     setAgreedAll(Object.values(next).every(Boolean));
   };
 
-  const onSubmit = async (data: SignupFormValues) => {
+  const onSubmit = (data: SignupFormValues) => {
     setSubmitAttempted(true);
     if (!emailChecked || !agreements.terms || !agreements.privacy) return;
-    setIsSubmitting(true);
     setSubmitError(null);
-    const { data: authData, error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: {
-          name: data.name,
-          phone: data.phone,
-          member_type: memberType,
-          admission_year: memberType === "alumni" ? data.admissionYear : null,
-          department: memberType === "alumni" ? data.department : null,
-          generation: memberType === "alumni" ? data.generation : null,
-        },
-      },
-    });
-    if (error) {
-      setSubmitError(error.message);
-      setIsSubmitting(false);
-      return;
-    }
-    // DB 트리거가 profiles를 자동 생성하지만, 실패 시 fallback으로 upsert
-    if (authData.user) {
-      await supabase.from("profiles").upsert({
-        id: authData.user.id,
+    signupMutation.mutate(
+      {
+        email: data.email,
+        password: data.password,
         name: data.name,
         phone: data.phone,
-        member_type: memberType,
-        admission_year: memberType === "alumni" ? data.admissionYear : null,
-        department: memberType === "alumni" ? data.department : null,
-        generation: memberType === "alumni" ? data.generation : null,
-        role: "user",
-        status: "pending",
-      });
-    }
-    navigate(PATHS.SIGNUP_COMPLETE);
+        memberType,
+        admissionYear: data.admissionYear,
+        department: data.department,
+        generation: data.generation,
+      },
+      {
+        onSuccess: () => navigate(PATHS.SIGNUP_COMPLETE),
+        onError: (error: unknown) => {
+          setSubmitError(error instanceof Error ? error.message : "오류가 발생했습니다.");
+        },
+      }
+    );
   };
 
   const handleSubmitClick = () => {
@@ -241,17 +224,17 @@ export default function SignupPage() {
             <button
               type="submit"
               onClick={handleSubmitClick}
-              disabled={isSubmitting}
+              disabled={signupMutation.isPending}
               className={`w-full py-3.5 bg-primary-container text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                 canSubmit ? "hover:opacity-90 active:scale-[0.98]" : "opacity-40 cursor-not-allowed"
               }`}
             >
-              {isSubmitting && (
+              {signupMutation.isPending && (
                 <span className="material-symbols-outlined text-sm animate-spin">
                   progress_activity
                 </span>
               )}
-              {isSubmitting ? "처리 중..." : "가입하기"}
+              {signupMutation.isPending ? "처리 중..." : "가입하기"}
             </button>
           </form>
 
