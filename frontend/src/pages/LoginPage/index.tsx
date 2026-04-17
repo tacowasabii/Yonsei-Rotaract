@@ -37,9 +37,9 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex-1 flex items-center justify-center px-4 py-12">
+    <main className="flex-1 flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
-        <div className="flex flex-col items-center mb-8 mt-12">
+        <div className="flex flex-col items-center mb-8">
           <img src="/logo.png" alt="연세 로타랙트 로고" className="h-14 w-14 object-contain mb-3" />
           <h1 className="text-2xl font-extrabold font-headline text-primary-container">로그인</h1>
           <p className="text-sm text-on-surface-variant mt-1">커뮤니티에 오신 것을 환영합니다</p>
