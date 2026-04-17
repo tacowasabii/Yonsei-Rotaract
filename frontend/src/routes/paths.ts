@@ -16,4 +16,6 @@ export const PATHS = {
   SIGNUP_COMPLETE: "/signup/complete",
   ONBOARDING: "/onboarding",
   ADMIN: "/admin",
+  ADMIN_PENDING: "/admin/pending",
+  ADMIN_MEMBERS: "/admin/members",
 } as const;

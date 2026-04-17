@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "./Layout";
 import ProtectedRoute from "./ProtectedRoute";
+import AdminLayout from "@components/layout/AdminLayout";
 import HomePage from "@pages/HomePage";
 import NewsPage from "@pages/NewsPage";
 import NoticePage from "@pages/NoticePage";
@@ -12,37 +13,45 @@ import GalleryPage from "@pages/GalleryPage";
 import LoginPage from "@pages/LoginPage";
 import SignupPage from "@pages/SignupPage";
 import OnboardingPage from "@pages/OnboardingPage";
-import AdminPage from "@pages/AdminPage";
 import SignupCompletePage from "@pages/SignupCompletePage";
+import AdminDashboard from "@pages/AdminPage/AdminDashboard";
+import AdminPending from "@pages/AdminPage/AdminPending";
+import AdminMembers from "@pages/AdminPage/AdminMembers";
 import { PATHS } from "./paths";
 
 export const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
-      // 공개 라우트
-      { path: PATHS.HOME, element: <HomePage /> },
-      { path: PATHS.NEWS, element: <NewsPage /> },
-      { path: PATHS.NOTICE, element: <NoticePage /> },
-      { path: PATHS.BOARD, element: <BoardPage /> },
-      { path: PATHS.BOARD_FREE, element: <BoardPage /> },
+      { path: PATHS.HOME,             element: <HomePage /> },
+      { path: PATHS.NEWS,             element: <NewsPage /> },
+      { path: PATHS.NOTICE,           element: <NoticePage /> },
+      { path: PATHS.BOARD,            element: <BoardPage /> },
+      { path: PATHS.BOARD_FREE,       element: <BoardPage /> },
       { path: PATHS.BOARD_FREE_WRITE, element: <BoardWritePage /> },
-      { path: PATHS.BOARD_FREE_POST, element: <BoardPostPage /> },
-      { path: PATHS.BOARD_PROMO, element: <BoardPage /> },
-      { path: PATHS.BOARD_PROMO_WRITE, element: <BoardWritePage /> },
+      { path: PATHS.BOARD_FREE_POST,  element: <BoardPostPage /> },
+      { path: PATHS.BOARD_PROMO,      element: <BoardPage /> },
+      { path: PATHS.BOARD_PROMO_WRITE,element: <BoardWritePage /> },
       { path: PATHS.BOARD_PROMO_POST, element: <BoardPostPage /> },
-      { path: PATHS.ALUMNI, element: <AlumniPage /> },
-      { path: PATHS.GALLERY, element: <GalleryPage /> },
-      { path: PATHS.LOGIN, element: <LoginPage /> },
-      { path: PATHS.SIGNUP, element: <SignupPage /> },
-      { path: PATHS.SIGNUP_COMPLETE, element: <SignupCompletePage /> },
-      { path: PATHS.ONBOARDING, element: <OnboardingPage /> },
-
-      // admin 이상만 접근 가능
+      { path: PATHS.ALUMNI,           element: <AlumniPage /> },
+      { path: PATHS.GALLERY,          element: <GalleryPage /> },
+      { path: PATHS.LOGIN,            element: <LoginPage /> },
+      { path: PATHS.SIGNUP,           element: <SignupPage /> },
+      { path: PATHS.SIGNUP_COMPLETE,  element: <SignupCompletePage /> },
+      { path: PATHS.ONBOARDING,       element: <OnboardingPage /> },
+    ],
+  },
+  // 관리자: 완전히 별도 레이아웃 (staff 이상 접근 가능)
+  {
+    element: <ProtectedRoute requiredRole="staff" />,
+    children: [
       {
-        element: <ProtectedRoute requiredRole="admin" />,
+        path: PATHS.ADMIN,
+        element: <AdminLayout />,
         children: [
-          { path: PATHS.ADMIN, element: <AdminPage /> },
+          { index: true,         element: <AdminDashboard /> },
+          { path: "pending",     element: <AdminPending /> },
+          { path: "members",     element: <AdminMembers /> },
         ],
       },
     ],

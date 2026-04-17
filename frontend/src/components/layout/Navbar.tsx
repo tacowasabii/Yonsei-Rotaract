@@ -1,5 +1,5 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { useAuth, useIsAdmin } from "@/contexts/AuthContext";
+import { useAuth, useIsStaff } from "@/contexts/AuthContext";
 import { ManageAccountsIcon } from "@assets/icons";
 
 const navLinks = [
@@ -16,7 +16,7 @@ const boardLinks = [
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
-  const isAdmin = useIsAdmin();
+  const isAdmin = useIsStaff();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
