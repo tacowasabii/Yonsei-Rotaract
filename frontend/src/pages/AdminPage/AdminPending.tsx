@@ -1,11 +1,14 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
-import { formatDate } from "./shared";
+import { formatDate, isAdminOrAbove } from "./shared";
 
 export default function AdminPending() {
+  const { role } = useAuth();
   const { data: pendingMembers = [], isLoading: pendingLoading } = usePendingMembers();
   const approveMember = useApproveMember();
   const rejectMember = useRejectMember();
   const pendingCount = pendingMembers.length;
+  const canApprove = isAdminOrAbove(role);
 
   return (
     <div className="space-y-4">
@@ -48,22 +51,24 @@ export default function AdminPending() {
                   <p className="text-xs text-on-surface-variant mt-0.5">신청일시: {formatDate(p.created_at)}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => approveMember.mutate(p.id)}
-                  disabled={approveMember.isPending}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-white text-sm font-bold rounded-full hover:opacity-80 active:scale-95 transition-all disabled:opacity-50"
-                >
-                  <span className="material-symbols-outlined text-base">check_circle</span>승인
-                </button>
-                <button
-                  onClick={() => rejectMember.mutate(p.id)}
-                  disabled={rejectMember.isPending}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-error/10 text-error text-sm font-bold rounded-full hover:opacity-80 active:scale-95 transition-all disabled:opacity-50"
-                >
-                  <span className="material-symbols-outlined text-base">cancel</span>거절
-                </button>
-              </div>
+              {canApprove && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => approveMember.mutate(p.id)}
+                    disabled={approveMember.isPending}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-white text-sm font-bold rounded-full hover:opacity-80 active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-base">check_circle</span>승인
+                  </button>
+                  <button
+                    onClick={() => rejectMember.mutate(p.id)}
+                    disabled={rejectMember.isPending}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-error/10 text-error text-sm font-bold rounded-full hover:opacity-80 active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-base">cancel</span>거절
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))

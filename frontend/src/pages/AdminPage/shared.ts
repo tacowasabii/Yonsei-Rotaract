@@ -12,6 +12,10 @@ export const ROLE_META: Record<AppRole, { label: string; color: string }> = {
   super_admin: { label: "슈퍼관리자", color: "bg-error text-white" },
 };
 
+export function isAdminOrAbove(role: AppRole | null): boolean {
+  return role === "admin" || role === "super_admin";
+}
+
 export function assignableRoles(viewerRole: AppRole, targetRole: AppRole): AppRole[] {
   if (viewerRole === "super_admin") return ["user", "staff", "admin", "super_admin"];
   if (viewerRole === "admin" && ROLE_HIERARCHY[targetRole] < ROLE_HIERARCHY["admin"])

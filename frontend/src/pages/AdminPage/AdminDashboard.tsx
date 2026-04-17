@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { useMembers } from "@/api/hooks/useMembers";
 import { usePendingMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
 import { PATHS } from "@/routes/paths";
-import { MOCK_MEMBERS } from "./shared";
+import { MOCK_MEMBERS, isAdminOrAbove } from "./shared";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { role } = useAuth();
+  const canApprove = isAdminOrAbove(role);
   const { data: fetchedMembers } = useMembers();
   const { data: pendingMembers = [], isLoading: pendingLoading } = usePendingMembers();
   const approveMember = useApproveMember();
@@ -70,20 +73,22 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => approveMember.mutate(p.id)}
-                    className="px-3 py-1 bg-primary-container text-white text-xs font-bold rounded-full hover:opacity-80"
-                  >
-                    승인
-                  </button>
-                  <button
-                    onClick={() => rejectMember.mutate(p.id)}
-                    className="px-3 py-1 bg-error/10 text-error text-xs font-bold rounded-full hover:opacity-80"
-                  >
-                    거절
-                  </button>
-                </div>
+                {canApprove && (
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => approveMember.mutate(p.id)}
+                      className="px-3 py-1 bg-primary-container text-white text-xs font-bold rounded-full hover:opacity-80"
+                    >
+                      승인
+                    </button>
+                    <button
+                      onClick={() => rejectMember.mutate(p.id)}
+                      className="px-3 py-1 bg-error/10 text-error text-xs font-bold rounded-full hover:opacity-80"
+                    >
+                      거절
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}

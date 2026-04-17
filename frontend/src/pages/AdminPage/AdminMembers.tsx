@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/api/types/member";
 import { useMembers, useUpdateMemberRole, useUpdateMemberStatus } from "@/api/hooks/useMembers";
-import { MOCK_MEMBERS, ROLE_META, assignableRoles, formatDate } from "./shared";
+import { MOCK_MEMBERS, ROLE_META, assignableRoles, formatDate, isAdminOrAbove } from "./shared";
 
 export default function AdminMembers() {
   const { role: viewerRole } = useAuth();
@@ -163,13 +163,19 @@ export default function AdminMembers() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => handleStatusToggle(member.id, member.status as "active" | "inactive")}
-                          disabled={isMockData || updateStatus.isPending}
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-70 disabled:cursor-not-allowed ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}
-                        >
-                          {member.status === "active" ? "활성" : "비활성"}
-                        </button>
+                        {isAdminOrAbove(viewerRole) ? (
+                          <button
+                            onClick={() => handleStatusToggle(member.id, member.status as "active" | "inactive")}
+                            disabled={isMockData || updateStatus.isPending}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-70 disabled:cursor-not-allowed ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}
+                          >
+                            {member.status === "active" ? "활성" : "비활성"}
+                          </button>
+                        ) : (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}>
+                            {member.status === "active" ? "활성" : "비활성"}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );
