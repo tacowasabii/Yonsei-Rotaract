@@ -8,6 +8,14 @@ export default function AdminMembers() {
   const { role: viewerRole } = useAuth();
   const [memberSearch, setMemberSearch] = useState("");
   const [filterType, setFilterType] = useState("전체");
+  const [sortKey, setSortKey] = useState<"name" | "generation" | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  const handleSort = (key: "name" | "generation") => {
+    if (sortKey !== key) { setSortKey(key); setSortDir("asc"); }
+    else if (sortDir === "asc") setSortDir("desc");
+    else { setSortKey(null); setSortDir("asc"); }
+  };
 
   const { data: members = [], isLoading: membersLoading, isError } = useMembers();
   const updateRole = useUpdateMemberRole();
@@ -19,6 +27,11 @@ export default function AdminMembers() {
 
   const handleStatusToggle = (memberId: string, currentStatus: "active" | "inactive") => {
     updateStatus.mutate({ memberId, newStatus: currentStatus === "active" ? "inactive" : "active" });
+  };
+
+  const sortIcon = (key: "name" | "generation") => {
+    if (sortKey !== key) return "unfold_more";
+    return sortDir === "asc" ? "arrow_upward" : "arrow_downward";
   };
 
   const filteredMembers = members.filter((m) => {
@@ -35,6 +48,11 @@ export default function AdminMembers() {
       (filterType === "운영진" && m.role === "staff") ||
       (filterType === "관리자" && m.role === "admin");
     return matchSearch && matchType;
+  }).sort((a, b) => {
+    if (!sortKey) return 0;
+    const av = sortKey === "name" ? a.name : (a.generation ?? "");
+    const bv = sortKey === "name" ? b.name : (b.generation ?? "");
+    return sortDir === "asc" ? av.localeCompare(bv, "ko") : bv.localeCompare(av, "ko");
   });
 
   return (
@@ -92,9 +110,18 @@ export default function AdminMembers() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-outline-variant/20 bg-surface-container/50">
-                  <th className="text-left px-5 py-3 text-xs font-bold text-on-surface-variant">회원</th>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-on-surface-variant">
+                    <button onClick={() => handleSort("name")} className="flex items-center gap-0.5 hover:text-on-surface transition-colors">
+                      이름 <span className="material-symbols-outlined text-sm">{sortIcon("name")}</span>
+                    </button>
+                  </th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden lg:table-cell">연락처</th>
-                  <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">학과 / 기수</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">학과</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">
+                    <button onClick={() => handleSort("generation")} className="flex items-center gap-0.5 hover:text-on-surface transition-colors">
+                      기수 <span className="material-symbols-outlined text-sm">{sortIcon("generation")}</span>
+                    </button>
+                  </th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">가입일</th>
                   <th className="text-center px-4 py-3 text-xs font-bold text-on-surface-variant">유형</th>
                   <th className="text-center px-4 py-3 text-xs font-bold text-on-surface-variant">권한</th>
@@ -128,9 +155,11 @@ export default function AdminMembers() {
                         <p className="text-xs text-on-surface">{member.email || "-"}</p>
                         <p className="text-xs text-on-surface-variant mt-0.5">{member.phone || "-"}</p>
                       </td>
-                      <td className="px-4 py-3 hidden md:table-cell">
-                        <p className="text-on-surface">{member.department ?? "-"}</p>
-                        <p className="text-xs text-on-surface-variant">{member.generation ?? "-"}</p>
+                      <td className="px-4 py-3 hidden md:table-cell text-sm text-on-surface">
+                        {member.department ?? "-"}
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell text-sm text-on-surface-variant">
+                        {member.generation ?? "-"}
                       </td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant hidden md:table-cell">
                         {formatDate(member.created_at)}
