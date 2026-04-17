@@ -2,16 +2,16 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/api/types/member";
 import { useMembers, useUpdateMemberRole, useUpdateMemberStatus } from "@/api/hooks/useMembers";
-import { ROLE_META, assignableRoles, formatDate, isAdminOrAbove } from "./shared";
+import { ROLE_META, assignableRoles, formatDate, formatPhone, isAdminOrAbove } from "./shared";
 
 export default function AdminMembers() {
   const { role: viewerRole } = useAuth();
   const [memberSearch, setMemberSearch] = useState("");
   const [filterType, setFilterType] = useState("전체");
-  const [sortKey, setSortKey] = useState<"name" | "generation" | null>(null);
+  const [sortKey, setSortKey] = useState<"name" | "generation" | "admission_year" | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-  const handleSort = (key: "name" | "generation") => {
+  const handleSort = (key: "name" | "generation" | "admission_year") => {
     if (sortKey !== key) { setSortKey(key); setSortDir("asc"); }
     else if (sortDir === "asc") setSortDir("desc");
     else { setSortKey(null); setSortDir("asc"); }
@@ -29,7 +29,7 @@ export default function AdminMembers() {
     updateStatus.mutate({ memberId, newStatus: currentStatus === "active" ? "inactive" : "active" });
   };
 
-  const sortIcon = (key: "name" | "generation") => {
+  const sortIcon = (key: "name" | "generation" | "admission_year") => {
     if (sortKey !== key) return "unfold_more";
     return sortDir === "asc" ? "arrow_upward" : "arrow_downward";
   };
@@ -40,7 +40,10 @@ export default function AdminMembers() {
       !memberSearch ||
       m.name.includes(memberSearch) ||
       m.email.includes(memberSearch) ||
-      (m.department ?? "").includes(memberSearch);
+      (m.department ?? "").includes(memberSearch) ||
+      (m.generation ?? "").includes(memberSearch) ||
+      (m.phone ?? "").replace(/-/g, "").includes(memberSearch.replace(/-/g, "")) ||
+      String(m.admission_year ?? "").includes(memberSearch);
     const matchType =
       filterType === "전체" ||
       (filterType === "현역"   && m.member_type === "current") ||
@@ -50,6 +53,11 @@ export default function AdminMembers() {
     return matchSearch && matchType;
   }).sort((a, b) => {
     if (!sortKey) return 0;
+    if (sortKey === "admission_year") {
+      const av = a.admission_year ?? 0;
+      const bv = b.admission_year ?? 0;
+      return sortDir === "asc" ? av - bv : bv - av;
+    }
     const av = sortKey === "name" ? a.name : (a.generation ?? "");
     const bv = sortKey === "name" ? b.name : (b.generation ?? "");
     return sortDir === "asc" ? av.localeCompare(bv, "ko") : bv.localeCompare(av, "ko");
@@ -74,7 +82,7 @@ export default function AdminMembers() {
           <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">search</span>
           <input
             type="text"
-            placeholder="이름, 학과 검색..."
+            placeholder="이름, 학과, 기수, 학번, 연락처 검색..."
             value={memberSearch}
             onChange={(e) => setMemberSearch(e.target.value)}
             className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 shadow-card"
@@ -115,13 +123,18 @@ export default function AdminMembers() {
                       이름 <span className="material-symbols-outlined text-sm">{sortIcon("name")}</span>
                     </button>
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden lg:table-cell">연락처</th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">학과</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">
+                    <button onClick={() => handleSort("admission_year")} className="flex items-center gap-0.5 hover:text-on-surface transition-colors">
+                      학번 <span className="material-symbols-outlined text-sm">{sortIcon("admission_year")}</span>
+                    </button>
+                  </th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">
                     <button onClick={() => handleSort("generation")} className="flex items-center gap-0.5 hover:text-on-surface transition-colors">
                       기수 <span className="material-symbols-outlined text-sm">{sortIcon("generation")}</span>
                     </button>
                   </th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden lg:table-cell">연락처</th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">가입일</th>
                   <th className="text-center px-4 py-3 text-xs font-bold text-on-surface-variant">유형</th>
                   <th className="text-center px-4 py-3 text-xs font-bold text-on-surface-variant">권한</th>
@@ -138,28 +151,19 @@ export default function AdminMembers() {
                       key={member.id}
                       className={`hover:bg-primary-fixed/10 transition-colors ${member.status === "inactive" ? "opacity-50" : ""}`}
                     >
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0">
-                            <span className="text-sm font-bold text-on-secondary-fixed-variant">{member.name.charAt(0)}</span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-on-surface">{member.name}</p>
-                            {member.admission_year && (
-                              <p className="text-xs text-on-surface-variant">{member.admission_year}년 입학</p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 hidden lg:table-cell">
-                        <p className="text-xs text-on-surface">{member.email || "-"}</p>
-                        <p className="text-xs text-on-surface-variant mt-0.5">{member.phone || "-"}</p>
-                      </td>
+                      <td className="px-5 py-3 font-semibold text-on-surface">{member.name}</td>
                       <td className="px-4 py-3 hidden md:table-cell text-sm text-on-surface">
                         {member.department ?? "-"}
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell text-sm text-on-surface-variant">
+                        {member.admission_year ? `${String(member.admission_year).slice(-2)}학번` : "-"}
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell text-sm text-on-surface-variant">
                         {member.generation ?? "-"}
+                      </td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <p className="text-xs text-on-surface">{member.email || "-"}</p>
+                        <p className="text-xs text-on-surface-variant mt-0.5">{formatPhone(member.phone)}</p>
                       </td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant hidden md:table-cell">
                         {formatDate(member.created_at)}
