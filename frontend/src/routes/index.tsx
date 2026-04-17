@@ -19,6 +19,7 @@ import AdminPending from "@pages/AdminPage/AdminPending";
 import AdminMembers from "@pages/AdminPage/AdminMembers";
 import PendingApprovalPage from "@pages/PendingApprovalPage";
 import RejectedPage from "@pages/RejectedPage";
+import InactivePage from "@pages/InactivePage";
 import { PATHS } from "./paths";
 
 export const router = createBrowserRouter([
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
   // 가입 상태 페이지 (standalone, Layout 없음)
   { path: PATHS.PENDING_APPROVAL, element: <PendingApprovalPage /> },
   { path: PATHS.REJECTED, element: <RejectedPage /> },
+  { path: PATHS.INACTIVE, element: <InactivePage /> },
   // 관리자: 완전히 별도 레이아웃 (staff 이상 접근 가능)
   {
     element: <ProtectedRoute requiredRole="staff" />,

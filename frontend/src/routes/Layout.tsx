@@ -8,8 +8,9 @@ import { PATHS } from "./paths";
 export default function Layout() {
   const { profile } = useAuth();
 
-  if (profile?.status === "pending") return <Navigate to={PATHS.PENDING_APPROVAL} replace />;
+  if (profile?.status === "pending")  return <Navigate to={PATHS.PENDING_APPROVAL} replace />;
   if (profile?.status === "rejected") return <Navigate to={PATHS.REJECTED} replace />;
+  if (profile?.status === "inactive") return <Navigate to={PATHS.INACTIVE} replace />;
 
   return (
     <div className="bg-background text-on-surface flex flex-col min-h-screen pb-20 md:pb-0">

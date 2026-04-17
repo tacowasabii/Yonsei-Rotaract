@@ -20,4 +20,5 @@ export const PATHS = {
   ADMIN_MEMBERS: "/admin/members",
   PENDING_APPROVAL: "/pending-approval",
   REJECTED: "/rejected",
+  INACTIVE: "/inactive",
 } as const;
