@@ -65,7 +65,7 @@ export default function SignupPage() {
       setIsSubmitting(false);
       return;
     }
-    navigate(PATHS.LOGIN);
+    navigate(PATHS.SIGNUP_COMPLETE);
   };
 
   const handleSubmitClick = () => {

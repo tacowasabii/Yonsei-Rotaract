@@ -78,7 +78,7 @@ export function EmailField({
           type="button"
           onClick={handleCheck}
           disabled={emailChecked === true || isChecking}
-          className="px-4 py-3 bg-primary-fixed text-primary-container text-sm font-bold rounded-xl hover:bg-primary-fixed/70 transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+          className="px-4 h-11 bg-primary-fixed text-primary-container text-sm font-bold rounded-xl hover:bg-primary-fixed/70 transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
         >
           {isChecking && (
             <span className="material-symbols-outlined text-sm animate-spin">

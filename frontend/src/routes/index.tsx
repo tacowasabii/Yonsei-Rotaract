@@ -10,6 +10,7 @@ import LoginPage from "@pages/LoginPage";
 import SignupPage from "@pages/SignupPage";
 import OnboardingPage from "@pages/OnboardingPage";
 import AdminPage from "@pages/AdminPage";
+import SignupCompletePage from "@pages/SignupCompletePage";
 import { PATHS } from "./paths";
 
 export const router = createBrowserRouter([
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { path: PATHS.GALLERY, element: <GalleryPage /> },
       { path: PATHS.LOGIN, element: <LoginPage /> },
       { path: PATHS.SIGNUP, element: <SignupPage /> },
+      { path: PATHS.SIGNUP_COMPLETE, element: <SignupCompletePage /> },
       { path: PATHS.ONBOARDING, element: <OnboardingPage /> },
       { path: PATHS.ADMIN, element: <AdminPage /> },
     ],
