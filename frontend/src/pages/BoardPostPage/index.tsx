@@ -26,7 +26,7 @@ const mockComments = [
 ];
 
 export default function BoardPostPage() {
-  const { id } = useParams();
+  useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const isPromo = location.pathname.includes("/promo/");
