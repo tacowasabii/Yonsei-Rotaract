@@ -29,3 +29,17 @@ export interface PendingMember {
   status: "pending";
   created_at: string;
 }
+
+export interface RejectedMember {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  member_type: "current" | "alumni" | null;
+  admission_year: number | null;
+  department: string | null;
+  generation: string | null;
+  role: AppRole;
+  status: "rejected";
+  created_at: string;
+}

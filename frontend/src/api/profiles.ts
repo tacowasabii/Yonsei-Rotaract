@@ -1,15 +1,26 @@
 import { supabase } from "@/lib/supabase";
-import type { Member, PendingMember, AppRole } from "./types/member";
+import type { Member, PendingMember, RejectedMember, AppRole } from "./types/member";
 
 export async function fetchMembers(): Promise<Member[]> {
   const { data, error } = await supabase
     .from("profiles")
     .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at")
     .neq("status", "pending")
+    .neq("status", "rejected")
     .neq("role", "super_admin")
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Member[];
+}
+
+export async function fetchRejectedMembers(): Promise<RejectedMember[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at")
+    .eq("status", "rejected")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as RejectedMember[];
 }
 
 export async function updateMemberRole(memberId: string, newRole: AppRole): Promise<void> {

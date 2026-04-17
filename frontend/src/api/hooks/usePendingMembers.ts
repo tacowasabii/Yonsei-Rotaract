@@ -1,12 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchPendingMembers,
+  fetchRejectedMembers,
   approveMember,
   rejectMember,
   approveAllPendingMembers,
 } from "../profiles";
 import type { PendingMember } from "../types/member";
 import { membersQueryKey } from "./useMembers";
+
+export const rejectedQueryKey = ["admin-rejected"] as const;
 
 export const pendingQueryKey = ["admin-pending"] as const;
 
@@ -56,7 +59,15 @@ export function useRejectMember() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: pendingQueryKey });
+      queryClient.invalidateQueries({ queryKey: rejectedQueryKey });
     },
+  });
+}
+
+export function useRejectedMembers() {
+  return useQuery({
+    queryKey: rejectedQueryKey,
+    queryFn: fetchRejectedMembers,
   });
 }
 

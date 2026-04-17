@@ -2,27 +2,22 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/api/types/member";
 import { useMembers, useUpdateMemberRole, useUpdateMemberStatus } from "@/api/hooks/useMembers";
-import { MOCK_MEMBERS, ROLE_META, assignableRoles, formatDate, isAdminOrAbove } from "./shared";
+import { ROLE_META, assignableRoles, formatDate, isAdminOrAbove } from "./shared";
 
 export default function AdminMembers() {
   const { role: viewerRole } = useAuth();
   const [memberSearch, setMemberSearch] = useState("");
   const [filterType, setFilterType] = useState("전체");
 
-  const { data: fetchedMembers, isLoading: membersLoading } = useMembers();
+  const { data: members = [], isLoading: membersLoading, isError } = useMembers();
   const updateRole = useUpdateMemberRole();
   const updateStatus = useUpdateMemberStatus();
 
-  const isMockData = !fetchedMembers || fetchedMembers.length === 0;
-  const members = isMockData ? MOCK_MEMBERS : fetchedMembers;
-
   const handleRoleChange = (memberId: string, newRole: AppRole) => {
-    if (isMockData) return;
     updateRole.mutate({ memberId, newRole });
   };
 
   const handleStatusToggle = (memberId: string, currentStatus: "active" | "inactive") => {
-    if (isMockData) return;
     updateStatus.mutate({ memberId, newStatus: currentStatus === "active" ? "inactive" : "active" });
   };
 
@@ -49,10 +44,10 @@ export default function AdminMembers() {
         <p className="text-sm text-on-surface-variant mt-1">회원 권한 및 상태 관리</p>
       </div>
 
-      {isMockData && !membersLoading && (
-        <div className="px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 flex items-center gap-2">
-          <span className="material-symbols-outlined text-base">info</span>
-          미리보기 데이터입니다. 실제 회원이 가입하면 자동으로 전환됩니다.
+      {isError && (
+        <div className="px-4 py-2.5 bg-error/10 border border-error/20 rounded-xl text-xs text-error flex items-center gap-2">
+          <span className="material-symbols-outlined text-base">error</span>
+          회원 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
         </div>
       )}
 
@@ -166,7 +161,7 @@ export default function AdminMembers() {
                         {isAdminOrAbove(viewerRole) ? (
                           <button
                             onClick={() => handleStatusToggle(member.id, member.status as "active" | "inactive")}
-                            disabled={isMockData || updateStatus.isPending}
+                            disabled={updateStatus.isPending}
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-70 disabled:cursor-not-allowed ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}
                           >
                             {member.status === "active" ? "활성" : "비활성"}

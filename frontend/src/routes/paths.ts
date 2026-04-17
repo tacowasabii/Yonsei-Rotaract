@@ -18,4 +18,6 @@ export const PATHS = {
   ADMIN: "/admin",
   ADMIN_PENDING: "/admin/pending",
   ADMIN_MEMBERS: "/admin/members",
+  PENDING_APPROVAL: "/pending-approval",
+  REJECTED: "/rejected",
 } as const;

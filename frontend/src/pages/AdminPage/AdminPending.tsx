@@ -1,10 +1,11 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { usePendingMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
+import { usePendingMembers, useRejectedMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
 import { formatDate, isAdminOrAbove } from "./shared";
 
 export default function AdminPending() {
   const { role } = useAuth();
   const { data: pendingMembers = [], isLoading: pendingLoading } = usePendingMembers();
+  const { data: rejectedMembers = [] } = useRejectedMembers();
   const approveMember = useApproveMember();
   const rejectMember = useRejectMember();
   const pendingCount = pendingMembers.length;
@@ -32,7 +33,7 @@ export default function AdminPending() {
       ) : (
         pendingMembers.map((p) => (
           <div key={p.id} className="bg-surface-container-lowest rounded-2xl p-5 shadow-card">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-2xl text-on-secondary-fixed-variant">person</span>
@@ -72,6 +73,47 @@ export default function AdminPending() {
             </div>
           </div>
         ))
+      )}
+
+      {/* 가입 거절 목록 */}
+      {rejectedMembers.length > 0 && (
+        <div className="mt-10">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="font-headline font-bold text-on-surface-variant">가입 거절 목록</h2>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+              {rejectedMembers.length}건
+            </span>
+          </div>
+          <div className="space-y-3">
+            {rejectedMembers.map((p) => (
+              <div key={p.id} className="bg-surface-container-lowest rounded-2xl p-5 shadow-card opacity-60">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-xl text-on-surface-variant">person_off</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold text-on-surface">{p.name}</p>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+                        거절됨
+                      </span>
+                      {p.member_type && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.member_type === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
+                          {p.member_type === "current" ? "현역" : "졸업생"}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-on-surface-variant mt-0.5">
+                      {p.department ?? "-"}{p.admission_year ? ` · ${p.admission_year}년 입학` : ""}
+                    </p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">{p.email}</p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">신청일시: {formatDate(p.created_at)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

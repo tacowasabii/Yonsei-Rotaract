@@ -1,4 +1,6 @@
 export { default as ManageAccountsIcon } from './manage_accounts.svg?react';
+export { default as ScheduleIcon } from './schedule.svg?react';
+export { default as CancelIcon } from './cancel.svg?react';
 export { default as SchoolIcon } from './school.svg?react';
 export { default as PhotoLibraryIcon } from './photo_library.svg?react';
 export { default as CampaignIcon } from './campaign.svg?react';

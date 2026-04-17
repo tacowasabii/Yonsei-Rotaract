@@ -3,19 +3,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMembers } from "@/api/hooks/useMembers";
 import { usePendingMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
 import { PATHS } from "@/routes/paths";
-import { MOCK_MEMBERS, isAdminOrAbove } from "./shared";
+import { isAdminOrAbove } from "./shared";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const canApprove = isAdminOrAbove(role);
-  const { data: fetchedMembers } = useMembers();
+  const { data: members = [] } = useMembers();
   const { data: pendingMembers = [], isLoading: pendingLoading } = usePendingMembers();
   const approveMember = useApproveMember();
   const rejectMember = useRejectMember();
-
-  const isMockData = !fetchedMembers || fetchedMembers.length === 0;
-  const members = isMockData ? MOCK_MEMBERS : fetchedMembers;
 
   return (
     <div className="space-y-8">
