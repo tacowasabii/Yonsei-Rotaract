@@ -47,7 +47,7 @@ export default function SignupPage() {
     if (!emailChecked || !agreements.terms || !agreements.privacy) return;
     setIsSubmitting(true);
     setSubmitError(null);
-    const { error } = await supabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -64,6 +64,19 @@ export default function SignupPage() {
       setSubmitError(error.message);
       setIsSubmitting(false);
       return;
+    }
+    // DB 트리거가 profiles를 자동 생성하지만, 실패 시 fallback으로 upsert
+    if (authData.user) {
+      await supabase.from("profiles").upsert({
+        id: authData.user.id,
+        name: data.name,
+        phone: data.phone,
+        member_type: memberType,
+        department: memberType === "alumni" ? data.department : null,
+        generation: memberType === "alumni" ? data.generation : null,
+        role: "user",
+        status: "pending",
+      });
     }
     navigate(PATHS.SIGNUP_COMPLETE);
   };

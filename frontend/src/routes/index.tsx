@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "./Layout";
+import ProtectedRoute from "./ProtectedRoute";
 import HomePage from "@pages/HomePage";
 import NewsPage from "@pages/NewsPage";
 import NoticePage from "@pages/NoticePage";
@@ -17,6 +18,7 @@ export const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
+      // 공개 라우트
       { path: PATHS.HOME, element: <HomePage /> },
       { path: PATHS.NEWS, element: <NewsPage /> },
       { path: PATHS.NOTICE, element: <NoticePage /> },
@@ -29,7 +31,14 @@ export const router = createBrowserRouter([
       { path: PATHS.SIGNUP, element: <SignupPage /> },
       { path: PATHS.SIGNUP_COMPLETE, element: <SignupCompletePage /> },
       { path: PATHS.ONBOARDING, element: <OnboardingPage /> },
-      { path: PATHS.ADMIN, element: <AdminPage /> },
+
+      // admin 이상만 접근 가능
+      {
+        element: <ProtectedRoute requiredRole="admin" />,
+        children: [
+          { path: PATHS.ADMIN, element: <AdminPage /> },
+        ],
+      },
     ],
   },
 ]);

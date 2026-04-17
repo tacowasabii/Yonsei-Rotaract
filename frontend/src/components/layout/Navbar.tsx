@@ -1,4 +1,5 @@
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { useAuth, useIsAdmin } from "@/contexts/AuthContext";
 
 const navLinks = [
   { label: "소식", to: "/news" },
@@ -13,6 +14,15 @@ const boardLinks = [
 ];
 
 export default function Navbar() {
+  const { user, signOut } = useAuth();
+  const isAdmin = useIsAdmin();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
   return (
     <nav className="sticky top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-card">
       <div className="flex justify-between items-center h-16 px-6 md:px-8 max-w-7xl mx-auto">
@@ -77,25 +87,49 @@ export default function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-3">
-          <Link to="/login" className="sm:hidden px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
-            로그인
-          </Link>
-          <div className="hidden sm:flex items-center gap-2">
-            {/* 관리자 로그인 상태일 때만 표시 — 실제 구현 시 auth 상태로 조건부 렌더링 */}
-            <Link
-              to="/admin"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all"
-            >
-              <span className="material-symbols-outlined text-sm">manage_accounts</span>
-              관리자
-            </Link>
-            <Link to="/login" className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
-              로그인
-            </Link>
-            <Link to="/signup" className="px-4 py-1.5 rounded-full text-sm font-bold bg-linear-to-br from-primary to-primary-container text-white shadow-lg hover:opacity-90 active:scale-95 transition-all">
-              회원가입
-            </Link>
-          </div>
+          {user ? (
+            <>
+              <div className="sm:hidden">
+                <button
+                  onClick={handleSignOut}
+                  className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+                >
+                  로그아웃
+                </button>
+              </div>
+              <div className="hidden sm:flex items-center gap-2">
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all"
+                  >
+                    <span className="material-symbols-outlined text-sm">manage_accounts</span>
+                    관리자
+                  </Link>
+                )}
+                <button
+                  onClick={handleSignOut}
+                  className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+                >
+                  로그아웃
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="sm:hidden px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+                로그인
+              </Link>
+              <div className="hidden sm:flex items-center gap-2">
+                <Link to="/login" className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+                  로그인
+                </Link>
+                <Link to="/signup" className="px-4 py-1.5 rounded-full text-sm font-bold bg-linear-to-br from-primary to-primary-container text-white shadow-lg hover:opacity-90 active:scale-95 transition-all">
+                  회원가입
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </nav>
