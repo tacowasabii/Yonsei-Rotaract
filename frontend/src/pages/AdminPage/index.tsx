@@ -13,7 +13,7 @@ const pendingSignups = [
     userId: "daeun_j",
     major: "심리학과",
     year: "2024년",
-    memberType: "active",
+    memberType: "current",
     provider: "kakao",
     appliedAt: "2025. 04. 09 14:32",
     status: "pending" as PendingStatus,
@@ -24,7 +24,7 @@ const pendingSignups = [
     userId: "hyunwoo_oh",
     major: "기계공학과",
     year: "2023년",
-    memberType: "active",
+    memberType: "current",
     provider: "email",
     appliedAt: "2025. 04. 09 11:18",
     status: "pending" as PendingStatus,
@@ -46,7 +46,7 @@ const pendingSignups = [
     userId: "sjyoon",
     major: "컴퓨터과학과",
     year: "2022년",
-    memberType: "active",
+    memberType: "current",
     provider: "naver",
     appliedAt: "2025. 04. 08 09:41",
     status: "pending" as PendingStatus,
@@ -54,13 +54,13 @@ const pendingSignups = [
 ];
 
 const members = [
-  { id: 1, name: "김연세", userId: "yonsei_k", major: "경영학과", year: "2021년", memberType: "active", role: "admin", status: "active", joinedAt: "2023. 03. 01" },
-  { id: 2, name: "이수현", userId: "suhyun_l", major: "사회학과", year: "2022년", memberType: "active", role: "member", status: "active", joinedAt: "2023. 03. 01" },
-  { id: 3, name: "박지민", userId: "jimin_p", major: "언론정보학과", year: "2023년", memberType: "active", role: "member", status: "active", joinedAt: "2024. 03. 05" },
-  { id: 4, name: "최윤서", userId: "yunseo_c", major: "의류환경학과", year: "2020년", memberType: "active", role: "member", status: "active", joinedAt: "2023. 03. 01" },
+  { id: 1, name: "김연세", userId: "yonsei_k", major: "경영학과", year: "2021년", memberType: "current", role: "admin", status: "active", joinedAt: "2023. 03. 01" },
+  { id: 2, name: "이수현", userId: "suhyun_l", major: "사회학과", year: "2022년", memberType: "current", role: "member", status: "active", joinedAt: "2023. 03. 01" },
+  { id: 3, name: "박지민", userId: "jimin_p", major: "언론정보학과", year: "2023년", memberType: "current", role: "member", status: "active", joinedAt: "2024. 03. 05" },
+  { id: 4, name: "최윤서", userId: "yunseo_c", major: "의류환경학과", year: "2020년", memberType: "current", role: "member", status: "active", joinedAt: "2023. 03. 01" },
   { id: 5, name: "김도현", userId: "dohyun_k", major: "경영학과", year: "2016년", memberType: "alumni", role: "member", status: "active", joinedAt: "2023. 06. 10" },
   { id: 6, name: "이수진", userId: "sujin_l", major: "사회학과", year: "2017년", memberType: "alumni", role: "member", status: "active", joinedAt: "2024. 01. 15" },
-  { id: 7, name: "한소희", userId: "sohee_h", major: "심리학과", year: "2024년", memberType: "active", role: "member", status: "inactive", joinedAt: "2024. 03. 08" },
+  { id: 7, name: "한소희", userId: "sohee_h", major: "심리학과", year: "2024년", memberType: "current", role: "member", status: "inactive", joinedAt: "2024. 03. 08" },
 ];
 
 const providerLabel: Record<string, { label: string; color: string }> = {
@@ -103,7 +103,7 @@ export default function AdminPage() {
       m.major.includes(memberSearch);
     const matchType =
       filterType === "전체" ||
-      (filterType === "현역" && m.memberType === "active") ||
+      (filterType === "현역" && m.memberType === "current") ||
       (filterType === "졸업생" && m.memberType === "alumni") ||
       (filterType === "관리자" && memberRoles[m.id] === "admin");
     return matchSearch && matchType;
@@ -155,7 +155,7 @@ export default function AdminPage() {
             {[
               { label: "전체 회원", value: members.length, icon: "group", color: "bg-primary-fixed text-primary-container" },
               { label: "가입 대기", value: pendingCount, icon: "pending", color: "bg-error/10 text-error" },
-              { label: "현역 회원", value: members.filter((m) => m.memberType === "active").length, icon: "school", color: "bg-secondary-fixed text-on-secondary-fixed" },
+              { label: "현역 회원", value: members.filter((m) => m.memberType === "current").length, icon: "school", color: "bg-secondary-fixed text-on-secondary-fixed" },
               { label: "졸업생", value: members.filter((m) => m.memberType === "alumni").length, icon: "work", color: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
             ].map((stat) => (
               <div key={stat.label} className="bg-surface-container-lowest rounded-2xl p-5 shadow-card">
@@ -260,8 +260,8 @@ export default function AdminPage() {
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${providerLabel[p.provider].color}`}>
                         {providerLabel[p.provider].label}
                       </span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.memberType === "active" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
-                        {p.memberType === "active" ? "현역" : "졸업생"}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.memberType === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
+                        {p.memberType === "current" ? "현역" : "졸업생"}
                       </span>
                     </div>
                     <p className="text-sm text-on-surface-variant mt-0.5">{p.major} · {p.year} 입학</p>
@@ -380,8 +380,8 @@ export default function AdminPage() {
                       </td>
                       <td className="px-4 py-3 text-xs text-on-surface-variant hidden md:table-cell">{member.joinedAt}</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${member.memberType === "active" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
-                          {member.memberType === "active" ? "현역" : "졸업생"}
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${member.memberType === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
+                          {member.memberType === "current" ? "현역" : "졸업생"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">

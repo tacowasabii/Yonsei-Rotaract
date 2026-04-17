@@ -23,7 +23,7 @@ export default function SignupPage() {
     formState: { errors },
   } = useForm<SignupFormValues>({ mode: "onBlur" });
 
-  const [memberType, setMemberType] = useState<"active" | "alumni">("active");
+  const [memberType, setMemberType] = useState<"current" | "alumni">("current");
   const [agreedAll, setAgreedAll] = useState(false);
   const [agreements, setAgreements] = useState({ terms: false, privacy: false, optional: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +55,7 @@ export default function SignupPage() {
           name: data.name,
           phone: data.phone,
           member_type: memberType,
+          admission_year: memberType === "alumni" ? data.admissionYear : null,
           department: memberType === "alumni" ? data.department : null,
           generation: memberType === "alumni" ? data.generation : null,
         },
@@ -72,6 +73,7 @@ export default function SignupPage() {
         name: data.name,
         phone: data.phone,
         member_type: memberType,
+        admission_year: memberType === "alumni" ? data.admissionYear : null,
         department: memberType === "alumni" ? data.department : null,
         generation: memberType === "alumni" ? data.generation : null,
         role: "user",
@@ -86,9 +88,9 @@ export default function SignupPage() {
     trigger();
   };
 
-  const [email, password, passwordConfirm, name, phone, department, generation] = useWatch({
+  const [email, password, passwordConfirm, name, phone, admissionYear, department, generation] = useWatch({
     control,
-    name: ["email", "password", "passwordConfirm", "name", "phone", "department", "generation"],
+    name: ["email", "password", "passwordConfirm", "name", "phone", "admissionYear", "department", "generation"],
   });
 
   const canSubmit = (() => {
@@ -106,7 +108,7 @@ export default function SignupPage() {
       /^01[0-9]-?\d{3,4}-?\d{4}$/.test(phone) &&
       agreements.terms &&
       agreements.privacy;
-    if (memberType === "alumni") return base && !!department && !!generation;
+    if (memberType === "alumni") return base && !!admissionYear && !!department && !!generation;
     return base;
   })();
 
@@ -186,6 +188,19 @@ export default function SignupPage() {
 
             {memberType === "alumni" && (
               <>
+                <FormInput
+                  label="입학년도"
+                  icon="tag"
+                  type="number"
+                  placeholder="예) 2018"
+                  hasError={!!errors.admissionYear}
+                  errorMessage={errors.admissionYear?.message}
+                  inputProps={register("admissionYear", {
+                    required: "입학년도를 입력하세요.",
+                    pattern: { value: /^\d{4}$/, message: "4자리 연도를 입력하세요." },
+                  })}
+                />
+
                 <FormInput
                   label="학과"
                   icon="menu_book"

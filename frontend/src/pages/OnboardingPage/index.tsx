@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function OnboardingPage() {
-  const [memberType, setMemberType] = useState<"active" | "alumni">("active");
+  const [memberType, setMemberType] = useState<"current" | "alumni">("current");
   const [joinInputType, setJoinInputType] = useState<"generation" | "semester">("generation");
   const [agreedAll, setAgreedAll] = useState(false);
   const [agreements, setAgreements] = useState({ terms: false, privacy: false, optional: false });
@@ -91,9 +91,9 @@ export default function OnboardingPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setMemberType("active")}
+                  onClick={() => setMemberType("current")}
                   className={`py-3 rounded-xl text-sm font-bold border-2 transition-all flex items-center justify-center gap-1.5 ${
-                    memberType === "active"
+                    memberType === "current"
                       ? "border-primary-container bg-primary-fixed text-primary-container"
                       : "border-outline-variant/30 text-on-surface-variant hover:border-primary-container/30"
                   }`}

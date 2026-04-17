@@ -4,6 +4,7 @@ export type SignupFormValues = {
   password: string;
   passwordConfirm: string;
   name: string;
+  admissionYear: string;
   department: string;
   generation: string;
   workplace: string;
