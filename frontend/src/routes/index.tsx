@@ -1,54 +1,69 @@
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "./Layout";
 import ProtectedRoute from "./ProtectedRoute";
-import AdminLayout from "@components/layout/AdminLayout";
+import { PATHS } from "./paths";
+
+// 메인
 import HomePage from "@pages/HomePage";
 import NewsPage from "@pages/NewsPage";
 import NoticePage from "@pages/NoticePage";
-import BoardPage from "@pages/board/BoardPage";
-import BoardPostPage from "@pages/board/BoardPostPage";
-import BoardWritePage from "@pages/board/BoardWritePage";
 import AlumniPage from "@pages/AlumniPage";
 import GalleryPage from "@pages/GalleryPage";
 import MyPage from "@pages/MyPage";
+
+// 게시판
+import BoardPage from "@pages/board/BoardPage";
+import BoardPostPage from "@pages/board/BoardPostPage";
+import BoardWritePage from "@pages/board/BoardWritePage";
+
+// 인증
 import LoginPage from "@pages/auth/LoginPage";
 import SignupPage from "@pages/auth/SignupPage";
 import SignupCompletePage from "@pages/auth/SignupCompletePage";
 import PendingApprovalPage from "@pages/auth/PendingApprovalPage";
 import RejectedPage from "@pages/auth/RejectedPage";
 import InactivePage from "@pages/auth/InactivePage";
+
+// 관리자
+import AdminLayout from "@components/layout/AdminLayout";
 import AdminDashboard from "@pages/admin/Dashboard";
 import AdminPending from "@pages/admin/Pending";
 import AdminMembers from "@pages/admin/Members";
-import { PATHS } from "./paths";
 
 export const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
-      { path: PATHS.HOME,             element: <HomePage /> },
-      { path: PATHS.NEWS,             element: <NewsPage /> },
-      { path: PATHS.NOTICE,           element: <NoticePage /> },
-      { path: PATHS.BOARD,            element: <BoardPage /> },
-      { path: PATHS.BOARD_FREE,       element: <BoardPage /> },
-      { path: PATHS.BOARD_FREE_WRITE, element: <BoardWritePage /> },
-      { path: PATHS.BOARD_FREE_POST,  element: <BoardPostPage /> },
-      { path: PATHS.BOARD_PROMO,      element: <BoardPage /> },
-      { path: PATHS.BOARD_PROMO_WRITE,element: <BoardWritePage /> },
-      { path: PATHS.BOARD_PROMO_POST, element: <BoardPostPage /> },
-      { path: PATHS.ALUMNI,           element: <AlumniPage /> },
-      { path: PATHS.GALLERY,          element: <GalleryPage /> },
-      { path: PATHS.LOGIN,            element: <LoginPage /> },
-      { path: PATHS.SIGNUP,           element: <SignupPage /> },
-      { path: PATHS.SIGNUP_COMPLETE,  element: <SignupCompletePage /> },
-      { path: PATHS.MYPAGE,           element: <MyPage /> },
+      // 메인
+      { path: PATHS.HOME,   element: <HomePage /> },
+      { path: PATHS.NEWS,   element: <NewsPage /> },
+      { path: PATHS.NOTICE, element: <NoticePage /> },
+      { path: PATHS.ALUMNI, element: <AlumniPage /> },
+      { path: PATHS.GALLERY,element: <GalleryPage /> },
+      { path: PATHS.MYPAGE, element: <MyPage /> },
+
+      // 게시판
+      { path: PATHS.BOARD,             element: <BoardPage /> },
+      { path: PATHS.BOARD_FREE,        element: <BoardPage /> },
+      { path: PATHS.BOARD_FREE_WRITE,  element: <BoardWritePage /> },
+      { path: PATHS.BOARD_FREE_POST,   element: <BoardPostPage /> },
+      { path: PATHS.BOARD_PROMO,       element: <BoardPage /> },
+      { path: PATHS.BOARD_PROMO_WRITE, element: <BoardWritePage /> },
+      { path: PATHS.BOARD_PROMO_POST,  element: <BoardPostPage /> },
+
+      // 인증
+      { path: PATHS.LOGIN,           element: <LoginPage /> },
+      { path: PATHS.SIGNUP,          element: <SignupPage /> },
+      { path: PATHS.SIGNUP_COMPLETE, element: <SignupCompletePage /> },
     ],
   },
+
   // 가입 상태 페이지 (standalone, Layout 없음)
   { path: PATHS.PENDING_APPROVAL, element: <PendingApprovalPage /> },
-  { path: PATHS.REJECTED, element: <RejectedPage /> },
-  { path: PATHS.INACTIVE, element: <InactivePage /> },
-  // 관리자: 완전히 별도 레이아웃 (staff 이상 접근 가능)
+  { path: PATHS.REJECTED,         element: <RejectedPage /> },
+  { path: PATHS.INACTIVE,         element: <InactivePage /> },
+
+  // 관리자 (staff 이상, 별도 레이아웃)
   {
     element: <ProtectedRoute requiredRole="staff" />,
     children: [
