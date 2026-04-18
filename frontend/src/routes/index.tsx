@@ -10,17 +10,17 @@ import BoardPostPage from "@pages/BoardPostPage";
 import BoardWritePage from "@pages/BoardWritePage";
 import AlumniPage from "@pages/AlumniPage";
 import GalleryPage from "@pages/GalleryPage";
-import LoginPage from "@pages/LoginPage";
-import SignupPage from "@pages/SignupPage";
-import OnboardingPage from "@pages/OnboardingPage";
-import SignupCompletePage from "@pages/SignupCompletePage";
-import AdminDashboard from "@pages/AdminPage/AdminDashboard";
-import AdminPending from "@pages/AdminPage/AdminPending";
-import AdminMembers from "@pages/AdminPage/AdminMembers";
 import MyPage from "@pages/MyPage";
-import PendingApprovalPage from "@pages/PendingApprovalPage";
-import RejectedPage from "@pages/RejectedPage";
-import InactivePage from "@pages/InactivePage";
+import LoginPage from "@pages/auth/LoginPage";
+import SignupPage from "@pages/auth/SignupPage";
+import SignupCompletePage from "@pages/auth/SignupCompletePage";
+import OnboardingPage from "@pages/auth/OnboardingPage";
+import PendingApprovalPage from "@pages/auth/PendingApprovalPage";
+import RejectedPage from "@pages/auth/RejectedPage";
+import InactivePage from "@pages/auth/InactivePage";
+import AdminDashboard from "@pages/admin/Dashboard";
+import AdminPending from "@pages/admin/Pending";
+import AdminMembers from "@pages/admin/Members";
 import { PATHS } from "./paths";
 
 export const router = createBrowserRouter([
@@ -58,9 +58,9 @@ export const router = createBrowserRouter([
         path: PATHS.ADMIN,
         element: <AdminLayout />,
         children: [
-          { index: true,         element: <AdminDashboard /> },
-          { path: "pending",     element: <AdminPending /> },
-          { path: "members",     element: <AdminMembers /> },
+          { index: true,     element: <AdminDashboard /> },
+          { path: "pending", element: <AdminPending /> },
+          { path: "members", element: <AdminMembers /> },
         ],
       },
     ],

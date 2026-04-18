@@ -2,7 +2,7 @@ import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers } from "@/api/hooks/usePendingMembers";
 import { PATHS } from "@/routes/paths";
-import { ROLE_META } from "@/pages/AdminPage/shared";
+import { ROLE_META } from "@/pages/admin/shared";
 
 const navItems = [
   { to: PATHS.ADMIN,         label: "대시보드", icon: "dashboard",  end: true  },

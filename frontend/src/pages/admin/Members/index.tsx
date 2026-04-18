@@ -2,66 +2,66 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/api/types/member";
 import { useMembers, useUpdateMemberRole, useUpdateMemberStatus } from "@/api/hooks/useMembers";
-import { ROLE_META, assignableRoles, formatDate, formatPhone, isAdminOrAbove } from "./shared";
+import { ROLE_META, assignableRoles, formatDate, formatPhone, isAdminOrAbove } from "../shared";
+import SortHeaderButton from "./components/SortHeaderButton";
+
+type SortKey = "name" | "generation" | "admission_year";
 
 export default function AdminMembers() {
   const { role: viewerRole } = useAuth();
   const [memberSearch, setMemberSearch] = useState("");
   const [filterType, setFilterType] = useState("전체");
-  const [sortKey, setSortKey] = useState<"name" | "generation" | "admission_year" | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-
-  const handleSort = (key: "name" | "generation" | "admission_year") => {
-    if (sortKey !== key) { setSortKey(key); setSortDir("asc"); }
-    else if (sortDir === "asc") setSortDir("desc");
-    else { setSortKey(null); setSortDir("asc"); }
-  };
 
   const { data: members = [], isLoading: membersLoading, isError } = useMembers();
   const updateRole = useUpdateMemberRole();
   const updateStatus = useUpdateMemberStatus();
 
-  const handleRoleChange = (memberId: string, newRole: AppRole) => {
+  function handleSort(key: SortKey) {
+    if (sortKey !== key) { setSortKey(key); setSortDir("asc"); }
+    else if (sortDir === "asc") setSortDir("desc");
+    else { setSortKey(null); setSortDir("asc"); }
+  }
+
+  function handleRoleChange(memberId: string, newRole: AppRole) {
     updateRole.mutate({ memberId, newRole });
-  };
+  }
 
-  const handleStatusToggle = (memberId: string, currentStatus: "active" | "inactive") => {
+  function handleStatusToggle(memberId: string, currentStatus: "active" | "inactive") {
     updateStatus.mutate({ memberId, newStatus: currentStatus === "active" ? "inactive" : "active" });
-  };
+  }
 
-  const sortIcon = (key: "name" | "generation" | "admission_year") => {
-    if (sortKey !== key) return "unfold_more";
-    return sortDir === "asc" ? "arrow_upward" : "arrow_downward";
-  };
-
-  const filteredMembers = members.filter((m) => {
-    if (m.role === "super_admin") return false;
-    const matchSearch =
-      !memberSearch ||
-      m.name.includes(memberSearch) ||
-      m.email.includes(memberSearch) ||
-      (m.department ?? "").includes(memberSearch) ||
-      (m.generation ?? "").includes(memberSearch) ||
-      (m.phone ?? "").replace(/-/g, "").includes(memberSearch.replace(/-/g, "")) ||
-      String(m.admission_year ?? "").includes(memberSearch);
-    const matchType =
-      filterType === "전체" ||
-      (filterType === "현역"   && m.member_type === "current") ||
-      (filterType === "졸업생" && m.member_type === "alumni") ||
-      (filterType === "운영진" && m.role === "staff") ||
-      (filterType === "관리자" && m.role === "admin");
-    return matchSearch && matchType;
-  }).sort((a, b) => {
-    if (!sortKey) return 0;
-    if (sortKey === "admission_year") {
-      const av = a.admission_year ?? 0;
-      const bv = b.admission_year ?? 0;
-      return sortDir === "asc" ? av - bv : bv - av;
-    }
-    const av = sortKey === "name" ? a.name : (a.generation ?? "");
-    const bv = sortKey === "name" ? b.name : (b.generation ?? "");
-    return sortDir === "asc" ? av.localeCompare(bv, "ko") : bv.localeCompare(av, "ko");
-  });
+  const filteredMembers = members
+    .filter((m) => {
+      if (m.role === "super_admin") return false;
+      const matchSearch =
+        !memberSearch ||
+        m.name.includes(memberSearch) ||
+        m.email.includes(memberSearch) ||
+        (m.department ?? "").includes(memberSearch) ||
+        (m.generation ?? "").includes(memberSearch) ||
+        (m.phone ?? "").replace(/-/g, "").includes(memberSearch.replace(/-/g, "")) ||
+        String(m.admission_year ?? "").includes(memberSearch);
+      const matchType =
+        filterType === "전체" ||
+        (filterType === "현역"   && m.member_type === "current") ||
+        (filterType === "졸업생" && m.member_type === "alumni") ||
+        (filterType === "운영진" && m.role === "staff") ||
+        (filterType === "관리자" && m.role === "admin");
+      return matchSearch && matchType;
+    })
+    .sort((a, b) => {
+      if (!sortKey) return 0;
+      if (sortKey === "admission_year") {
+        const av = a.admission_year ?? 0;
+        const bv = b.admission_year ?? 0;
+        return sortDir === "asc" ? av - bv : bv - av;
+      }
+      const av = sortKey === "name" ? a.name : (a.generation ?? "");
+      const bv = sortKey === "name" ? b.name : (b.generation ?? "");
+      return sortDir === "asc" ? av.localeCompare(bv, "ko") : bv.localeCompare(av, "ko");
+    });
 
   return (
     <div className="space-y-4">
@@ -119,20 +119,14 @@ export default function AdminMembers() {
               <thead>
                 <tr className="border-b border-outline-variant/20 bg-surface-container/50">
                   <th className="text-left px-5 py-3 text-xs font-bold text-on-surface-variant">
-                    <button onClick={() => handleSort("name")} className="flex items-center gap-0.5 hover:text-on-surface transition-colors">
-                      이름 <span className="material-symbols-outlined text-sm">{sortIcon("name")}</span>
-                    </button>
+                    <SortHeaderButton label="이름" sortKey="name" activeSortKey={sortKey} sortDir={sortDir} onSort={() => handleSort("name")} />
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">학과</th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">
-                    <button onClick={() => handleSort("admission_year")} className="flex items-center gap-0.5 hover:text-on-surface transition-colors">
-                      학번 <span className="material-symbols-outlined text-sm">{sortIcon("admission_year")}</span>
-                    </button>
+                    <SortHeaderButton label="학번" sortKey="admission_year" activeSortKey={sortKey} sortDir={sortDir} onSort={() => handleSort("admission_year")} />
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">
-                    <button onClick={() => handleSort("generation")} className="flex items-center gap-0.5 hover:text-on-surface transition-colors">
-                      기수 <span className="material-symbols-outlined text-sm">{sortIcon("generation")}</span>
-                    </button>
+                    <SortHeaderButton label="기수" sortKey="generation" activeSortKey={sortKey} sortDir={sortDir} onSort={() => handleSort("generation")} />
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden lg:table-cell">연락처</th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant hidden md:table-cell">가입일</th>

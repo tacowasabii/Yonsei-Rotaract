@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers, useRejectedMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
-import { formatDate, isAdminOrAbove } from "./shared";
+import { formatDate, isAdminOrAbove } from "../shared";
 
 type ConfirmAction = { type: "approve" | "reject"; id: string; name: string } | null;
 
