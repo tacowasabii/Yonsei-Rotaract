@@ -7,7 +7,6 @@ export type SignupFormValues = {
   admissionYear: string;
   department: string;
   generation: string;
-  workplace: string;
 };
 
 export const GENERATION_OPTIONS = [

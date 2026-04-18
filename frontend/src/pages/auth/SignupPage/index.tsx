@@ -199,13 +199,6 @@ export default function SignupPage() {
                   error={errors.generation}
                 />
 
-                <FormInput
-                  label="현재 직장/직군 (선택)"
-                  icon="business"
-                  placeholder="예) 삼성전자 마케팅"
-                  hasError={false}
-                  inputProps={register("workplace")}
-                />
               </>
             )}
 
