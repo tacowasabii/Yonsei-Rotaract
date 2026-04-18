@@ -20,6 +20,10 @@
 - **Frontend**: Vite + React + TypeScript + Tailwind CSS v4
 - **디렉토리**: `frontend/`
 
+## 코드 컨벤션
+→ **`docs/CONVENTIONS.md`** 참고
+- 폴더 구조, 파일 네이밍, 라우트 패턴, 컴포넌트 작성 규칙 등이 정의되어 있다.
+
 ## 디자인 시스템
 - 참고 파일: `frontend/design/` 폴더 내 HTML 프로토타입 및 `design_system.md`
 - **Primary 색상**: #003876 (네이비 블루) - 로타랙트 브랜드 컬러
