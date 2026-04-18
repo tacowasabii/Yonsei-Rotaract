@@ -17,6 +17,7 @@ import SignupCompletePage from "@pages/SignupCompletePage";
 import AdminDashboard from "@pages/AdminPage/AdminDashboard";
 import AdminPending from "@pages/AdminPage/AdminPending";
 import AdminMembers from "@pages/AdminPage/AdminMembers";
+import MyPage from "@pages/MyPage";
 import PendingApprovalPage from "@pages/PendingApprovalPage";
 import RejectedPage from "@pages/RejectedPage";
 import InactivePage from "@pages/InactivePage";
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: PATHS.SIGNUP,           element: <SignupPage /> },
       { path: PATHS.SIGNUP_COMPLETE,  element: <SignupCompletePage /> },
       { path: PATHS.ONBOARDING,       element: <OnboardingPage /> },
+      { path: PATHS.MYPAGE,           element: <MyPage /> },
     ],
   },
   // 가입 상태 페이지 (standalone, Layout 없음)

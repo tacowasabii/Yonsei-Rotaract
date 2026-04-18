@@ -108,6 +108,13 @@ export default function Navbar() {
                     관리자
                   </Link>
                 )}
+                <Link
+                  to="/mypage"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all"
+                >
+                  <span className="material-symbols-outlined text-base">person</span>
+                  마이페이지
+                </Link>
                 <button
                   onClick={handleSignOut}
                   className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"

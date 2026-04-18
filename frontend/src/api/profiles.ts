@@ -83,6 +83,29 @@ export async function approveAllPendingMembers(): Promise<void> {
   if (error) throw error;
 }
 
+export async function fetchMyFullProfile(userId: string): Promise<Member> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at")
+    .eq("id", userId)
+    .single();
+  if (error) throw error;
+  return data as Member;
+}
+
+export async function updateMyPhone(userId: string, phone: string): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ phone })
+    .eq("id", userId);
+  if (error) throw error;
+}
+
+export async function updatePassword(newPassword: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+}
+
 export async function upsertProfile(profile: {
   id: string;
   name: string;
