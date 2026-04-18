@@ -5,16 +5,15 @@ import AdminLayout from "@components/layout/AdminLayout";
 import HomePage from "@pages/HomePage";
 import NewsPage from "@pages/NewsPage";
 import NoticePage from "@pages/NoticePage";
-import BoardPage from "@pages/BoardPage";
-import BoardPostPage from "@pages/BoardPostPage";
-import BoardWritePage from "@pages/BoardWritePage";
+import BoardPage from "@pages/board/BoardPage";
+import BoardPostPage from "@pages/board/BoardPostPage";
+import BoardWritePage from "@pages/board/BoardWritePage";
 import AlumniPage from "@pages/AlumniPage";
 import GalleryPage from "@pages/GalleryPage";
 import MyPage from "@pages/MyPage";
 import LoginPage from "@pages/auth/LoginPage";
 import SignupPage from "@pages/auth/SignupPage";
 import SignupCompletePage from "@pages/auth/SignupCompletePage";
-import OnboardingPage from "@pages/auth/OnboardingPage";
 import PendingApprovalPage from "@pages/auth/PendingApprovalPage";
 import RejectedPage from "@pages/auth/RejectedPage";
 import InactivePage from "@pages/auth/InactivePage";
@@ -42,7 +41,6 @@ export const router = createBrowserRouter([
       { path: PATHS.LOGIN,            element: <LoginPage /> },
       { path: PATHS.SIGNUP,           element: <SignupPage /> },
       { path: PATHS.SIGNUP_COMPLETE,  element: <SignupCompletePage /> },
-      { path: PATHS.ONBOARDING,       element: <OnboardingPage /> },
       { path: PATHS.MYPAGE,           element: <MyPage /> },
     ],
   },
