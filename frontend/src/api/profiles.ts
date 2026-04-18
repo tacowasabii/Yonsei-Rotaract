@@ -93,6 +93,14 @@ export async function fetchMyFullProfile(userId: string): Promise<Member> {
   return data as Member;
 }
 
+export async function updateMyMemberType(userId: string, memberType: "current" | "alumni"): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ member_type: memberType })
+    .eq("id", userId);
+  if (error) throw error;
+}
+
 export async function updateMyPhone(userId: string, phone: string): Promise<void> {
   const { error } = await supabase
     .from("profiles")

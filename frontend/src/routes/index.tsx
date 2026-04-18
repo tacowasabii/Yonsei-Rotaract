@@ -9,7 +9,10 @@ import NewsPage from "@pages/NewsPage";
 import NoticePage from "@pages/NoticePage";
 import AlumniPage from "@pages/AlumniPage";
 import GalleryPage from "@pages/GalleryPage";
-import MyPage from "@pages/MyPage";
+import MyPageLayout from "@pages/MyPage";
+import MyProfile   from "@pages/MyPage/Profile";
+import MyPosts     from "@pages/MyPage/Posts";
+import MyMessages  from "@pages/MyPage/Messages";
 
 // 게시판
 import BoardPage from "@pages/board/BoardPage";
@@ -40,7 +43,15 @@ export const router = createBrowserRouter([
       { path: PATHS.NOTICE, element: <NoticePage /> },
       { path: PATHS.ALUMNI, element: <AlumniPage /> },
       { path: PATHS.GALLERY,element: <GalleryPage /> },
-      { path: PATHS.MYPAGE, element: <MyPage /> },
+      {
+        path: PATHS.MYPAGE,
+        element: <MyPageLayout />,
+        children: [
+          { index: true,    element: <MyProfile /> },
+          { path: "posts",    element: <MyPosts /> },
+          { path: "messages", element: <MyMessages /> },
+        ],
+      },
 
       // 게시판
       { path: PATHS.BOARD,             element: <BoardPage /> },

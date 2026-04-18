@@ -6,6 +6,8 @@ export const PATHS = {
   ALUMNI: "/alumni",
   GALLERY: "/gallery",
   MYPAGE: "/mypage",
+  MYPAGE_POSTS: "/mypage/posts",
+  MYPAGE_MESSAGES: "/mypage/messages",
 
   // 게시판
   BOARD: "/board",

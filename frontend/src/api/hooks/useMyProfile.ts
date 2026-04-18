@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchMyFullProfile, updateMyPhone, updatePassword } from "../profiles";
+import { fetchMyFullProfile, updateMyPhone, updateMyMemberType, updatePassword } from "../profiles";
 import type { Member } from "../types/member";
 
 export function useMyProfile(userId: string | undefined) {
@@ -15,6 +15,17 @@ export function useUpdateMyPhone() {
   return useMutation({
     mutationFn: ({ userId, phone }: { userId: string; phone: string }) =>
       updateMyPhone(userId, phone),
+    onSuccess: (_data, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: ["my-profile", userId] });
+    },
+  });
+}
+
+export function useUpdateMyMemberType() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, memberType }: { userId: string; memberType: "current" | "alumni" }) =>
+      updateMyMemberType(userId, memberType),
     onSuccess: (_data, { userId }) => {
       queryClient.invalidateQueries({ queryKey: ["my-profile", userId] });
     },
