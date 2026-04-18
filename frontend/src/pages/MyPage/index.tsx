@@ -28,56 +28,66 @@ export default function MyPageLayout() {
   const { data: profile, isLoading } = useMyProfile(user?.id);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10 space-y-6">
-      {/* 프로필 헤더 */}
-      <div className="bg-surface-container-lowest rounded-2xl shadow-card p-6 flex items-center gap-5">
-        {isLoading || !profile ? (
-          <div className="h-16 w-16 rounded-full bg-surface-container animate-pulse shrink-0" />
-        ) : (
-          <>
-            <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-              <span className="text-2xl font-black text-white">{profile.name.charAt(0)}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-black font-headline text-on-surface">{profile.name}</h1>
-              <div className="flex flex-wrap gap-2 mt-1.5">
-                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${ROLE_COLORS[profile.role] ?? "bg-surface-container text-on-surface-variant"}`}>
-                  {ROLE_LABELS[profile.role] ?? profile.role}
-                </span>
-                {profile.member_type && (
-                  <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${profile.member_type === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
-                    {profile.member_type === "current" ? "현역" : "졸업생"}
-                  </span>
-                )}
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-8 pt-12 pb-24 md:pb-12">
+      <div className="flex gap-6 items-start">
+        {/* 왼쪽 사이드바 */}
+        <aside className="w-64 shrink-0 space-y-3 sticky top-24">
+          {/* 프로필 카드 */}
+          <div className="bg-surface-container-lowest rounded-2xl shadow-card p-5">
+            {isLoading || !profile ? (
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-16 w-16 rounded-full bg-surface-container animate-pulse" />
+                <div className="h-4 w-24 rounded-full bg-surface-container animate-pulse" />
               </div>
-            </div>
-          </>
-        )}
-      </div>
+            ) : (
+              <div className="flex flex-col items-center text-center gap-3">
+                <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center">
+                  <span className="text-2xl font-black text-white">{profile.name.charAt(0)}</span>
+                </div>
+                <div>
+                  <h1 className="text-base font-black font-headline text-on-surface">{profile.name}</h1>
+                  <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${ROLE_COLORS[profile.role] ?? "bg-surface-container text-on-surface-variant"}`}>
+                      {ROLE_LABELS[profile.role] ?? profile.role}
+                    </span>
+                    {profile.member_type && (
+                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${profile.member_type === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
+                        {profile.member_type === "current" ? "현역" : "졸업생"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
-      {/* 내부 네비게이션 */}
-      <div className="bg-surface-container rounded-2xl p-1 flex gap-1">
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) =>
-              `flex items-center gap-2 flex-1 justify-center px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                isActive
-                  ? "bg-surface-container-lowest text-on-surface shadow-card"
-                  : "text-on-surface-variant hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
-            {item.label}
-          </NavLink>
-        ))}
-      </div>
+          {/* 세로 네비게이션 */}
+          <nav className="bg-surface-container-lowest rounded-2xl shadow-card p-2 flex flex-col gap-1">
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                    isActive
+                      ? "bg-primary-container text-white"
+                      : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                  }`
+                }
+              >
+                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        </aside>
 
-      {/* 하위 페이지 */}
-      <Outlet />
+        {/* 오른쪽 콘텐츠 */}
+        <main className="flex-1 min-w-0">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

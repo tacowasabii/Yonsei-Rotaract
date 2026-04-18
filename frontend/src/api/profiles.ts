@@ -114,6 +114,11 @@ export async function updatePassword(newPassword: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function verifyCurrentPassword(email: string, password: string): Promise<boolean> {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  return !error;
+}
+
 export async function upsertProfile(profile: {
   id: string;
   name: string;
