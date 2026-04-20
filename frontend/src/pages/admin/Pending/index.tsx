@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers, useRejectedMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
 import { formatDate, isAdminOrAbove } from "../shared";
+import MailIcon from "@/assets/icons/mail.svg?react";
+import CallIcon from "@/assets/icons/call.svg?react";
 
 type ConfirmAction = { type: "approve" | "reject"; id: string; name: string } | null;
 
@@ -62,8 +64,12 @@ export default function AdminPending() {
                     </div>
                     <p className="text-sm text-on-surface-variant mt-0.5">
                       {p.department ?? "-"}{p.admission_year ? ` · ${String(p.admission_year).slice(-2)}학번` : ""}
+                      {p.generation ? ` · ${p.generation}` : ""}
                     </p>
-                    <p className="text-xs text-on-surface-variant mt-0.5">{p.email}</p>
+                    <p className="text-xs text-on-surface-variant mt-0.5 flex items-center gap-3 flex-wrap">
+                      <span className="flex items-center gap-1"><MailIcon className="w-4 h-4 shrink-0" />{p.email}</span>
+                      {p.phone && <span className="flex items-center gap-1"><CallIcon className="w-4 h-4 shrink-0" />{p.phone}</span>}
+                    </p>
                     <p className="text-xs text-on-surface-variant mt-0.5">신청일시: {formatDate(p.created_at)}</p>
                   </div>
                 </div>
@@ -118,8 +124,12 @@ export default function AdminPending() {
                       </div>
                       <p className="text-sm text-on-surface-variant mt-0.5">
                         {p.department ?? "-"}{p.admission_year ? ` · ${String(p.admission_year).slice(-2)}학번` : ""}
+                        {p.generation ? ` · ${p.generation}` : ""}
                       </p>
-                      <p className="text-xs text-on-surface-variant mt-0.5">{p.email}</p>
+                      <p className="text-xs text-on-surface-variant mt-0.5 flex items-center gap-3 flex-wrap">
+                        <span className="flex items-center gap-1"><MailIcon className="w-4 h-4 shrink-0" />{p.email}</span>
+                        {p.phone && <span className="flex items-center gap-1"><CallIcon className="w-4 h-4 shrink-0" />{p.phone}</span>}
+                      </p>
                       <p className="text-xs text-on-surface-variant mt-0.5">신청일시: {formatDate(p.created_at)}</p>
                     </div>
                   </div>
