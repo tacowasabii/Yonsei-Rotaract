@@ -86,6 +86,67 @@ export async function fetchPost(id: string): Promise<Post> {
   return data as Post;
 }
 
+export async function deletePost(id: string): Promise<void> {
+  // 먼저 image_urls 조회
+  const { data: post } = await supabase
+    .from("posts")
+    .select("image_urls")
+    .eq("id", id)
+    .single();
+
+  // Storage 이미지 삭제
+  if (post?.image_urls?.length) {
+    const bucketUrl = supabase.storage.from("post-images").getPublicUrl("").data.publicUrl.replace(/\/$/, "");
+    const paths = (post.image_urls as string[])
+      .map((url) => url.replace(`${bucketUrl}/`, ""))
+      .filter(Boolean);
+    if (paths.length) {
+      await supabase.storage.from("post-images").remove(paths);
+    }
+  }
+
+  const { error } = await supabase.from("posts").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export interface UpdatePostParams {
+  title: string;
+  content: string;
+  visibility: "public" | "members";
+  existingImageUrls: string[];
+  newImages: File[];
+}
+
+export async function updatePost(id: string, params: UpdatePostParams): Promise<Post> {
+  const newUrls: string[] = [];
+
+  for (const image of params.newImages) {
+    const compressed = await compressImage(image);
+    const path = `${id}/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from("post-images")
+      .upload(path, compressed, { contentType: "image/jpeg" });
+    if (uploadError) throw uploadError;
+    const { data: { publicUrl } } = supabase.storage.from("post-images").getPublicUrl(path);
+    newUrls.push(publicUrl);
+  }
+
+  const { data, error } = await supabase
+    .from("posts")
+    .update({
+      title: params.title,
+      content: params.content,
+      visibility: params.visibility,
+      image_urls: [...params.existingImageUrls, ...newUrls],
+    })
+    .eq("id", id)
+    .select("*, profiles(name, role)")
+    .single();
+
+  if (error) throw error;
+  return data as Post;
+}
+
 export async function createPost(
   authorId: string,
   params: CreatePostParams

@@ -14,9 +14,11 @@ export const PATHS = {
   BOARD_FREE: "/board/free",
   BOARD_FREE_WRITE: "/board/free/write",
   BOARD_FREE_POST: "/board/free/:id",
+  BOARD_FREE_EDIT: "/board/free/:id/edit",
   BOARD_PROMO: "/board/promo",
   BOARD_PROMO_WRITE: "/board/promo/write",
   BOARD_PROMO_POST: "/board/promo/:id",
+  BOARD_PROMO_EDIT: "/board/promo/:id/edit",
 
   // 인증
   LOGIN: "/login",

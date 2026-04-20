@@ -58,9 +58,11 @@ export const router = createBrowserRouter([
       { path: PATHS.BOARD_FREE,        element: <BoardPage /> },
       { path: PATHS.BOARD_FREE_WRITE,  element: <BoardWritePage /> },
       { path: PATHS.BOARD_FREE_POST,   element: <BoardPostPage /> },
+      { path: PATHS.BOARD_FREE_EDIT,   element: <BoardWritePage /> },
       { path: PATHS.BOARD_PROMO,       element: <BoardPage /> },
       { path: PATHS.BOARD_PROMO_WRITE, element: <BoardWritePage /> },
       { path: PATHS.BOARD_PROMO_POST,  element: <BoardPostPage /> },
+      { path: PATHS.BOARD_PROMO_EDIT,  element: <BoardWritePage /> },
 
       // 인증
       { path: PATHS.LOGIN,           element: <LoginPage /> },

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import { usePost } from "@/api/hooks/usePost";
+import { useDeletePost } from "@/api/hooks/useDeletePost";
+import { useAuth } from "@/contexts/AuthContext";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -16,15 +18,22 @@ export default function BoardPostPage() {
   const boardType = isPromo ? "promo" : "free";
   const boardLabel = isPromo ? "홍보게시판" : "자유게시판";
 
+  const { user } = useAuth();
   const { data: post, isLoading, isError } = usePost(id);
+  const { mutate: deletePost, isPending: isDeleting } = useDeletePost(boardType);
 
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [commentText, setCommentText] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const handleLike = () => {
-    setLiked((prev) => !prev);
-    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+  const isAuthor = !!user && !!post && user.id === post.author_id;
+
+  const handleDelete = () => {
+    if (!id) return;
+    deletePost(id, {
+      onSuccess: () => navigate(`/board/${boardType}`),
+    });
   };
 
   return (
@@ -39,7 +48,6 @@ export default function BoardPostPage() {
         </button>
       </div>
 
-      {/* 로딩 */}
       {isLoading && (
         <div className="bg-white rounded-2xl shadow-card p-8 animate-pulse space-y-4">
           <div className="h-6 bg-surface-container rounded w-3/4" />
@@ -52,14 +60,12 @@ export default function BoardPostPage() {
         </div>
       )}
 
-      {/* 에러 */}
       {isError && (
         <div className="bg-white rounded-2xl shadow-card p-12 text-center text-on-surface-variant">
           게시글을 불러오지 못했습니다.
         </div>
       )}
 
-      {/* 게시글 */}
       {post && (
         <div>
           <div className="bg-white rounded-2xl shadow-card overflow-hidden mb-4">
@@ -84,14 +90,56 @@ export default function BoardPostPage() {
                     <p className="text-xs text-on-surface-variant">{formatDate(post.created_at)}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-on-surface-variant">
-                  <span className="flex items-center gap-1">
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1 text-xs text-on-surface-variant">
                     <span className="material-symbols-outlined text-base">visibility</span>
                     {post.views}
                   </span>
+                  {/* 수정/삭제 버튼 (작성자만) */}
+                  {isAuthor && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => navigate(`/board/${boardType}/${id}/edit`)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-all"
+                      >
+                        <span className="material-symbols-outlined text-sm">edit</span>
+                        수정
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:bg-red-50 transition-all"
+                      >
+                        <span className="material-symbols-outlined text-sm">delete</span>
+                        삭제
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* 삭제 확인 */}
+            {showDeleteConfirm && (
+              <div className="mx-8 mt-6 px-5 py-4 bg-red-50 rounded-xl border border-red-100 flex items-center justify-between gap-4">
+                <p className="text-sm text-red-600 font-medium">정말 삭제하시겠어요? 되돌릴 수 없습니다.</p>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-4 py-1.5 rounded-lg text-sm font-semibold text-on-surface-variant bg-white hover:bg-surface-container transition-all"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-all disabled:opacity-60"
+                  >
+                    {isDeleting && <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                    {isDeleting ? "삭제 중..." : "삭제"}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Body */}
             <div className="px-8 py-8">
@@ -99,16 +147,10 @@ export default function BoardPostPage() {
                 {post.content}
               </p>
 
-              {/* 첨부 이미지 */}
               {post.image_urls && post.image_urls.length > 0 && (
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-col gap-3">
                   {post.image_urls.map((url, i) => (
-                    <img
-                      key={i}
-                      src={url}
-                      alt=""
-                      className="max-w-sm w-full rounded-xl object-cover"
-                    />
+                    <img key={i} src={url} alt="" className="max-w-sm w-full rounded-xl object-cover" />
                   ))}
                 </div>
               )}
@@ -117,17 +159,17 @@ export default function BoardPostPage() {
             {/* Actions */}
             <div className="px-8 pb-6 flex items-center justify-between">
               <button
-                onClick={handleLike}
+                onClick={() => {
+                  setLiked((prev) => !prev);
+                  setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+                }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
                   liked
                     ? "bg-tertiary-container/20 text-tertiary-container"
                     : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
                 }`}
               >
-                <span
-                  className="material-symbols-outlined text-lg"
-                  style={{ fontVariationSettings: liked ? '"FILL" 1' : '"FILL" 0' }}
-                >
+                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: liked ? '"FILL" 1' : '"FILL" 0' }}>
                   favorite
                 </span>
                 {likeCount}
@@ -144,7 +186,6 @@ export default function BoardPostPage() {
             <div className="px-8 py-5 border-b border-surface-container">
               <h2 className="font-bold text-on-surface">댓글</h2>
             </div>
-
             <div className="px-8 py-5 bg-surface-container-low">
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center shrink-0">
