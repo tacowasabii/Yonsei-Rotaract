@@ -71,6 +71,17 @@ export async function fetchPosts(boardType: "free" | "promo"): Promise<Post[]> {
   return (data ?? []) as Post[];
 }
 
+export async function fetchMyPosts(authorId: string): Promise<Post[]> {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*, profiles(name, role)")
+    .eq("author_id", authorId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as Post[];
+}
+
 export async function fetchPost(id: string): Promise<Post> {
   const { data, error } = await supabase
     .from("posts")
