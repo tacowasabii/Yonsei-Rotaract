@@ -86,11 +86,23 @@ export async function approveAllPendingMembers(): Promise<void> {
 export async function fetchMyFullProfile(userId: string): Promise<Member> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at")
+    .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at, company, job_title, is_company_public")
     .eq("id", userId)
     .single();
   if (error) throw error;
   return data as Member;
+}
+
+export async function updateMyCompanyInfo(userId: string, payload: {
+  company: string;
+  job_title: string;
+  is_company_public: boolean;
+}): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update(payload)
+    .eq("id", userId);
+  if (error) throw error;
 }
 
 export async function updateMyMemberType(userId: string, memberType: "current" | "alumni"): Promise<void> {

@@ -3,12 +3,15 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile, useUpdateMyMemberType } from "@/api/hooks/useMyProfile";
-import { updateMyPhone, updatePassword, verifyCurrentPassword } from "@/api/profiles";
+import { updateMyPhone, updatePassword, verifyCurrentPassword, updateMyCompanyInfo } from "@/api/profiles";
 import { formatDate } from "../shared";
 import InfoRow from "../components/InfoRow";
 
 type FormValues = {
   phone: string;
+  company: string;
+  jobTitle: string;
+  companyPublic: boolean;
   newPw: string;
   confirmPw: string;
   currentPw: string;
@@ -30,19 +33,22 @@ export default function MyProfile() {
   const queryClient = useQueryClient();
   const updateType = useUpdateMyMemberType();
 
-  const { register, handleSubmit, getValues, setValue, setError, reset, formState: { errors } } =
+  const { register, handleSubmit, getValues, setValue, watch, setError, reset, formState: { errors } } =
     useForm<FormValues>({ mode: "onBlur" });
 
-  const [companyName, setCompanyName] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [companyPublic, setCompanyPublic] = useState(true);
+  const companyPublic = watch("companyPublic");
+
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showTypeModal, setShowTypeModal] = useState(false);
 
   useEffect(() => {
-    if (profile?.phone) setValue("phone", profile.phone);
-  }, [profile?.phone, setValue]);
+    if (!profile) return;
+    if (profile.phone) setValue("phone", profile.phone);
+    setValue("company", profile.company ?? "");
+    setValue("jobTitle", profile.job_title ?? "");
+    setValue("companyPublic", profile.is_company_public ?? true);
+  }, [profile, setValue]);
 
   if (!profile) return null;
 
@@ -67,10 +73,15 @@ export default function MyProfile() {
       const tasks: Promise<void>[] = [];
       if (data.phone !== (profile.phone ?? "")) tasks.push(updateMyPhone(user!.id, data.phone));
       if (data.newPw) tasks.push(updatePassword(data.newPw));
+      if (isAlumni) tasks.push(updateMyCompanyInfo(user!.id, {
+        company: data.company,
+        job_title: data.jobTitle,
+        is_company_public: data.companyPublic,
+      }));
 
       await Promise.all(tasks);
       queryClient.invalidateQueries({ queryKey: ["my-profile", user!.id] });
-      reset({ phone: data.phone, newPw: "", confirmPw: "", currentPw: "" });
+      reset({ phone: data.phone, company: data.company, jobTitle: data.jobTitle, companyPublic: data.companyPublic, newPw: "", confirmPw: "", currentPw: "" });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
     } catch {
@@ -113,13 +124,19 @@ export default function MyProfile() {
         <div className="bg-surface-container-lowest rounded-2xl shadow-card divide-y divide-outline-variant/10">
           {/* 연락처 */}
           <div className="px-6 py-5">
-            <label className="text-xs font-bold text-on-surface-variant block mb-2">연락처</label>
+            <label className="text-xs font-bold text-on-surface-variant block mb-2">
+              연락처 <span className="text-error ml-0.5">*</span>
+            </label>
             <input
               type="tel"
-              {...register("phone")}
-              placeholder="010-0000-0000"
-              className={inputCls(false)}
+              {...register("phone", {
+                required: "연락처를 입력해주세요.",
+                pattern: { value: /^01[0-9]\d{7,8}$/, message: "올바른 연락처를 입력해주세요." },
+              })}
+              placeholder="01012345678"
+              className={inputCls(!!errors.phone)}
             />
+            <FieldError message={errors.phone?.message} />
           </div>
 
           {/* 회사 정보 (졸업생만) */}
@@ -127,22 +144,30 @@ export default function MyProfile() {
             <div className="px-6 py-5 space-y-3">
               <label className="text-xs font-bold text-on-surface-variant block">회사 정보</label>
               <div>
-                <label className="text-xs font-semibold text-on-surface-variant block mb-1">회사명</label>
+                <label className="text-xs font-semibold text-on-surface-variant block mb-1">
+                  소속{companyPublic && <span className="text-error ml-1">*</span>}
+                </label>
                 <input
                   type="text"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="회사명을 입력하세요"
-                  className={inputCls(false)}
+                  {...register("company", {
+                    validate: (v) => {
+                      if (companyPublic && !v.trim()) return "공개 시 소속을 입력해주세요.";
+                      return true;
+                    },
+                  })}
+                  placeholder="회사, 병원, 법률사무소 등"
+                  className={inputCls(!!errors.company)}
                 />
+                <FieldError message={errors.company?.message} />
               </div>
               <div>
-                <label className="text-xs font-semibold text-on-surface-variant block mb-1">직책</label>
+                <label className="text-xs font-semibold text-on-surface-variant block mb-1">
+                  직함 <span className="font-normal text-on-surface-variant/60">(선택)</span>
+                </label>
                 <input
                   type="text"
-                  value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
-                  placeholder="직책을 입력하세요"
+                  {...register("jobTitle")}
+                  placeholder="마케팅팀, 개발자, 개인 사업 등 자유롭게 입력해주세요"
                   className={inputCls(false)}
                 />
               </div>
@@ -155,7 +180,7 @@ export default function MyProfile() {
                   type="button"
                   role="switch"
                   aria-checked={companyPublic}
-                  onClick={() => setCompanyPublic((v) => !v)}
+                  onClick={() => setValue("companyPublic", !companyPublic)}
                   className={`w-12 h-7 rounded-full transition-colors relative shrink-0 ${companyPublic ? "bg-primary-container" : "bg-surface-container-highest"}`}
                 >
                   <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${companyPublic ? "translate-x-5" : "translate-x-0"}`} />

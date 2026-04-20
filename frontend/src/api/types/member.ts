@@ -14,6 +14,9 @@ export interface Member {
   role: AppRole;
   status: "active" | "inactive";
   created_at: string;
+  company: string | null;
+  job_title: string | null;
+  is_company_public: boolean;
 }
 
 export interface PendingMember {
