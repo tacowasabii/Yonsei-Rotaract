@@ -1,12 +1,8 @@
 import { useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
-
-const mockUser = {
-  name: "김연세",
-  verified: true,
-  role: "현역 회원",
-};
+import { useAuth } from "@/contexts/AuthContext";
+import { useCreatePost } from "@/api/hooks/useCreatePost";
 
 type Visibility = "public" | "members";
 
@@ -17,6 +13,9 @@ export default function BoardWritePage() {
   const boardType = isPromo ? "promo" : "free";
   const boardLabel = isPromo ? "홍보게시판" : "자유게시판";
 
+  const { profile } = useAuth();
+  const { mutate: createPost, isPending, error } = useCreatePost();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [visibility, setVisibility] = useState<Visibility>("public");
@@ -24,7 +23,7 @@ export default function BoardWritePage() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const canSubmit = title.trim().length > 0 && content.trim().length > 0;
+  const canSubmit = title.trim().length > 0 && content.trim().length > 0 && !isPending;
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -43,7 +42,14 @@ export default function BoardWritePage() {
   };
 
   const handleSubmit = () => {
-    navigate(`/board/${boardType}`);
+    createPost(
+      { board_type: boardType, title, content, visibility, images },
+      {
+        onSuccess: (post) => {
+          navigate(`/board/${boardType}/${post.id}`);
+        },
+      }
+    );
   };
 
   return (
@@ -110,7 +116,6 @@ export default function BoardWritePage() {
                 <span className="text-xs text-on-surface-variant">{images.length}/5</span>
               </div>
 
-              {/* Drop Zone */}
               <div
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}
@@ -137,7 +142,6 @@ export default function BoardWritePage() {
                 onChange={(e) => handleFiles(e.target.files)}
               />
 
-              {/* Preview */}
               {images.length > 0 && (
                 <div className="flex gap-3 mt-3 flex-wrap">
                   {images.map((file, i) => (
@@ -158,22 +162,33 @@ export default function BoardWritePage() {
                 </div>
               )}
             </div>
+
+            {/* Error */}
+            {error && (
+              <p className="text-sm text-red-500 bg-red-50 px-4 py-3 rounded-xl">
+                {error instanceof Error ? error.message : "오류가 발생했습니다. 다시 시도해주세요."}
+              </p>
+            )}
           </div>
 
           {/* Footer Buttons */}
           <div className="px-8 pb-7 flex justify-end gap-3">
             <button
               onClick={() => navigate(`/board/${boardType}`)}
-              className="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all"
+              disabled={isPending}
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all disabled:opacity-40"
             >
               취소
             </button>
             <button
               onClick={handleSubmit}
               disabled={!canSubmit}
-              className="px-6 py-2.5 rounded-xl text-sm font-bold bg-primary-container text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-primary-container text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              등록하기
+              {isPending && (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              )}
+              {isPending ? "등록 중..." : "등록하기"}
             </button>
           </div>
         </div>
@@ -189,8 +204,8 @@ export default function BoardWritePage() {
               </div>
               <div>
                 <div className="flex items-center gap-1">
-                  <span className="font-bold text-on-surface">{mockUser.name}</span>
-                  {mockUser.verified && (
+                  <span className="font-bold text-on-surface">{profile?.name ?? "—"}</span>
+                  {profile?.status === "active" && (
                     <span
                       className="material-symbols-outlined text-sm text-surface-tint"
                       style={{ fontVariationSettings: '"FILL" 1' }}
@@ -199,7 +214,9 @@ export default function BoardWritePage() {
                     </span>
                   )}
                 </div>
-                <span className="text-xs text-on-surface-variant">{mockUser.role}</span>
+                <span className="text-xs text-on-surface-variant">
+                  {profile?.member_type === "alumni" ? "졸업생" : "현역 회원"}
+                </span>
               </div>
             </div>
           </div>
