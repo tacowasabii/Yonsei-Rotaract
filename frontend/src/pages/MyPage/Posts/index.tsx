@@ -81,10 +81,6 @@ export default function MyPosts() {
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0 text-xs text-on-surface-variant">
                 <span>{formatDate(post.created_at)}</span>
-                <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">visibility</span>
-                  {post.views}
-                </span>
               </div>
             </button>
           );

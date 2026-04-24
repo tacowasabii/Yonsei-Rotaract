@@ -6,8 +6,8 @@ import { ForumIcon } from "@assets/icons";
 import { usePosts } from "@/api/hooks/usePosts";
 
 const noticePosts = [
-  { id: "notice", title: "[필독] 2025년도 2학기 동아리 활동 가이드라인 안내", author: "관리자", date: "25.01.10", views: 1240, pinned: true },
-  { id: "notice2", title: "3월 정기 모임 참가 신청 안내 (선착순 30명)", author: "운영위원회", date: "25.01.08", views: 856, pinned: false },
+  { id: "notice", title: "[필독] 2025년도 2학기 동아리 활동 가이드라인 안내", author: "관리자", date: "25.01.10", pinned: true },
+  { id: "notice2", title: "3월 정기 모임 참가 신청 안내 (선착순 30명)", author: "운영위원회", date: "25.01.08", pinned: false },
 ];
 
 function formatDate(iso: string): string {
@@ -72,7 +72,6 @@ export default function BoardPage() {
                 <th className="py-4 px-4 text-left w-1/2">제목</th>
                 <th className="py-4 px-4 text-center w-24 hidden sm:table-cell">글쓴이</th>
                 <th className="py-4 px-4 text-center w-24 hidden md:table-cell">날짜</th>
-                <th className="py-4 px-4 text-center w-20 hidden md:table-cell">조회수</th>
               </tr>
             </thead>
             <tbody className="text-sm">
@@ -94,11 +93,10 @@ export default function BoardPage() {
                   </td>
                   <td className="py-4 px-4 text-center text-on-surface-variant hidden sm:table-cell">{post.author}</td>
                   <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">{post.date}</td>
-                  <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">{post.views.toLocaleString()}</td>
                 </tr>
               ))}
 
-              <tr><td colSpan={5} className="h-px bg-outline-variant/20 p-0" /></tr>
+              <tr><td colSpan={4} className="h-px bg-outline-variant/20 p-0" /></tr>
 
               {/* 로딩 */}
               {isLoading && (
@@ -108,7 +106,6 @@ export default function BoardPage() {
                     <td className="py-4 px-4"><div className="h-4 bg-surface-container rounded w-3/4" /></td>
                     <td className="py-4 px-4 hidden sm:table-cell"><div className="h-4 bg-surface-container rounded mx-auto w-16" /></td>
                     <td className="py-4 px-4 hidden md:table-cell"><div className="h-4 bg-surface-container rounded mx-auto w-16" /></td>
-                    <td className="py-4 px-4 hidden md:table-cell"><div className="h-4 bg-surface-container rounded mx-auto w-10" /></td>
                   </tr>
                 ))
               )}
@@ -116,7 +113,7 @@ export default function BoardPage() {
               {/* 에러 */}
               {isError && (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-on-surface-variant text-sm">
+                  <td colSpan={4} className="py-12 text-center text-on-surface-variant text-sm">
                     게시글을 불러오지 못했습니다.
                   </td>
                 </tr>
@@ -125,7 +122,7 @@ export default function BoardPage() {
               {/* 데이터 없음 */}
               {!isLoading && !isError && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-on-surface-variant text-sm">
+                  <td colSpan={4} className="py-12 text-center text-on-surface-variant text-sm">
                     {search ? "검색 결과가 없습니다." : "아직 게시글이 없습니다."}
                   </td>
                 </tr>
@@ -149,9 +146,6 @@ export default function BoardPage() {
                   </td>
                   <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">
                     {formatDate(post.created_at)}
-                  </td>
-                  <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">
-                    {post.views}
                   </td>
                 </tr>
               ))}

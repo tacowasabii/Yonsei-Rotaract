@@ -91,10 +91,6 @@ export default function BoardPostPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1 text-xs text-on-surface-variant">
-                    <span className="material-symbols-outlined text-base">visibility</span>
-                    {post.views}
-                  </span>
                   {/* 수정/삭제 버튼 (작성자만) */}
                   {isAuthor && (
                     <div className="flex items-center gap-1">

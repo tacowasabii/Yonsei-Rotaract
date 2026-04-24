@@ -42,7 +42,6 @@ export interface Post {
   content: string;
   author_id: string;
   visibility: "public" | "members";
-  views: number;
   image_urls: string[];
   created_at: string;
   updated_at: string;
@@ -90,10 +89,6 @@ export async function fetchPost(id: string): Promise<Post> {
     .single();
 
   if (error) throw error;
-
-  // 조회수 증가 (fire and forget)
-  supabase.rpc("increment_post_views", { post_id: id });
-
   return data as Post;
 }
 
