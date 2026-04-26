@@ -4,7 +4,9 @@ import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import { ForumIcon, ChatBubbleIcon } from "@assets/icons";
 import { usePosts } from "@/api/hooks/usePosts";
+import { POSTS_PER_PAGE } from "@/api/posts";
 import { useIsLoggedIn } from "@/contexts/AuthContext";
+import Pagination from "@components/common/Pagination";
 
 const noticePosts = [
   { id: "notice", title: "[필독] 2025년도 2학기 동아리 활동 가이드라인 안내", author: "관리자", date: "25.01.10", pinned: true },
@@ -33,9 +35,11 @@ export default function BoardPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data: posts, isLoading, isError } = usePosts(boardType);
+  const { data, isLoading, isError } = usePosts(boardType, page);
+  const posts = data?.posts ?? [];
+  const totalPages = Math.ceil((data?.totalCount ?? 0) / POSTS_PER_PAGE);
 
-  const filtered = (posts ?? []).filter((p) =>
+  const filtered = posts.filter((p) =>
     p.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -167,27 +171,7 @@ export default function BoardPage() {
         </div>
 
         <div className="p-5 bg-surface-container-low flex justify-center">
-          <div className="flex items-center gap-1.5">
-            <button className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">
-              <span className="material-symbols-outlined text-xl">chevron_left</span>
-            </button>
-            {[1, 2, 3, 4, 5].map((p) => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold transition-all ${
-                  page === p
-                    ? "bg-primary-container text-white"
-                    : "hover:bg-surface-container-high text-on-surface"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-            <button className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">
-              <span className="material-symbols-outlined text-xl">chevron_right</span>
-            </button>
-          </div>
+          <Pagination page={page} totalPages={totalPages} onChange={(p) => { setPage(p); setSearch(""); }} />
         </div>
       </div>
     </PageLayout>

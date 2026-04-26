@@ -60,15 +60,24 @@ export interface CreatePostParams {
   images: File[];
 }
 
-export async function fetchPosts(boardType: "free" | "promo"): Promise<Post[]> {
-  const { data, error } = await supabase
+export const POSTS_PER_PAGE = 15;
+
+export async function fetchPosts(
+  boardType: "free" | "promo",
+  page: number = 1
+): Promise<{ posts: Post[]; totalCount: number }> {
+  const from = (page - 1) * POSTS_PER_PAGE;
+  const to = from + POSTS_PER_PAGE - 1;
+
+  const { data, error, count } = await supabase
     .from("posts")
-    .select("*, profiles(name, role), comments(count)")
+    .select("*, profiles(name, role), comments(count)", { count: "exact" })
     .eq("board_type", boardType)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw error;
-  return (data ?? []) as Post[];
+  return { posts: (data ?? []) as Post[], totalCount: count ?? 0 };
 }
 
 export async function fetchMyPosts(authorId: string): Promise<Post[]> {
