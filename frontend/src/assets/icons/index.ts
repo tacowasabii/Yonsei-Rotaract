@@ -13,3 +13,4 @@ export { default as ChatBubbleIcon } from './chat_bubble.svg?react';
 export { default as FavoriteIcon } from './favorite.svg?react';
 export { default as FavoriteFillIcon } from './favorite_fill.svg?react';
 export { default as HelpIcon } from './help.svg?react';
+export { default as CloseIcon } from './close.svg?react';
