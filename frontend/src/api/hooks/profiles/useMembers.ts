@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchMembers, updateMemberRole, updateMemberStatus } from "../profiles";
-import type { Member, AppRole } from "../types/member";
+import { fetchMembers, updateMemberRole, updateMemberStatus } from "../../profiles";
+import type { Member, AppRole } from "../../types/member";
 
 export const membersQueryKey = ["admin-members"] as const;
 

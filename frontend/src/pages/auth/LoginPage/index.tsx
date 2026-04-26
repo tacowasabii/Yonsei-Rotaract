@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useLogin } from "@/api/hooks/useLogin";
+import { useLogin } from "@/api/hooks/auth/useLogin";
 import { PATHS } from "@/routes/paths";
 
 export default function LoginPage() {

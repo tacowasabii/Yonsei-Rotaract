@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMyPosts } from "@/api/hooks/useMyPosts";
+import { useMyPosts } from "@/api/hooks/posts/useMyPosts";
 import { MY_POSTS_PER_PAGE } from "@/api/posts";
 import Pagination from "@components/common/Pagination";
 import { ChatBubbleIcon, FavoriteIcon } from "@assets/icons";

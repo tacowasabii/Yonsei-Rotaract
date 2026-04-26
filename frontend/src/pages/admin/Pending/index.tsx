@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePendingMembers, useRejectedMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
+import { usePendingMembers, useRejectedMembers, useApproveMember, useRejectMember } from "@/api/hooks/profiles/usePendingMembers";
 import { formatDate, isAdminOrAbove } from "../shared";
 import MailIcon from "@/assets/icons/mail.svg?react";
 import { PersonIcon } from "@assets/icons";

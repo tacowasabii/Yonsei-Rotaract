@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { type SignupParams } from "../auth";
-import { upsertProfile } from "../profiles";
+import { type SignupParams } from "../../auth";
+import { upsertProfile } from "../../profiles";
 
 export function useSignup() {
   return useMutation({

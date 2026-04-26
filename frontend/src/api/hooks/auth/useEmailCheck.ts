@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { checkEmailAvailable } from "../auth";
+import { checkEmailAvailable } from "../../auth";
 
 export function useEmailCheck() {
   return useMutation({

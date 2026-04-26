@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchMyFullProfile, updateMyPhone, updateMyMemberType, updatePassword } from "../profiles";
-import type { Member } from "../types/member";
+import { fetchMyFullProfile, updateMyPhone, updateMyMemberType, updatePassword } from "../../profiles";
+import type { Member } from "../../types/member";
 
 export function useMyProfile(userId: string | undefined) {
   return useQuery<Member>({

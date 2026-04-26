@@ -43,10 +43,18 @@ components/
 ### api/
 ```
 api/
-├── hooks/    # React Query 훅 (useXxx.ts)
-├── types/    # API 응답 타입 정의
+├── hooks/              # React Query 훅 - 도메인별 폴더로 구분
+│   ├── auth/           # useLogin, useSignup, useEmailCheck
+│   ├── posts/          # usePosts, usePost, useCreatePost, ...
+│   ├── comments/       # useComments, useCreateComment, ...
+│   ├── profiles/       # useMyProfile, useMembers, useAlumni, ...
+│   └── messages/       # useMessages
+├── types/              # API 응답 타입 정의
 ├── auth.ts
-└── profiles.ts
+├── posts.ts
+├── comments.ts
+├── profiles.ts
+└── messages.ts
 ```
 
 ---

@@ -2,17 +2,25 @@ import { useState } from "react";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import { SchoolIcon, PersonIcon } from "@assets/icons";
-import { useAlumni } from "@/api/hooks/useAlumni";
+import { useAlumni } from "@/api/hooks/profiles/useAlumni";
 import type { AlumniMember } from "@/api/types/member";
+import { useAuth } from "@/contexts/AuthContext";
+import ComposeModal from "@components/common/ComposeModal";
+import type { MemberSearchResult } from "@/api/types/message";
 
 function formatAdmissionYear(year: number | null): string {
   if (!year) return "";
   return `${String(year).slice(-2)}학번`;
 }
 
-function AlumniCard({ person }: { person: AlumniMember }) {
+interface AlumniCardProps {
+  person: AlumniMember;
+  onMessage?: (recipient: MemberSearchResult) => void;
+}
+
+function AlumniCard({ person, onMessage }: AlumniCardProps) {
   return (
-    <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-card hover:shadow-lg hover:-translate-y-1 transition-all">
+    <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-card hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col">
       <div className="flex flex-col items-center mb-4">
         <div className="w-14 h-14 rounded-full bg-secondary-fixed flex items-center justify-center mb-3">
           <PersonIcon className="w-6 h-6 text-on-secondary-fixed-variant" />
@@ -54,12 +62,24 @@ function AlumniCard({ person }: { person: AlumniMember }) {
           </div>
         )}
       </div>
+
+      {onMessage && (
+        <button
+          onClick={() => onMessage({ id: person.id, name: person.name })}
+          className="mt-4 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+        >
+          <span className="material-symbols-outlined text-[16px]">mail</span>
+          쪽지 보내기
+        </button>
+      )}
     </div>
   );
 }
 
 export default function AlumniPage() {
   const [search, setSearch] = useState("");
+  const [composeTarget, setComposeTarget] = useState<MemberSearchResult | null>(null);
+  const { user } = useAuth();
   const { data, isLoading, isError } = useAlumni();
 
   const filtered = (data ?? []).filter((a) => {
@@ -125,10 +145,22 @@ export default function AlumniPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {filtered.map((person) => (
-              <AlumniCard key={person.id} person={person} />
+              <AlumniCard
+                key={person.id}
+                person={person}
+                onMessage={user ? setComposeTarget : undefined}
+              />
             ))}
           </div>
         )
+      )}
+
+      {composeTarget && user && (
+        <ComposeModal
+          senderId={user.id}
+          initialRecipient={composeTarget}
+          onClose={() => setComposeTarget(null)}
+        />
       )}
     </PageLayout>
   );

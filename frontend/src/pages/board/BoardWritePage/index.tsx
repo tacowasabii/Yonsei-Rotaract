@@ -3,9 +3,9 @@ import { PersonIcon } from "@assets/icons";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCreatePost } from "@/api/hooks/useCreatePost";
-import { useUpdatePost } from "@/api/hooks/useUpdatePost";
-import { usePost } from "@/api/hooks/usePost";
+import { useCreatePost } from "@/api/hooks/posts/useCreatePost";
+import { useUpdatePost } from "@/api/hooks/posts/useUpdatePost";
+import { usePost } from "@/api/hooks/posts/usePost";
 import { BOARD_PATHS } from "@/routes/paths";
 
 type Visibility = "public" | "members";

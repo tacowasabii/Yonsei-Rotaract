@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
-import { usePost } from "@/api/hooks/usePost";
-import { useDeletePost } from "@/api/hooks/useDeletePost";
-import { useComments } from "@/api/hooks/useComments";
-import { useCreateComment } from "@/api/hooks/useCreateComment";
-import { useUpdateComment } from "@/api/hooks/useUpdateComment";
-import { useDeleteComment } from "@/api/hooks/useDeleteComment";
+import { usePost } from "@/api/hooks/posts/usePost";
+import { useDeletePost } from "@/api/hooks/posts/useDeletePost";
+import { useComments } from "@/api/hooks/comments/useComments";
+import { useCreateComment } from "@/api/hooks/comments/useCreateComment";
+import { useUpdateComment } from "@/api/hooks/comments/useUpdateComment";
+import { useDeleteComment } from "@/api/hooks/comments/useDeleteComment";
 import { useAuth } from "@/contexts/AuthContext";
 import { PATHS, BOARD_PATHS } from "@/routes/paths";
-import { usePostLike } from "@/api/hooks/usePostLike";
+import { usePostLike } from "@/api/hooks/posts/usePostLike";
 import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
 import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon, PersonIcon } from "@assets/icons";
 

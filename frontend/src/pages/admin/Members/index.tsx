@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/api/types/member";
-import { useMembers, useUpdateMemberRole, useUpdateMemberStatus } from "@/api/hooks/useMembers";
+import { useMembers, useUpdateMemberRole, useUpdateMemberStatus } from "@/api/hooks/profiles/useMembers";
 import { ROLE_META, assignableRoles, formatDate, formatPhone, isAdminOrAbove } from "../shared";
 import SortHeaderButton from "./components/SortHeaderButton";
 

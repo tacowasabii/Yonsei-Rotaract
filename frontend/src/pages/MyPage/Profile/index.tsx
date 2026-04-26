@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMyProfile, useUpdateMyMemberType } from "@/api/hooks/useMyProfile";
+import { useMyProfile, useUpdateMyMemberType } from "@/api/hooks/profiles/useMyProfile";
 import {
   updateMyPhone,
   updatePassword,

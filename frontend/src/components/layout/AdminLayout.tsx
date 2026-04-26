@@ -1,6 +1,6 @@
 import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePendingMembers } from "@/api/hooks/usePendingMembers";
+import { usePendingMembers } from "@/api/hooks/profiles/usePendingMembers";
 import { PATHS } from "@/routes/paths";
 import { ROLE_META } from "@/pages/admin/shared";
 

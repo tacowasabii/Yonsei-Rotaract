@@ -8,8 +8,8 @@ import {
   deleteMessageBySender,
   deleteMessageByRecipient,
   searchMembers,
-} from "../messages";
-import type { Message, MemberSearchResult } from "../types/message";
+} from "../../messages";
+import type { Message, MemberSearchResult } from "../../types/message";
 
 export function useReceivedMessages(userId: string | undefined) {
   return useQuery<Message[]>({

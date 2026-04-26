@@ -5,8 +5,8 @@ import {
   approveMember,
   rejectMember,
   approveAllPendingMembers,
-} from "../profiles";
-import type { PendingMember } from "../types/member";
+} from "../../profiles";
+import type { PendingMember } from "../../types/member";
 import { membersQueryKey } from "./useMembers";
 
 export const rejectedQueryKey = ["admin-rejected"] as const;

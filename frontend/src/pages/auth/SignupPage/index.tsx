@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
-import { useSignup } from "@/api/hooks/useSignup";
+import { useSignup } from "@/api/hooks/auth/useSignup";
 import { PATHS } from "@/routes/paths";
 import type { SignupFormValues } from "./types";
 import { EmailField } from "./components/EmailField";

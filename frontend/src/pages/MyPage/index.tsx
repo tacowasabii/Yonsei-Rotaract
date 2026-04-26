@@ -1,7 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMyProfile } from "@/api/hooks/useMyProfile";
-import { useUnreadCount } from "@/api/hooks/useMessages";
+import { useMyProfile } from "@/api/hooks/profiles/useMyProfile";
+import { useUnreadCount } from "@/api/hooks/messages/useMessages";
 import { PATHS } from "@/routes/paths";
 
 const ROLE_LABELS: Record<string, string> = {
