@@ -7,6 +7,7 @@ import { usePosts } from "@/api/hooks/usePosts";
 import { useNoticePosts } from "@/api/hooks/useNoticePosts";
 import { POSTS_PER_PAGE } from "@/api/posts";
 import { useIsLoggedIn, useIsStaff } from "@/contexts/AuthContext";
+import { BOARD_PATHS } from "@/routes/paths";
 import Pagination from "@components/common/Pagination";
 
 function formatDate(iso: string): string {
@@ -66,7 +67,7 @@ export default function BoardPage() {
         <div className="flex items-center gap-2 shrink-0">
           {isStaff && (
             <button
-              onClick={() => navigate(`/board/${boardType}/write?notice=true`)}
+              onClick={() => navigate(`${BOARD_PATHS.write(boardType)}?notice=true`)}
               className="flex items-center gap-2 px-5 py-2.5 bg-secondary-fixed text-primary-container font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
             >
               <span className="material-symbols-outlined text-[18px]">campaign</span>
@@ -75,7 +76,7 @@ export default function BoardPage() {
           )}
           {isLoggedIn && (
             <button
-              onClick={() => navigate(`/board/${boardType}/write`)}
+              onClick={() => navigate(BOARD_PATHS.write(boardType))}
               className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
             >
               <span className="material-symbols-outlined text-[18px]">edit</span>
@@ -101,7 +102,7 @@ export default function BoardPage() {
               {noticePosts.map((post) => (
                 <tr
                   key={post.id}
-                  onClick={() => navigate(`/board/${boardType}/${post.id}`)}
+                  onClick={() => navigate(BOARD_PATHS.post(boardType, post.id))}
                   className="bg-secondary-fixed/30 hover:bg-secondary-fixed/50 transition-colors cursor-pointer"
                 >
                   <td className="py-4 px-4 text-center">
@@ -156,7 +157,7 @@ export default function BoardPage() {
                 return (
                   <tr
                     key={post.id}
-                    onClick={() => navigate(`/board/${boardType}/${post.id}`)}
+                    onClick={() => navigate(BOARD_PATHS.post(boardType, post.id))}
                     className="hover:bg-surface-container-lowest transition-colors cursor-pointer group bg-white"
                   >
                     <td className="py-4 px-4 text-center text-on-surface-variant">{post.post_number}</td>

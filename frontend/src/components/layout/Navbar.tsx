@@ -1,17 +1,18 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth, useIsStaff } from "@/contexts/AuthContext";
 import { ManageAccountsIcon, PersonIcon } from "@assets/icons";
+import { PATHS } from "@/routes/paths";
 
 const navLinks = [
-  { label: "소식", to: "/news" },
-  { label: "공지사항", to: "/notice" },
-  { label: "선배님", to: "/alumni" },
-  { label: "사진첩", to: "/gallery" },
+  { label: "소식", to: PATHS.NEWS },
+  { label: "공지사항", to: PATHS.NOTICE },
+  { label: "선배님", to: PATHS.ALUMNI },
+  { label: "사진첩", to: PATHS.GALLERY },
 ];
 
 const boardLinks = [
-  { label: "자유게시판", to: "/board/free" },
-  { label: "홍보게시판", to: "/board/promo" },
+  { label: "자유게시판", to: PATHS.BOARD_FREE },
+  { label: "홍보게시판", to: PATHS.BOARD_PROMO },
 ];
 
 export default function Navbar() {
@@ -21,7 +22,7 @@ export default function Navbar() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    navigate(PATHS.HOME);
   };
 
   return (
@@ -29,7 +30,7 @@ export default function Navbar() {
       <div className="flex justify-between items-center h-16 px-6 md:px-8 max-w-7xl mx-auto">
         {/* Logo & Nav Links */}
         <div className="flex items-center gap-8">
-          <NavLink to="/" className="flex items-center gap-2">
+          <NavLink to={PATHS.HOME} className="flex items-center gap-2">
             <img
               src="/logo.png"
               alt="연세 로타랙트 로고"
@@ -58,12 +59,10 @@ export default function Navbar() {
 
             {/* 게시판 드롭다운 */}
             <div className="relative group">
-              <button
-                className="font-headline font-bold tracking-tight transition-colors text-slate-500 hover:text-primary-container group-hover:text-primary-container"
-              >
+              <button className="font-headline font-bold tracking-tight transition-colors text-slate-500 hover:text-primary-container group-hover:text-primary-container">
                 게시판
               </button>
-              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 hidden group-hover:block">
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 pt-3 hidden group-hover:block">
                 <div className="bg-white rounded-2xl shadow-lg border border-slate-100 py-1.5 min-w-30 overflow-hidden">
                   {boardLinks.map((link) => (
                     <NavLink
@@ -101,7 +100,7 @@ export default function Navbar() {
               <div className="hidden sm:flex items-center gap-2">
                 {isAdmin && (
                   <Link
-                    to="/admin"
+                    to={PATHS.ADMIN}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all"
                   >
                     <ManageAccountsIcon className="w-4 h-4" />
@@ -109,7 +108,7 @@ export default function Navbar() {
                   </Link>
                 )}
                 <Link
-                  to="/mypage"
+                  to={PATHS.MYPAGE}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all"
                 >
                   <PersonIcon className="w-4 h-4" />
@@ -125,14 +124,23 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" className="sm:hidden px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+              <Link
+                to={PATHS.LOGIN}
+                className="sm:hidden px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+              >
                 로그인
               </Link>
               <div className="hidden sm:flex items-center gap-2">
-                <Link to="/login" className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+                <Link
+                  to={PATHS.LOGIN}
+                  className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+                >
                   로그인
                 </Link>
-                <Link to="/signup" className="px-4 py-1.5 rounded-full text-sm font-bold bg-linear-to-br from-primary to-primary-container text-white shadow-lg hover:opacity-90 active:scale-95 transition-all">
+                <Link
+                  to={PATHS.SIGNUP}
+                  className="px-4 py-1.5 rounded-full text-sm font-bold bg-linear-to-br from-primary to-primary-container text-white shadow-lg hover:opacity-90 active:scale-95 transition-all"
+                >
                   회원가입
                 </Link>
               </div>

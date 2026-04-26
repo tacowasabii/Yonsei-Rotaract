@@ -133,7 +133,7 @@ export default function LoginPage() {
           {/* Sign up link */}
           <p className="text-center text-sm text-on-surface-variant mt-6">
             아직 회원이 아니신가요?{" "}
-            <Link to="/signup" className="text-primary-container font-bold hover:underline">
+            <Link to={PATHS.SIGNUP} className="text-primary-container font-bold hover:underline">
               회원가입
             </Link>
           </p>

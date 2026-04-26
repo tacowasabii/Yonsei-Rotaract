@@ -233,7 +233,7 @@ export default function SignupPage() {
 
           <p className="text-center text-sm text-on-surface-variant mt-6">
             이미 회원이신가요?{" "}
-            <Link to="/login" className="text-primary-container font-bold hover:underline">
+            <Link to={PATHS.LOGIN} className="text-primary-container font-bold hover:underline">
               로그인
             </Link>
           </p>

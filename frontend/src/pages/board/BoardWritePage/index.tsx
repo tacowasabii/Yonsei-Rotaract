@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCreatePost } from "@/api/hooks/useCreatePost";
 import { useUpdatePost } from "@/api/hooks/useUpdatePost";
 import { usePost } from "@/api/hooks/usePost";
+import { BOARD_PATHS } from "@/routes/paths";
 
 type Visibility = "public" | "members";
 
@@ -69,13 +70,13 @@ export default function BoardWritePage() {
     if (isEditMode && id) {
       updatePost(
         { id, params: { title, content, visibility, existingImageUrls, newImages } },
-        { onSuccess: (post) => navigate(`/board/${boardType}/${post.id}`) }
+        { onSuccess: (post) => navigate(BOARD_PATHS.post(boardType, post.id)) }
       );
     } else {
       const effectiveVisibility: Visibility = isNotice ? "members" : visibility;
       createPost(
         { board_type: boardType, title, content, visibility: effectiveVisibility, images: newImages, is_notice: isNotice },
-        { onSuccess: (post) => navigate(`/board/${boardType}/${post.id}`) }
+        { onSuccess: (post) => navigate(BOARD_PATHS.post(boardType, post.id)) }
       );
     }
   };
@@ -84,7 +85,7 @@ export default function BoardWritePage() {
     <PageLayout>
       <div className="flex items-center gap-2 mb-6 text-sm text-on-surface-variant">
         <button
-          onClick={() => navigate(isEditMode ? `/board/${boardType}/${id}` : `/board/${boardType}`)}
+          onClick={() => navigate(isEditMode && id ? BOARD_PATHS.post(boardType, id) : BOARD_PATHS.root(boardType))}
           className="flex items-center gap-1 hover:text-primary-container transition-colors font-semibold"
         >
           <span className="material-symbols-outlined text-lg">arrow_back</span>
@@ -206,7 +207,7 @@ export default function BoardWritePage() {
 
           <div className="px-8 pb-7 flex justify-end gap-3">
             <button
-              onClick={() => navigate(isEditMode ? `/board/${boardType}/${id}` : `/board/${boardType}`)}
+              onClick={() => navigate(isEditMode && id ? BOARD_PATHS.post(boardType, id) : BOARD_PATHS.root(boardType))}
               disabled={isPending}
               className="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all disabled:opacity-40"
             >

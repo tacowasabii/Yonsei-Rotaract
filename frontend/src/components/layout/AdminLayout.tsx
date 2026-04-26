@@ -18,7 +18,7 @@ export default function AdminLayout() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    navigate(PATHS.HOME);
   };
 
   return (
@@ -27,7 +27,7 @@ export default function AdminLayout() {
       <aside className="w-64 shrink-0 bg-primary-container flex flex-col fixed top-0 left-0 h-screen z-40">
         {/* Logo */}
         <div className="px-6 py-5 border-b border-white/10">
-          <Link to="/" className="flex items-center gap-2.5 mb-1">
+          <Link to={PATHS.HOME} className="flex items-center gap-2.5 mb-1">
             <img src="/logo.png" alt="연세 로타랙트 로고" className="h-8 w-8 object-contain" />
             <span className="text-white font-black font-headline tracking-tight text-base leading-tight">
               연세 로타랙트
@@ -80,7 +80,7 @@ export default function AdminLayout() {
             </div>
           )}
           <Link
-            to="/"
+            to={PATHS.HOME}
             className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-white/60 hover:bg-white/10 hover:text-white transition-all"
           >
             <span className="material-symbols-outlined text-base">arrow_back</span>

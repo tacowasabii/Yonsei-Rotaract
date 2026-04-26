@@ -4,6 +4,7 @@ import { useMyPosts } from "@/api/hooks/useMyPosts";
 import { MY_POSTS_PER_PAGE } from "@/api/posts";
 import Pagination from "@components/common/Pagination";
 import { ChatBubbleIcon, FavoriteIcon } from "@assets/icons";
+import { BOARD_PATHS } from "@/routes/paths";
 
 type BoardFilter = "all" | "free" | "promo";
 
@@ -107,7 +108,7 @@ export default function MyPosts() {
             return (
               <button
                 key={post.id}
-                onClick={() => navigate(`/board/${boardType}/${post.id}`)}
+                onClick={() => navigate(BOARD_PATHS.post(boardType, post.id))}
                 className="w-full px-6 py-3.5 flex items-center gap-3 hover:bg-surface-container-low transition-colors text-left group"
               >
                 {/* 왼쪽: 게시판 배지 + 제목 */}

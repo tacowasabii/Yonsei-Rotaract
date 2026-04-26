@@ -8,6 +8,7 @@ import { useCreateComment } from "@/api/hooks/useCreateComment";
 import { useUpdateComment } from "@/api/hooks/useUpdateComment";
 import { useDeleteComment } from "@/api/hooks/useDeleteComment";
 import { useAuth } from "@/contexts/AuthContext";
+import { PATHS, BOARD_PATHS } from "@/routes/paths";
 import { usePostLike } from "@/api/hooks/usePostLike";
 import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
 import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon, PersonIcon } from "@assets/icons";
@@ -77,7 +78,7 @@ export default function BoardPostPage() {
   const handleDelete = () => {
     if (!id) return;
     deletePost(id, {
-      onSuccess: () => navigate(`/board/${boardType}`),
+      onSuccess: () => navigate(BOARD_PATHS.root(boardType)),
     });
   };
 
@@ -85,7 +86,7 @@ export default function BoardPostPage() {
     <PageLayout>
       <div className="flex items-center gap-2 mb-6 text-sm text-on-surface-variant">
         <button
-          onClick={() => navigate(`/board/${boardType}`)}
+          onClick={() => navigate(BOARD_PATHS.root(boardType))}
           className="flex items-center gap-1 hover:text-primary-container transition-colors font-semibold"
         >
           <span className="material-symbols-outlined text-lg">arrow_back</span>
@@ -152,7 +153,7 @@ export default function BoardPostPage() {
               </p>
             </div>
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(PATHS.LOGIN)}
               className="mt-2 px-6 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
             >
               로그인하기
@@ -202,7 +203,7 @@ export default function BoardPostPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() =>
-                          navigate(`/board/${boardType}/${id}/edit`)
+                          id && navigate(BOARD_PATHS.edit(boardType, id))
                         }
                         className="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-all"
                       >
@@ -249,7 +250,7 @@ export default function BoardPostPage() {
               <div className="flex items-center gap-5">
                 <button
                   onClick={() => {
-                    if (!user) { navigate("/login"); return; }
+                    if (!user) { navigate(PATHS.LOGIN); return; }
                     toggleLike();
                   }}
                   className={`flex items-center gap-1.5 text-sm font-semibold transition-colors ${
@@ -426,7 +427,7 @@ export default function BoardPostPage() {
                     댓글을 작성하려면 로그인이 필요합니다.
                   </p>
                   <button
-                    onClick={() => navigate("/login")}
+                    onClick={() => navigate(PATHS.LOGIN)}
                     className="px-4 py-2 bg-primary-container text-white font-bold rounded-xl text-sm hover:opacity-90 transition-all shrink-0"
                   >
                     로그인하기

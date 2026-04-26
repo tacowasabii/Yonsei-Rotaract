@@ -32,3 +32,10 @@ export const PATHS = {
   ADMIN_PENDING: "/admin/pending",
   ADMIN_MEMBERS: "/admin/members",
 } as const;
+
+export const BOARD_PATHS = {
+  root: (type: string) => `/board/${type}`,
+  write: (type: string) => `/board/${type}/write`,
+  post: (type: string, id: string | number) => `/board/${type}/${id}`,
+  edit: (type: string, id: string | number) => `/board/${type}/${id}/edit`,
+};
