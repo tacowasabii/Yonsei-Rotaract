@@ -3,9 +3,15 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile, useUpdateMyMemberType } from "@/api/hooks/useMyProfile";
-import { updateMyPhone, updatePassword, verifyCurrentPassword, updateMyCompanyInfo } from "@/api/profiles";
+import {
+  updateMyPhone,
+  updatePassword,
+  verifyCurrentPassword,
+  updateMyCompanyInfo,
+} from "@/api/profiles";
 import { formatDate } from "../shared";
 import InfoRow from "../components/InfoRow";
+import { HelpIcon } from "@assets/icons";
 
 type FormValues = {
   phone: string;
@@ -33,14 +39,23 @@ export default function MyProfile() {
   const queryClient = useQueryClient();
   const updateType = useUpdateMyMemberType();
 
-  const { register, handleSubmit, getValues, setValue, watch, setError, reset, formState: { errors } } =
-    useForm<FormValues>({ mode: "onBlur" });
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    setValue,
+    watch,
+    setError,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({ mode: "onBlur" });
 
   const companyPublic = watch("companyPublic");
 
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showTypeModal, setShowTypeModal] = useState(false);
+  const [showInfoPopover, setShowInfoPopover] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
@@ -56,9 +71,12 @@ export default function MyProfile() {
 
   const handleTypeChange = () => {
     if (!user?.id) return;
-    updateType.mutate({ userId: user.id, memberType: "alumni" }, {
-      onSuccess: () => setShowTypeModal(false),
-    });
+    updateType.mutate(
+      { userId: user.id, memberType: "alumni" },
+      {
+        onSuccess: () => setShowTypeModal(false),
+      },
+    );
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -66,26 +84,42 @@ export default function MyProfile() {
     try {
       const isValid = await verifyCurrentPassword(user!.email!, data.currentPw);
       if (!isValid) {
-        setError("currentPw", { message: "현재 비밀번호가 올바르지 않습니다." });
+        setError("currentPw", {
+          message: "현재 비밀번호가 올바르지 않습니다.",
+        });
         return;
       }
 
       const tasks: Promise<void>[] = [];
-      if (data.phone !== (profile.phone ?? "")) tasks.push(updateMyPhone(user!.id, data.phone));
+      if (data.phone !== (profile.phone ?? ""))
+        tasks.push(updateMyPhone(user!.id, data.phone));
       if (data.newPw) tasks.push(updatePassword(data.newPw));
-      if (isAlumni) tasks.push(updateMyCompanyInfo(user!.id, {
-        company: data.company,
-        job_title: data.jobTitle,
-        is_company_public: data.companyPublic,
-      }));
+      if (isAlumni)
+        tasks.push(
+          updateMyCompanyInfo(user!.id, {
+            company: data.company,
+            job_title: data.jobTitle,
+            is_company_public: data.companyPublic,
+          }),
+        );
 
       await Promise.all(tasks);
       queryClient.invalidateQueries({ queryKey: ["my-profile", user!.id] });
-      reset({ phone: data.phone, company: data.company, jobTitle: data.jobTitle, companyPublic: data.companyPublic, newPw: "", confirmPw: "", currentPw: "" });
+      reset({
+        phone: data.phone,
+        company: data.company,
+        jobTitle: data.jobTitle,
+        companyPublic: data.companyPublic,
+        newPw: "",
+        confirmPw: "",
+        currentPw: "",
+      });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
     } catch {
-      setError("currentPw", { message: "저장에 실패했습니다. 다시 시도해주세요." });
+      setError("currentPw", {
+        message: "저장에 실패했습니다. 다시 시도해주세요.",
+      });
     } finally {
       setSaving(false);
     }
@@ -95,17 +129,54 @@ export default function MyProfile() {
     <div className="space-y-4">
       {/* 기본 정보 (읽기 전용) */}
       <div className="bg-surface-container-lowest rounded-2xl shadow-card px-6 py-5">
-        <h2 className="text-xs font-bold text-on-surface-variant mb-3">기본 정보</h2>
+        <div className="flex items-center gap-1.5 mb-3">
+          <h2 className="text-xs font-bold text-on-surface-variant">
+            기본 정보
+          </h2>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowInfoPopover((v) => !v)}
+              className="flex items-center text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+            >
+              <HelpIcon className="w-4 h-4" />
+            </button>
+            {showInfoPopover && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setShowInfoPopover(false)}
+                />
+                <div className="absolute -left-3 top-6 z-20 w-56 bg-on-surface text-surface text-xs rounded-xl px-3.5 py-2.5 shadow-xl leading-relaxed">
+                  <span className="absolute -top-1.5 left-[14px] w-3 h-3 bg-on-surface rotate-45 rounded-sm" />
+                  기본 정보는 변경할 수 없습니다. 변경을 원하시면 관리자에게
+                  문의해 주세요.
+                </div>
+              </>
+            )}
+          </div>
+        </div>
         <div className="space-y-3">
           <InfoRow label="이메일" value={profile.email || "-"} />
           <InfoRow label="학과" value={profile.department ?? "-"} />
-          <InfoRow label="학번" value={profile.admission_year ? `${String(profile.admission_year).slice(-2)}학번` : "-"} />
+          <InfoRow
+            label="학번"
+            value={
+              profile.admission_year
+                ? `${String(profile.admission_year).slice(-2)}학번`
+                : "-"
+            }
+          />
           <InfoRow label="기수" value={profile.generation ?? "-"} />
           <InfoRow label="가입일" value={formatDate(profile.created_at)} />
           <div className="flex items-center gap-4">
-            <span className="text-xs font-semibold text-on-surface-variant w-14 shrink-0">회원 구분</span>
+            <span className="text-xs font-semibold text-on-surface-variant w-14 shrink-0">
+              회원 구분
+            </span>
             <div className="flex items-center gap-3">
-              <span className="text-sm text-on-surface">{isAlumni ? "졸업생" : "현역"}</span>
+              <span className="text-sm text-on-surface">
+                {isAlumni ? "졸업생" : "현역"}
+              </span>
               {!isAlumni && (
                 <button
                   onClick={() => setShowTypeModal(true)}
@@ -131,7 +202,10 @@ export default function MyProfile() {
               type="tel"
               {...register("phone", {
                 required: "연락처를 입력해주세요.",
-                pattern: { value: /^01[0-9]\d{7,8}$/, message: "올바른 연락처를 입력해주세요." },
+                pattern: {
+                  value: /^01[0-9]\d{7,8}$/,
+                  message: "올바른 연락처를 입력해주세요.",
+                },
               })}
               placeholder="01012345678"
               className={inputCls(!!errors.phone)}
@@ -142,16 +216,20 @@ export default function MyProfile() {
           {/* 회사 정보 (졸업생만) */}
           {isAlumni && (
             <div className="px-6 py-5 space-y-3">
-              <label className="text-xs font-bold text-on-surface-variant block">회사 정보</label>
+              <label className="text-xs font-bold text-on-surface-variant block">
+                회사 정보
+              </label>
               <div>
                 <label className="text-xs font-semibold text-on-surface-variant block mb-1">
-                  소속{companyPublic && <span className="text-error ml-1">*</span>}
+                  소속
+                  {companyPublic && <span className="text-error ml-1">*</span>}
                 </label>
                 <input
                   type="text"
                   {...register("company", {
                     validate: (v) => {
-                      if (companyPublic && !v.trim()) return "공개 시 소속을 입력해주세요.";
+                      if (companyPublic && !v.trim())
+                        return "공개 시 소속을 입력해주세요.";
                       return true;
                     },
                   })}
@@ -162,7 +240,10 @@ export default function MyProfile() {
               </div>
               <div>
                 <label className="text-xs font-semibold text-on-surface-variant block mb-1">
-                  직함 <span className="font-normal text-on-surface-variant/60">(선택)</span>
+                  직함{" "}
+                  <span className="font-normal text-on-surface-variant/60">
+                    (선택)
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -173,8 +254,12 @@ export default function MyProfile() {
               </div>
               <div className="flex items-center justify-between py-1">
                 <div>
-                  <p className="text-sm font-semibold text-on-surface">공개 여부</p>
-                  <p className="text-xs text-on-surface-variant mt-0.5">선배님 페이지에 회사 정보를 공개합니다</p>
+                  <p className="text-sm font-semibold text-on-surface">
+                    공개 여부
+                  </p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    선배님 페이지에 회사 정보를 공개합니다
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -183,7 +268,9 @@ export default function MyProfile() {
                   onClick={() => setValue("companyPublic", !companyPublic)}
                   className={`w-12 h-7 rounded-full transition-colors relative shrink-0 ${companyPublic ? "bg-primary-container" : "bg-surface-container-highest"}`}
                 >
-                  <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${companyPublic ? "translate-x-5" : "translate-x-0"}`} />
+                  <span
+                    className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${companyPublic ? "translate-x-5" : "translate-x-0"}`}
+                  />
                 </button>
               </div>
             </div>
@@ -192,17 +279,23 @@ export default function MyProfile() {
           {/* 비밀번호 변경 (선택) */}
           <div className="px-6 py-5 space-y-3">
             <label className="text-xs font-bold text-on-surface-variant block">
-              비밀번호 변경 <span className="font-normal text-on-surface-variant/60">(선택)</span>
+              비밀번호 변경{" "}
+              <span className="font-normal text-on-surface-variant/60">
+                (선택)
+              </span>
             </label>
             <div>
-              <label className="text-xs font-semibold text-on-surface-variant block mb-1">새 비밀번호</label>
+              <label className="text-xs font-semibold text-on-surface-variant block mb-1">
+                새 비밀번호
+              </label>
               <input
                 type="password"
                 {...register("newPw", {
                   validate: (v) => {
                     if (!v) return true;
                     if (v.length < 8) return "8자 이상이어야 합니다.";
-                    if (!PW_PATTERN.test(v)) return "영문, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.";
+                    if (!PW_PATTERN.test(v))
+                      return "영문, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.";
                     return true;
                   },
                 })}
@@ -212,7 +305,9 @@ export default function MyProfile() {
               <FieldError message={errors.newPw?.message} />
             </div>
             <div>
-              <label className="text-xs font-semibold text-on-surface-variant block mb-1">새 비밀번호 확인</label>
+              <label className="text-xs font-semibold text-on-surface-variant block mb-1">
+                새 비밀번호 확인
+              </label>
               <input
                 type="password"
                 {...register("confirmPw", {
@@ -232,10 +327,14 @@ export default function MyProfile() {
           {/* 현재 비밀번호 + 저장 */}
           <div className="px-6 py-5 space-y-3">
             <div>
-              <label className="text-xs font-bold text-on-surface-variant block mb-2">현재 비밀번호 확인</label>
+              <label className="text-xs font-bold text-on-surface-variant block mb-2">
+                현재 비밀번호 확인
+              </label>
               <input
                 type="password"
-                {...register("currentPw", { required: "현재 비밀번호를 입력해주세요." })}
+                {...register("currentPw", {
+                  required: "현재 비밀번호를 입력해주세요.",
+                })}
                 placeholder="저장하려면 현재 비밀번호를 입력하세요"
                 className={inputCls(!!errors.currentPw)}
               />
@@ -266,12 +365,18 @@ export default function MyProfile() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-3">
-              <span className="material-symbols-outlined text-on-tertiary-container text-2xl mt-0.5">warning</span>
+              <span className="material-symbols-outlined text-on-tertiary-container text-2xl mt-0.5">
+                warning
+              </span>
               <div>
-                <h3 className="text-base font-bold text-on-surface">졸업생으로 변경</h3>
+                <h3 className="text-base font-bold text-on-surface">
+                  졸업생으로 변경
+                </h3>
                 <p className="text-sm text-on-surface-variant mt-1.5 leading-relaxed">
                   한번 졸업생으로 변경하면{" "}
-                  <span className="font-bold text-on-tertiary-container">다시 현역으로 되돌릴 수 없습니다.</span>{" "}
+                  <span className="font-bold text-on-tertiary-container">
+                    다시 현역으로 되돌릴 수 없습니다.
+                  </span>{" "}
                   계속하시겠습니까?
                 </p>
               </div>
