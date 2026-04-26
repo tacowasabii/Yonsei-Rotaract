@@ -9,7 +9,6 @@ import {
   verifyCurrentPassword,
   updateMyCompanyInfo,
 } from "@/api/profiles";
-import { formatDate } from "../shared";
 import InfoRow from "../components/InfoRow";
 import { HelpIcon } from "@assets/icons";
 
@@ -168,7 +167,6 @@ export default function MyProfile() {
             }
           />
           <InfoRow label="기수" value={profile.generation ?? "-"} />
-          <InfoRow label="가입일" value={formatDate(profile.created_at)} />
           <div className="flex items-center gap-4">
             <span className="text-xs font-semibold text-on-surface-variant w-14 shrink-0">
               회원 구분
