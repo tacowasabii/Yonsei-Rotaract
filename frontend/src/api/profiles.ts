@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { Member, PendingMember, RejectedMember, AppRole } from "./types/member";
+import type { Member, AlumniMember, PendingMember, RejectedMember, AppRole } from "./types/member";
 
 export async function fetchMembers(): Promise<Member[]> {
   const { data, error } = await supabase
@@ -124,6 +124,19 @@ export async function updateMyPhone(userId: string, phone: string): Promise<void
 export async function updatePassword(newPassword: string): Promise<void> {
   const { error } = await supabase.auth.updateUser({ password: newPassword });
   if (error) throw error;
+}
+
+export async function fetchAlumni(): Promise<AlumniMember[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, name, email, admission_year, department, generation, company, job_title")
+    .eq("member_type", "alumni")
+    .eq("status", "active")
+    .eq("is_company_public", true)
+    .order("generation", { ascending: true })
+    .order("name", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as AlumniMember[];
 }
 
 export async function verifyCurrentPassword(email: string, password: string): Promise<boolean> {

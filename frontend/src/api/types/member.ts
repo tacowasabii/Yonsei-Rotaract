@@ -33,6 +33,10 @@ export interface PendingMember {
   created_at: string;
 }
 
+export type AlumniMember = Pick<Member,
+  "id" | "name" | "email" | "admission_year" | "department" | "generation" | "company" | "job_title"
+>;
+
 export interface RejectedMember {
   id: string;
   name: string;
