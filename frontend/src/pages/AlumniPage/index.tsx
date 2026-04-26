@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
-import { SchoolIcon } from "@assets/icons";
+import { SchoolIcon, PersonIcon } from "@assets/icons";
 import { useAlumni } from "@/api/hooks/useAlumni";
 import type { AlumniMember } from "@/api/types/member";
 
@@ -15,9 +15,7 @@ function AlumniCard({ person }: { person: AlumniMember }) {
     <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-card hover:shadow-lg hover:-translate-y-1 transition-all">
       <div className="flex flex-col items-center mb-4">
         <div className="w-14 h-14 rounded-full bg-secondary-fixed flex items-center justify-center mb-3">
-          <span className="material-symbols-outlined text-2xl text-on-secondary-fixed-variant">
-            person
-          </span>
+          <PersonIcon className="w-6 h-6 text-on-secondary-fixed-variant" />
         </div>
         <h3 className="font-headline font-bold text-base text-on-surface">{person.name}</h3>
         <p className="text-xs text-on-surface-variant mt-0.5">{person.email}</p>

@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers, useRejectedMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
 import { formatDate, isAdminOrAbove } from "../shared";
 import MailIcon from "@/assets/icons/mail.svg?react";
+import { PersonIcon } from "@assets/icons";
 import CallIcon from "@/assets/icons/call.svg?react";
 
 type ConfirmAction = { type: "approve" | "reject"; id: string; name: string } | null;
@@ -53,7 +54,7 @@ export default function AdminPending() {
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-2xl text-on-secondary-fixed-variant">person</span>
+                    <PersonIcon className="w-6 h-6 text-on-secondary-fixed-variant" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">

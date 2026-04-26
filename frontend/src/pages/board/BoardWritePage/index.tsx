@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { PersonIcon } from "@assets/icons";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -228,7 +229,7 @@ export default function BoardWritePage() {
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">작성자</p>
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-full bg-primary-fixed flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-xl text-primary-container">person</span>
+                <PersonIcon className="w-5 h-5 text-primary-container" />
               </div>
               <div>
                 <div className="flex items-center gap-1">

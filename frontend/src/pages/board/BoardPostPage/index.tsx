@@ -10,7 +10,7 @@ import { useDeleteComment } from "@/api/hooks/useDeleteComment";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePostLike } from "@/api/hooks/usePostLike";
 import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
-import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon } from "@assets/icons";
+import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon, PersonIcon } from "@assets/icons";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -185,9 +185,7 @@ export default function BoardPostPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center">
-                    <span className="material-symbols-outlined text-sm text-primary-container">
-                      person
-                    </span>
+                    <PersonIcon className="w-4 h-4 text-primary-container" />
                   </div>
                   <div>
                     <span className="text-sm font-semibold text-on-surface">
@@ -319,9 +317,7 @@ export default function BoardPostPage() {
                         className="px-8 py-4 flex items-start gap-3"
                       >
                         <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="material-symbols-outlined text-base text-on-surface-variant">
-                            person
-                          </span>
+                          <PersonIcon className="w-4 h-4 text-on-surface-variant" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
@@ -402,9 +398,7 @@ export default function BoardPostPage() {
               {user ? (
                 <div className="flex gap-3">
                   <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-base text-on-surface-variant">
-                      person
-                    </span>
+                    <PersonIcon className="w-4 h-4 text-on-surface-variant" />
                   </div>
                   <div className="flex-1 flex gap-2">
                     <input

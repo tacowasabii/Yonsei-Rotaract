@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { PersonIcon } from "@assets/icons";
 import { useMembers } from "@/api/hooks/useMembers";
 import { usePendingMembers, useApproveMember, useRejectMember } from "@/api/hooks/usePendingMembers";
 import { PATHS } from "@/routes/paths";
@@ -79,7 +80,7 @@ export default function AdminDashboard() {
                 <div key={p.id} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-0">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center">
-                      <span className="material-symbols-outlined text-base text-on-secondary-fixed-variant">person</span>
+                      <PersonIcon className="w-4 h-4 text-on-secondary-fixed-variant" />
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-on-surface">{p.name}</p>

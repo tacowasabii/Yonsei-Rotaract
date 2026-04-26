@@ -1,12 +1,12 @@
+import { AccountCircleIcon } from "@assets/icons";
+
 export default function LeftSidebar() {
   return (
     <aside className="md:col-span-3 space-y-6">
       {/* User Profile Card - centered like main2 */}
       <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-card flex flex-col items-center text-center">
         <div className="w-20 h-20 rounded-full bg-secondary-fixed mb-4 overflow-hidden flex items-center justify-center">
-          <span className="material-symbols-outlined text-4xl text-on-secondary-fixed-variant">
-            account_circle
-          </span>
+          <AccountCircleIcon className="w-10 h-10 text-on-secondary-fixed-variant" />
         </div>
         <h3 className="font-headline font-bold text-lg text-on-surface">
           김연세
@@ -46,7 +46,9 @@ export default function LeftSidebar() {
             </span>
           ))}
           {["6", "7", "8", "9", "10"].map((d) => (
-            <span key={d} className="p-1">{d}</span>
+            <span key={d} className="p-1">
+              {d}
+            </span>
           ))}
           <span className="p-1 bg-primary-fixed text-on-primary-fixed rounded-full font-bold">
             10

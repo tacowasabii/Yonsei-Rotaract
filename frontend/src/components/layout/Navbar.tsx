@@ -1,6 +1,6 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth, useIsStaff } from "@/contexts/AuthContext";
-import { ManageAccountsIcon } from "@assets/icons";
+import { ManageAccountsIcon, PersonIcon } from "@assets/icons";
 
 const navLinks = [
   { label: "소식", to: "/news" },
@@ -112,7 +112,7 @@ export default function Navbar() {
                   to="/mypage"
                   className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all"
                 >
-                  <span className="material-symbols-outlined text-base">person</span>
+                  <PersonIcon className="w-4 h-4" />
                   마이페이지
                 </Link>
                 <button

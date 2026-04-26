@@ -1,3 +1,5 @@
+export { default as AccountCircleIcon } from './account_circle.svg?react';
+export { default as PersonIcon } from './person.svg?react';
 export { default as ManageAccountsIcon } from './manage_accounts.svg?react';
 export { default as ScheduleIcon } from './schedule.svg?react';
 export { default as CancelIcon } from './cancel.svg?react';
