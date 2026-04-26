@@ -15,7 +15,7 @@ const boardLinks = [
 ];
 
 export default function Navbar() {
-  const { user, signOut } = useAuth();
+  const { profile, signOut } = useAuth();
   const isAdmin = useIsStaff();
   const navigate = useNavigate();
 
@@ -88,7 +88,7 @@ export default function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-3">
-          {user ? (
+          {profile ? (
             <>
               <div className="sm:hidden">
                 <button

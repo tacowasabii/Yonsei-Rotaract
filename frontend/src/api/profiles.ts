@@ -134,6 +134,7 @@ export async function verifyCurrentPassword(email: string, password: string): Pr
 export async function upsertProfile(profile: {
   id: string;
   name: string;
+  email: string;
   phone: string;
   member_type: "current" | "alumni";
   admission_year: string | null;

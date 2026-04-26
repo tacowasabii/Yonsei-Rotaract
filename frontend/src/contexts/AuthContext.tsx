@@ -17,6 +17,7 @@ interface AuthContextValue {
   user: User | null;
   profile: Profile | null;
   role: AppRole | null;
+  isLoggedIn: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -68,7 +69,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, role: profile?.role ?? null, loading, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        role: profile?.role ?? null,
+        isLoggedIn: !!profile,
+        loading,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -78,6 +88,10 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
+}
+
+export function useIsLoggedIn() {
+  return useAuth().isLoggedIn;
 }
 
 export function useRole() {

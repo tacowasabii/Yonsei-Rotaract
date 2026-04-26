@@ -17,11 +17,13 @@ export function useSignup() {
           generation: params.memberType === "alumni" ? params.generation ?? null : null,
         },
       });
-      if (error) throw error;
-      if (data.user) {
+      if (error && (error as { code?: string }).code !== "same_password") throw error;
+      const user = data.user ?? (await supabase.auth.getUser()).data.user;
+      if (user) {
         await upsertProfile({
-          id: data.user.id,
+          id: user.id,
           name: params.name,
+          email: params.email,
           phone: params.phone,
           member_type: params.memberType,
           admission_year: params.memberType === "alumni" ? params.admissionYear ?? null : null,

@@ -1,11 +1,37 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { ScheduleIcon } from "@/assets/icons";
 import { PATHS } from "@/routes/paths";
 
 export default function PendingApprovalPage() {
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (profile?.status === "active") {
+      navigate(PATHS.HOME, { replace: true });
+      return;
+    }
+  }, [profile?.status, navigate]);
+
+  useEffect(() => {
+    if (!profile?.id) return;
+    const channel = supabase
+      .channel("profile-status")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${profile.id}` },
+        (payload) => {
+          if ((payload.new as { status: string }).status === "active") {
+            navigate(PATHS.HOME, { replace: true });
+          }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [profile?.id, navigate]);
 
   const handleSignOut = async () => {
     await signOut();

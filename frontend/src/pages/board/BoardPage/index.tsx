@@ -4,6 +4,7 @@ import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import { ForumIcon } from "@assets/icons";
 import { usePosts } from "@/api/hooks/usePosts";
+import { useIsLoggedIn } from "@/contexts/AuthContext";
 
 const noticePosts = [
   { id: "notice", title: "[필독] 2025년도 2학기 동아리 활동 가이드라인 안내", author: "관리자", date: "25.01.10", pinned: true },
@@ -28,6 +29,7 @@ export default function BoardPage() {
     : "회원들과 자유롭게 소통하는 공간입니다.";
 
   const navigate = useNavigate();
+  const isLoggedIn = useIsLoggedIn();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
@@ -54,13 +56,15 @@ export default function BoardPage() {
             className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-container/30 transition-all placeholder:text-on-surface-variant shadow-card"
           />
         </div>
-        <button
-          onClick={() => navigate(`/board/${boardType}/write`)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm shrink-0"
-        >
-          <span className="material-symbols-outlined text-[18px]">edit</span>
-          글쓰기
-        </button>
+        {isLoggedIn && (
+          <button
+            onClick={() => navigate(`/board/${boardType}/write`)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm shrink-0"
+          >
+            <span className="material-symbols-outlined text-[18px]">edit</span>
+            글쓰기
+          </button>
+        )}
       </div>
 
       <div className="bg-surface-container-low rounded-2xl overflow-hidden">
