@@ -67,12 +67,13 @@ export const POSTS_PER_PAGE = 15;
 
 export async function fetchPosts(
   boardType: "free" | "promo",
-  page: number = 1
+  page: number = 1,
+  search: string = ""
 ): Promise<{ posts: Post[]; totalCount: number }> {
   const from = (page - 1) * POSTS_PER_PAGE;
   const to = from + POSTS_PER_PAGE - 1;
 
-  const { data, error, count } = await supabase
+  let query = supabase
     .from("posts")
     .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)", { count: "exact" })
     .eq("board_type", boardType)
@@ -80,6 +81,11 @@ export async function fetchPosts(
     .order("created_at", { ascending: false })
     .range(from, to);
 
+  if (search.trim()) {
+    query = query.ilike("title", `%${search.trim()}%`);
+  }
+
+  const { data, error, count } = await query;
   if (error) throw error;
   return { posts: (data ?? []) as Post[], totalCount: count ?? 0 };
 }

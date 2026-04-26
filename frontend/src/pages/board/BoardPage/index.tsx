@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
@@ -30,16 +30,21 @@ export default function BoardPage() {
   const isLoggedIn = useIsLoggedIn();
   const isStaff = useIsStaff();
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError } = usePosts(boardType, page);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data, isLoading, isError } = usePosts(boardType, page, debouncedSearch);
   const { data: noticePosts = [] } = useNoticePosts(boardType);
   const posts = data?.posts ?? [];
   const totalPages = Math.ceil((data?.totalCount ?? 0) / POSTS_PER_PAGE);
-
-  const filtered = posts.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <PageLayout>
@@ -136,16 +141,16 @@ export default function BoardPage() {
               )}
 
               {/* 데이터 없음 */}
-              {!isLoading && !isError && filtered.length === 0 && (
+              {!isLoading && !isError && posts.length === 0 && (
                 <tr>
                   <td colSpan={4} className="py-12 text-center text-on-surface-variant text-sm">
-                    {search ? "검색 결과가 없습니다." : "아직 게시글이 없습니다."}
+                    {debouncedSearch ? "검색 결과가 없습니다." : "아직 게시글이 없습니다."}
                   </td>
                 </tr>
               )}
 
               {/* 게시글 목록 */}
-              {!isLoading && filtered.map((post) => {
+              {!isLoading && posts.map((post) => {
                 const commentCount = post.comments?.[0]?.count ?? 0;
                 const likeCount = post.post_likes?.[0]?.count ?? 0;
                 return (
