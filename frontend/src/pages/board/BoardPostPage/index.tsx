@@ -118,6 +118,11 @@ export default function BoardPostPage() {
               <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-fixed text-primary-container">
                 {boardLabel}
               </span>
+              {post.is_notice && (
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-white">
+                  공지
+                </span>
+              )}
               <span className="text-xs text-on-surface-variant">
                 #{post.post_number}
               </span>
@@ -165,6 +170,11 @@ export default function BoardPostPage() {
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-fixed text-primary-container">
                   {boardLabel}
                 </span>
+                {post.is_notice && (
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-white">
+                    공지
+                  </span>
+                )}
                 <span className="text-xs text-on-surface-variant">
                   #{post.post_number}
                 </span>

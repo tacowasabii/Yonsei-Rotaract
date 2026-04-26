@@ -42,6 +42,7 @@ export interface Post {
   content: string;
   author_id: string;
   visibility: "public" | "members";
+  is_notice: boolean;
   image_urls: string[];
   created_at: string;
   updated_at: string;
@@ -59,6 +60,7 @@ export interface CreatePostParams {
   content: string;
   visibility: "public" | "members";
   images: File[];
+  is_notice?: boolean;
 }
 
 export const POSTS_PER_PAGE = 15;
@@ -74,11 +76,24 @@ export async function fetchPosts(
     .from("posts")
     .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)", { count: "exact" })
     .eq("board_type", boardType)
+    .eq("is_notice", false)
     .order("created_at", { ascending: false })
     .range(from, to);
 
   if (error) throw error;
   return { posts: (data ?? []) as Post[], totalCount: count ?? 0 };
+}
+
+export async function fetchNoticePosts(boardType: "free" | "promo"): Promise<Post[]> {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)")
+    .eq("board_type", boardType)
+    .eq("is_notice", true)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as Post[];
 }
 
 export const MY_POSTS_PER_PAGE = 15;
@@ -231,6 +246,7 @@ export async function createPost(
       content: params.content,
       author_id: authorId,
       visibility: params.visibility,
+      is_notice: params.is_notice ?? false,
       image_urls: imageUrls,
     })
     .select("*, profiles!posts_author_id_fkey(name, role)")

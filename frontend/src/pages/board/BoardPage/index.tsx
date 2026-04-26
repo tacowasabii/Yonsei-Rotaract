@@ -4,14 +4,10 @@ import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import { ForumIcon, ChatBubbleIcon, FavoriteIcon } from "@assets/icons";
 import { usePosts } from "@/api/hooks/usePosts";
+import { useNoticePosts } from "@/api/hooks/useNoticePosts";
 import { POSTS_PER_PAGE } from "@/api/posts";
-import { useIsLoggedIn } from "@/contexts/AuthContext";
+import { useIsLoggedIn, useIsStaff } from "@/contexts/AuthContext";
 import Pagination from "@components/common/Pagination";
-
-const noticePosts = [
-  { id: "notice", title: "[필독] 2025년도 2학기 동아리 활동 가이드라인 안내", author: "관리자", date: "25.01.10", pinned: true },
-  { id: "notice2", title: "3월 정기 모임 참가 신청 안내 (선착순 30명)", author: "운영위원회", date: "25.01.08", pinned: false },
-];
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -32,10 +28,12 @@ export default function BoardPage() {
 
   const navigate = useNavigate();
   const isLoggedIn = useIsLoggedIn();
+  const isStaff = useIsStaff();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isError } = usePosts(boardType, page);
+  const { data: noticePosts = [] } = useNoticePosts(boardType);
   const posts = data?.posts ?? [];
   const totalPages = Math.ceil((data?.totalCount ?? 0) / POSTS_PER_PAGE);
 
@@ -60,15 +58,26 @@ export default function BoardPage() {
             className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-container/30 transition-all placeholder:text-on-surface-variant shadow-card"
           />
         </div>
-        {isLoggedIn && (
-          <button
-            onClick={() => navigate(`/board/${boardType}/write`)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">edit</span>
-            글쓰기
-          </button>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {isStaff && (
+            <button
+              onClick={() => navigate(`/board/${boardType}/write?notice=true`)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-secondary-fixed text-primary-container font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
+            >
+              <span className="material-symbols-outlined text-[18px]">campaign</span>
+              공지글쓰기
+            </button>
+          )}
+          {isLoggedIn && (
+            <button
+              onClick={() => navigate(`/board/${boardType}/write`)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
+            >
+              <span className="material-symbols-outlined text-[18px]">edit</span>
+              글쓰기
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="bg-surface-container-low rounded-2xl overflow-hidden">
@@ -85,22 +94,21 @@ export default function BoardPage() {
             <tbody className="text-sm">
               {/* 공지 */}
               {noticePosts.map((post) => (
-                <tr key={post.id} className="bg-secondary-fixed/30 hover:bg-secondary-fixed/50 transition-colors cursor-pointer">
+                <tr
+                  key={post.id}
+                  onClick={() => navigate(`/board/${boardType}/${post.id}`)}
+                  className="bg-secondary-fixed/30 hover:bg-secondary-fixed/50 transition-colors cursor-pointer"
+                >
                   <td className="py-4 px-4 text-center">
                     <span className="bg-primary-container text-white px-2 py-0.5 rounded text-[10px] font-bold">공지</span>
                   </td>
                   <td className="py-4 px-4 font-bold text-primary-container max-w-0">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="truncate">{post.title}</span>
-                      {post.pinned && (
-                        <span className="material-symbols-outlined text-sm shrink-0" style={{ fontVariationSettings: '"FILL" 1' }}>
-                          push_pin
-                        </span>
-                      )}
                     </div>
                   </td>
-                  <td className="py-4 px-4 text-center text-on-surface-variant hidden sm:table-cell">{post.author}</td>
-                  <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">{post.date}</td>
+                  <td className="py-4 px-4 text-center text-on-surface-variant hidden sm:table-cell">{post.profiles?.name ?? "—"}</td>
+                  <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">{formatDate(post.created_at)}</td>
                 </tr>
               ))}
 

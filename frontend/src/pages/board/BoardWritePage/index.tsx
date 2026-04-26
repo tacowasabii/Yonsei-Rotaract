@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreatePost } from "@/api/hooks/useCreatePost";
@@ -12,6 +12,7 @@ export default function BoardWritePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
 
   const isPromo = location.pathname.includes("/promo/");
   const boardType = isPromo ? "promo" : "free";
@@ -24,9 +25,13 @@ export default function BoardWritePage() {
 
   const { data: existingPost } = usePost(isEditMode ? id : undefined);
 
+  const isNoticeNew = searchParams.get("notice") === "true" && !isEditMode;
+  const isNoticeEdit = isEditMode && !!existingPost?.is_notice;
+  const isNotice = isNoticeNew || isNoticeEdit;
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [visibility, setVisibility] = useState<Visibility>("public");
+  const [visibility, setVisibility] = useState<Visibility>(isNotice ? "members" : "public");
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -66,8 +71,9 @@ export default function BoardWritePage() {
         { onSuccess: (post) => navigate(`/board/${boardType}/${post.id}`) }
       );
     } else {
+      const effectiveVisibility: Visibility = isNotice ? "members" : visibility;
       createPost(
-        { board_type: boardType, title, content, visibility, images: newImages },
+        { board_type: boardType, title, content, visibility: effectiveVisibility, images: newImages, is_notice: isNotice },
         { onSuccess: (post) => navigate(`/board/${boardType}/${post.id}`) }
       );
     }
@@ -91,8 +97,13 @@ export default function BoardWritePage() {
             <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-fixed text-primary-container">
               {boardLabel}
             </span>
+            {isNotice && (
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-white">
+                공지
+              </span>
+            )}
             <h1 className="text-lg font-black text-on-surface font-headline">
-              {isEditMode ? "글 수정" : "글쓰기"}
+              {isEditMode ? "글 수정" : isNotice ? "공지글 작성" : "글쓰기"}
             </h1>
           </div>
 
@@ -235,38 +246,51 @@ export default function BoardWritePage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-card px-6 py-5">
-            <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">공개 범위</p>
-            <div className="space-y-2">
-              {([
-                { value: "public", label: "전체 공개", desc: "누구나 볼 수 있어요", icon: "public" },
-                { value: "members", label: "회원만 공개", desc: "로그인한 회원만 볼 수 있어요", icon: "lock" },
-              ] as { value: Visibility; label: string; desc: string; icon: string }[]).map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setVisibility(opt.value)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
-                    visibility === opt.value
-                      ? "border-primary-container bg-primary-fixed/20"
-                      : "border-transparent bg-surface-container-low hover:bg-surface-container"
-                  }`}
-                >
-                  <span className={`material-symbols-outlined text-xl ${visibility === opt.value ? "text-primary-container" : "text-on-surface-variant"}`}>
-                    {opt.icon}
-                  </span>
-                  <div>
-                    <p className={`text-sm font-semibold ${visibility === opt.value ? "text-primary-container" : "text-on-surface"}`}>{opt.label}</p>
-                    <p className="text-xs text-on-surface-variant">{opt.desc}</p>
-                  </div>
-                  {visibility === opt.value && (
-                    <span className="material-symbols-outlined text-primary-container text-lg ml-auto" style={{ fontVariationSettings: '"FILL" 1' }}>
-                      check_circle
-                    </span>
-                  )}
-                </button>
-              ))}
+          {isNotice ? (
+            <div className="bg-white rounded-2xl shadow-card px-6 py-5">
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">공개 범위</p>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-primary-container bg-primary-fixed/20">
+                <span className="material-symbols-outlined text-xl text-primary-container">lock</span>
+                <div>
+                  <p className="text-sm font-semibold text-primary-container">회원만 공개</p>
+                  <p className="text-xs text-on-surface-variant">공지글은 회원만 공개로 고정됩니다</p>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-card px-6 py-5">
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">공개 범위</p>
+              <div className="space-y-2">
+                {([
+                  { value: "public", label: "전체 공개", desc: "누구나 볼 수 있어요", icon: "public" },
+                  { value: "members", label: "회원만 공개", desc: "로그인한 회원만 볼 수 있어요", icon: "lock" },
+                ] as { value: Visibility; label: string; desc: string; icon: string }[]).map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setVisibility(opt.value)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
+                      visibility === opt.value
+                        ? "border-primary-container bg-primary-fixed/20"
+                        : "border-transparent bg-surface-container-low hover:bg-surface-container"
+                    }`}
+                  >
+                    <span className={`material-symbols-outlined text-xl ${visibility === opt.value ? "text-primary-container" : "text-on-surface-variant"}`}>
+                      {opt.icon}
+                    </span>
+                    <div>
+                      <p className={`text-sm font-semibold ${visibility === opt.value ? "text-primary-container" : "text-on-surface"}`}>{opt.label}</p>
+                      <p className="text-xs text-on-surface-variant">{opt.desc}</p>
+                    </div>
+                    {visibility === opt.value && (
+                      <span className="material-symbols-outlined text-primary-container text-lg ml-auto" style={{ fontVariationSettings: '"FILL" 1' }}>
+                        check_circle
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </PageLayout>
