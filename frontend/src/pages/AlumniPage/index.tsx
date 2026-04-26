@@ -26,7 +26,20 @@ function AlumniCard({ person, onMessage }: AlumniCardProps) {
           <PersonIcon className="w-6 h-6 text-on-secondary-fixed-variant" />
         </div>
         <h3 className="font-headline font-bold text-base text-on-surface">{person.name}</h3>
-        <p className="text-xs text-on-surface-variant mt-0.5">{person.email}</p>
+
+        {(person.company || person.job_title) && (
+          <div className="mt-2 flex items-center gap-1.5 justify-center flex-wrap">
+            {person.company && (
+              <span className="text-sm font-bold text-primary">{person.company}</span>
+            )}
+            {person.company && person.job_title && (
+              <span className="text-on-surface-variant/40 text-xs">·</span>
+            )}
+            {person.job_title && (
+              <span className="text-sm font-bold text-primary">{person.job_title}</span>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2 justify-center flex-wrap mb-4">
@@ -49,16 +62,10 @@ function AlumniCard({ person, onMessage }: AlumniCardProps) {
             <span>{person.department}</span>
           </div>
         )}
-        {person.company && (
-          <div className="flex items-center gap-2 text-xs">
-            <span className="material-symbols-outlined text-sm text-on-surface-variant">business</span>
-            <span className="font-semibold text-on-surface">{person.company}</span>
-          </div>
-        )}
-        {person.job_title && (
+        {person.email && (
           <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-            <span className="material-symbols-outlined text-sm">badge</span>
-            <span>{person.job_title}</span>
+            <span className="material-symbols-outlined text-sm">mail</span>
+            <span className="truncate">{person.email}</span>
           </div>
         )}
       </div>
