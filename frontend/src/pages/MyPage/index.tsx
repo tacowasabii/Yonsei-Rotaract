@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/api/hooks/useMyProfile";
+import { useUnreadCount } from "@/api/hooks/useMessages";
 import { PATHS } from "@/routes/paths";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
 export default function MyPageLayout() {
   const { user } = useAuth();
   const { data: profile, isLoading } = useMyProfile(user?.id);
+  const { data: unreadCount = 0 } = useUnreadCount(user?.id);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 pt-12 pb-24 md:pb-12">
@@ -78,6 +80,11 @@ export default function MyPageLayout() {
               >
                 <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
                 {item.label}
+                {item.icon === "mail" && unreadCount > 0 && (
+                  <span className="ml-auto text-[10px] font-black bg-error text-white rounded-full min-w-4.5 h-4.5 flex items-center justify-center px-1">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
