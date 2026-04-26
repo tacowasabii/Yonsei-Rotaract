@@ -89,9 +89,9 @@ AS $$
   SELECT role::TEXT FROM public.profiles WHERE id = auth.uid();
 $$;
 
-CREATE POLICY "Users can view own profile"
+CREATE POLICY "authenticated users can read profiles"
   ON public.profiles FOR SELECT
-  USING (auth.uid() = id);
+  USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Users can insert own profile"
   ON public.profiles FOR INSERT
@@ -101,6 +101,6 @@ CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
-CREATE POLICY "Staff can view all profiles"
-  ON public.profiles FOR SELECT
-  USING (public.get_my_role() IN ('staff', 'admin', 'super_admin'));
+CREATE POLICY "admins can update any profile"
+  ON public.profiles FOR UPDATE
+  USING (public.get_my_role() IN ('admin', 'super_admin'));
