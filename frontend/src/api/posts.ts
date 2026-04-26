@@ -50,6 +50,7 @@ export interface Post {
     role: string;
   } | null;
   comments: Array<{ count: number }> | null;
+  post_likes: Array<{ count: number }> | null;
 }
 
 export interface CreatePostParams {
@@ -71,7 +72,7 @@ export async function fetchPosts(
 
   const { data, error, count } = await supabase
     .from("posts")
-    .select("*, profiles(name, role), comments(count)", { count: "exact" })
+    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)", { count: "exact" })
     .eq("board_type", boardType)
     .order("created_at", { ascending: false })
     .range(from, to);
@@ -80,26 +81,62 @@ export async function fetchPosts(
   return { posts: (data ?? []) as Post[], totalCount: count ?? 0 };
 }
 
-export async function fetchMyPosts(authorId: string): Promise<Post[]> {
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*, profiles(name, role)")
-    .eq("author_id", authorId)
-    .order("created_at", { ascending: false });
+export const MY_POSTS_PER_PAGE = 15;
 
+export async function fetchMyPosts(
+  authorId: string,
+  boardType: "all" | "free" | "promo" = "all",
+  page: number = 1
+): Promise<{ posts: Post[]; totalCount: number }> {
+  const from = (page - 1) * MY_POSTS_PER_PAGE;
+  const to = from + MY_POSTS_PER_PAGE - 1;
+
+  let query = supabase
+    .from("posts")
+    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)", { count: "exact" })
+    .eq("author_id", authorId)
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (boardType !== "all") {
+    query = query.eq("board_type", boardType);
+  }
+
+  const { data, error, count } = await query;
   if (error) throw error;
-  return (data ?? []) as Post[];
+  return { posts: (data ?? []) as Post[], totalCount: count ?? 0 };
 }
 
 export async function fetchPost(id: string): Promise<Post> {
   const { data, error } = await supabase
     .from("posts")
-    .select("*, profiles(name, role)")
+    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)")
     .eq("id", id)
     .single();
 
   if (error) throw error;
   return data as Post;
+}
+
+export async function fetchPostLiked(postId: string, userId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("post_likes")
+    .select("post_id")
+    .eq("post_id", postId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  return !!data;
+}
+
+export async function togglePostLike(postId: string, userId: string): Promise<boolean> {
+  const liked = await fetchPostLiked(postId, userId);
+  if (liked) {
+    await supabase.from("post_likes").delete().eq("post_id", postId).eq("user_id", userId);
+    return false;
+  } else {
+    await supabase.from("post_likes").insert({ post_id: postId, user_id: userId });
+    return true;
+  }
 }
 
 export async function deletePost(id: string): Promise<void> {
@@ -156,7 +193,7 @@ export async function updatePost(id: string, params: UpdatePostParams): Promise<
       image_urls: [...params.existingImageUrls, ...newUrls],
     })
     .eq("id", id)
-    .select("*, profiles(name, role)")
+    .select("*, profiles!posts_author_id_fkey(name, role)")
     .single();
 
   if (error) throw error;
@@ -196,7 +233,7 @@ export async function createPost(
       visibility: params.visibility,
       image_urls: imageUrls,
     })
-    .select("*, profiles(name, role)")
+    .select("*, profiles!posts_author_id_fkey(name, role)")
     .single();
 
   if (error) throw error;

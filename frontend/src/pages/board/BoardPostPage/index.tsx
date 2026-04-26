@@ -8,6 +8,7 @@ import { useCreateComment } from "@/api/hooks/useCreateComment";
 import { useUpdateComment } from "@/api/hooks/useUpdateComment";
 import { useDeleteComment } from "@/api/hooks/useDeleteComment";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePostLike } from "@/api/hooks/usePostLike";
 import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
 import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon } from "@assets/icons";
 
@@ -42,8 +43,8 @@ export default function BoardPostPage() {
   );
   const { mutate: deleteComment } = useDeleteComment(id ?? "");
 
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
+  const { liked, toggle: toggleLike } = usePostLike(id);
+  const likeCount = post?.post_likes?.[0]?.count ?? 0;
   const [commentText, setCommentText] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -240,8 +241,8 @@ export default function BoardPostPage() {
               <div className="flex items-center gap-5">
                 <button
                   onClick={() => {
-                    setLiked((prev) => !prev);
-                    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+                    if (!user) { navigate("/login"); return; }
+                    toggleLike();
                   }}
                   className={`flex items-center gap-1.5 text-sm font-semibold transition-colors ${
                     liked
