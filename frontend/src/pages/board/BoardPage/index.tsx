@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
-import { ForumIcon, ChatBubbleIcon } from "@assets/icons";
+import { ForumIcon, ChatBubbleIcon, FavoriteIcon } from "@assets/icons";
 import { usePosts } from "@/api/hooks/usePosts";
 import { POSTS_PER_PAGE } from "@/api/posts";
 import { useIsLoggedIn } from "@/contexts/AuthContext";
@@ -139,6 +139,7 @@ export default function BoardPage() {
               {/* 게시글 목록 */}
               {!isLoading && filtered.map((post) => {
                 const commentCount = post.comments?.[0]?.count ?? 0;
+                const likeCount = post.post_likes?.[0]?.count ?? 0;
                 return (
                   <tr
                     key={post.id}
@@ -153,6 +154,12 @@ export default function BoardPage() {
                           <span className="flex items-center gap-0.5 text-primary-container shrink-0">
                             <ChatBubbleIcon className="w-4 h-4" />
                             <span className="text-xs font-semibold">{commentCount}</span>
+                          </span>
+                        )}
+                        {likeCount > 0 && (
+                          <span className="flex items-center gap-0.5 text-primary-container shrink-0">
+                            <FavoriteIcon className="w-4 h-4" />
+                            <span className="text-xs font-semibold">{likeCount}</span>
                           </span>
                         )}
                       </div>
