@@ -22,7 +22,6 @@ import BoardWritePage from "@pages/board/BoardWritePage";
 // 인증
 import LoginPage from "@pages/auth/LoginPage";
 import SignupPage from "@pages/auth/SignupPage";
-import SignupCompletePage from "@pages/auth/SignupCompletePage";
 import PendingApprovalPage from "@pages/auth/PendingApprovalPage";
 import RejectedPage from "@pages/auth/RejectedPage";
 import InactivePage from "@pages/auth/InactivePage";
@@ -67,7 +66,6 @@ export const router = createBrowserRouter([
       // 인증
       { path: PATHS.LOGIN,           element: <LoginPage /> },
       { path: PATHS.SIGNUP,          element: <SignupPage /> },
-      { path: PATHS.SIGNUP_COMPLETE, element: <SignupCompletePage /> },
     ],
   },
 

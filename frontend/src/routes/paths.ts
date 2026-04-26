@@ -23,7 +23,6 @@ export const PATHS = {
   // 인증
   LOGIN: "/login",
   SIGNUP: "/signup",
-  SIGNUP_COMPLETE: "/signup/complete",
   PENDING_APPROVAL: "/pending-approval",
   REJECTED: "/rejected",
   INACTIVE: "/inactive",

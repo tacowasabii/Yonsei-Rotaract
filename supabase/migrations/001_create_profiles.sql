@@ -33,9 +33,15 @@ CREATE TRIGGER on_profiles_updated
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 -- 신규 유저 가입 시 profiles 자동 생성 트리거 함수
+-- OTP 임시 유저(member_type 없음)는 스킵 → upsertProfile()에서 별도 생성
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
+  IF NEW.raw_user_meta_data IS NULL OR
+     NEW.raw_user_meta_data->>'member_type' IS NULL OR
+     NEW.raw_user_meta_data->>'member_type' = '' THEN
+    RETURN NEW;
+  END IF;
   INSERT INTO public.profiles (id, name, email, phone, member_type, admission_year, department, generation)
   VALUES (
     NEW.id,
@@ -54,3 +60,43 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 이메일 중복 확인 함수 (auth.users + profiles 조인 — OTP 임시 유저는 가입된 것으로 보지 않음)
+CREATE OR REPLACE FUNCTION public.check_email_available(email_to_check TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN NOT EXISTS (
+    SELECT 1 FROM auth.users u
+    INNER JOIN public.profiles p ON p.id = u.id
+    WHERE u.email = email_to_check
+  );
+END;
+$$;
+
+-- RLS 활성화
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- profiles 자기참조 무한루프 방지용 role 조회 함수
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT role::TEXT FROM public.profiles WHERE id = auth.uid();
+$$;
+
+CREATE POLICY "Users can view own profile"
+  ON public.profiles FOR SELECT
+  USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile"
+  ON public.profiles FOR UPDATE
+  USING (auth.uid() = id);
+
+CREATE POLICY "Staff can view all profiles"
+  ON public.profiles FOR SELECT
+  USING (public.get_my_role() IN ('staff', 'admin', 'super_admin'));

@@ -26,13 +26,8 @@ export default function LoginPage() {
         }
         navigate(PATHS.HOME);
       },
-      onError: (error: unknown) => {
-        const code = (error as { code?: string }).code;
-        if (code === "email_not_confirmed") {
-          setLoginError("이메일 인증이 필요합니다. 받은편지함을 확인해주세요.");
-        } else {
-          setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.");
-        }
+      onError: () => {
+        setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.");
       },
     });
   };

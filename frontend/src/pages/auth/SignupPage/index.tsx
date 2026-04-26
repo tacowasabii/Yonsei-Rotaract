@@ -58,7 +58,7 @@ export default function SignupPage() {
         generation: data.generation,
       },
       {
-        onSuccess: () => navigate(PATHS.SIGNUP_COMPLETE),
+        onSuccess: () => navigate(PATHS.PENDING_APPROVAL),
         onError: (error: unknown) => {
           setSubmitError(error instanceof Error ? error.message : "오류가 발생했습니다.");
         },
