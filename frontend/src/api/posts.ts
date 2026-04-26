@@ -49,6 +49,7 @@ export interface Post {
     name: string;
     role: string;
   } | null;
+  comments: Array<{ count: number }> | null;
 }
 
 export interface CreatePostParams {
@@ -62,7 +63,7 @@ export interface CreatePostParams {
 export async function fetchPosts(boardType: "free" | "promo"): Promise<Post[]> {
   const { data, error } = await supabase
     .from("posts")
-    .select("*, profiles(name, role)")
+    .select("*, profiles(name, role), comments(count)")
     .eq("board_type", boardType)
     .order("created_at", { ascending: false });
 

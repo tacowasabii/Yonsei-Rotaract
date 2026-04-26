@@ -32,6 +32,13 @@
 - **디자인 철학**: "The Digital Campus Square" - 편집 디자인급 커뮤니티 경험, tonal layering 기반
 - **로고**: `frontend/public/logo.png` (Rotaract Club 공식 로고)
 
+## Supabase DB 운영 규칙
+
+- **개발 DB**: `jnnggfhymhausvummeku` (Rotaract Website Dev)
+- **운영 DB**: `hsilxvjhhnoeecovwtus` (Roatract Website)
+- **DB 변경 시 반드시 개발·운영 두 프로젝트에 동시 적용할 것** (마이그레이션, RLS 정책, 함수 등 모두 포함)
+- Supabase MCP(`mcp__supabase__apply_migration`)로 직접 실행 가능
+
 ## 프로젝트 구조
 ```
 frontend/

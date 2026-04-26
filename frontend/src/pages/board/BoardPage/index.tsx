@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
-import { ForumIcon } from "@assets/icons";
+import { ForumIcon, ChatBubbleIcon } from "@assets/icons";
 import { usePosts } from "@/api/hooks/usePosts";
 import { useIsLoggedIn } from "@/contexts/AuthContext";
 
@@ -133,26 +133,35 @@ export default function BoardPage() {
               )}
 
               {/* 게시글 목록 */}
-              {!isLoading && filtered.map((post) => (
-                <tr
-                  key={post.id}
-                  onClick={() => navigate(`/board/${boardType}/${post.id}`)}
-                  className="hover:bg-surface-container-lowest transition-colors cursor-pointer group bg-white"
-                >
-                  <td className="py-4 px-4 text-center text-on-surface-variant">{post.post_number}</td>
-                  <td className="py-4 px-4 text-on-surface group-hover:text-primary-container transition-colors font-medium">
-                    {post.title}
-                  </td>
-                  <td className="py-4 px-4 text-center hidden sm:table-cell">
-                    <div className="flex items-center justify-center gap-1">
+              {!isLoading && filtered.map((post) => {
+                const commentCount = post.comments?.[0]?.count ?? 0;
+                return (
+                  <tr
+                    key={post.id}
+                    onClick={() => navigate(`/board/${boardType}/${post.id}`)}
+                    className="hover:bg-surface-container-lowest transition-colors cursor-pointer group bg-white"
+                  >
+                    <td className="py-4 px-4 text-center text-on-surface-variant">{post.post_number}</td>
+                    <td className="py-4 px-4 text-on-surface group-hover:text-primary-container transition-colors font-medium max-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="truncate">{post.title}</span>
+                        {commentCount > 0 && (
+                          <span className="flex items-center gap-0.5 text-primary-container shrink-0">
+                            <ChatBubbleIcon className="w-4 h-4" />
+                            <span className="text-xs font-semibold">{commentCount}</span>
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-center hidden sm:table-cell">
                       <span className="text-on-surface-variant">{post.profiles?.name ?? "—"}</span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">
-                    {formatDate(post.created_at)}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">
+                      {formatDate(post.created_at)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
