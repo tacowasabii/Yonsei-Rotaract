@@ -8,6 +8,7 @@ import { usePosts } from "@/api/hooks/posts/usePosts";
 import { useNoticePosts } from "@/api/hooks/posts/useNoticePosts";
 import { POSTS_PER_PAGE } from "@/api/posts";
 import { useIsLoggedIn, useIsStaff } from "@/contexts/AuthContext";
+import RoleBadge from "@components/common/RoleBadge";
 import { BOARD_PATHS } from "@/routes/paths";
 import Pagination from "@components/common/Pagination";
 
@@ -110,7 +111,14 @@ export default function BoardPage() {
                       <span className="truncate">{post.title}</span>
                     </div>
                   </td>
-                  <td className="py-4 px-4 text-center text-on-surface-variant hidden sm:table-cell">{isAnon ? "익명" : (post.profiles?.name ?? "—")}</td>
+                  <td className="py-4 px-4 text-center text-on-surface-variant hidden sm:table-cell">
+                    {isAnon ? "익명" : (
+                      <div className="flex items-center justify-center gap-1.5">
+                        <span>{post.profiles?.name ?? "—"}</span>
+                        <RoleBadge role={post.profiles?.role} />
+                      </div>
+                    )}
+                  </td>
                   <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">{formatDate(post.created_at)}</td>
                 </tr>
               ))}
@@ -176,7 +184,14 @@ export default function BoardPage() {
                       </div>
                     </td>
                     <td className="py-4 px-4 text-center hidden sm:table-cell">
-                      <span className="text-on-surface-variant">{isAnon ? "익명" : (post.profiles?.name ?? "—")}</span>
+                      {isAnon ? (
+                        <span className="text-on-surface-variant">익명</span>
+                      ) : (
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span className="text-on-surface-variant">{post.profiles?.name ?? "—"}</span>
+                          <RoleBadge role={post.profiles?.role} />
+                        </div>
+                      )}
                     </td>
                     <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">
                       {formatDate(post.created_at)}

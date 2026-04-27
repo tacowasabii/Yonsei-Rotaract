@@ -7,6 +7,7 @@ import { useCreatePost } from "@/api/hooks/posts/useCreatePost";
 import { useUpdatePost } from "@/api/hooks/posts/useUpdatePost";
 import { usePost } from "@/api/hooks/posts/usePost";
 import { BOARD_PATHS } from "@/routes/paths";
+import RoleBadge from "@components/common/RoleBadge";
 
 type Visibility = "public" | "members";
 
@@ -234,13 +235,9 @@ export default function BoardWritePage() {
                 <PersonIcon className="w-5 h-5 text-primary-container" />
               </div>
               <div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <span className="font-bold text-on-surface">{isAnon ? "익명" : (profile?.name ?? "—")}</span>
-                  {profile?.status === "active" && (
-                    <span className="material-symbols-outlined text-sm text-surface-tint" style={{ fontVariationSettings: '"FILL" 1' }}>
-                      verified
-                    </span>
-                  )}
+                  {!isAnon && <RoleBadge role={profile?.role} />}
                 </div>
                 <span className="text-xs text-on-surface-variant">
                   {profile?.member_type === "alumni" ? "졸업생" : "현역 회원"}

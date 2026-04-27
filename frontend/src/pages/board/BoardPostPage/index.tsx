@@ -6,6 +6,7 @@ import { usePost } from "@/api/hooks/posts/usePost";
 import { useAnonPost } from "@/api/hooks/posts/useAnonPost";
 import { useDeletePost } from "@/api/hooks/posts/useDeletePost";
 import { useComments } from "@/api/hooks/comments/useComments";
+import RoleBadge from "@components/common/RoleBadge";
 import { useAnonComments } from "@/api/hooks/comments/useAnonComments";
 import { useCreateComment } from "@/api/hooks/comments/useCreateComment";
 import { useUpdateComment } from "@/api/hooks/comments/useUpdateComment";
@@ -196,9 +197,12 @@ export default function BoardPostPage() {
                     <PersonIcon className="w-4 h-4 text-primary-container" />
                   </div>
                   <div>
-                    <span className="text-sm font-semibold text-on-surface">
-                      {isAnon ? "익명" : (post?.profiles?.name ?? "알 수 없음")}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-semibold text-on-surface">
+                        {isAnon ? "익명" : (post?.profiles?.name ?? "알 수 없음")}
+                      </span>
+                      {!isAnon && <RoleBadge role={post?.profiles?.role} />}
+                    </div>
                     <p className="text-xs text-on-surface-variant">
                       {formatDateTime(resolvedPost.created_at)}
                     </p>

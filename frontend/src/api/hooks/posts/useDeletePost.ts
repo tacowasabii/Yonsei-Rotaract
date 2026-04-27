@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deletePost } from "@/api/posts";
 
-export function useDeletePost(boardType: "free" | "promo") {
+export function useDeletePost(boardType: "free" | "promo" | "anon") {
   const queryClient = useQueryClient();
 
   return useMutation({
