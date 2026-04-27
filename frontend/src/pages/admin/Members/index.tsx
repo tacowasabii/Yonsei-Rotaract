@@ -4,6 +4,8 @@ import type { AppRole } from "@/api/types/member";
 import { useMembers, useUpdateMemberRole, useUpdateMemberStatus } from "@/api/hooks/profiles/useMembers";
 import { ROLE_META, assignableRoles, formatDate, formatPhone, isAdminOrAbove } from "../shared";
 import SortHeaderButton from "./components/SortHeaderButton";
+import RoleBadge from "@components/common/RoleBadge";
+import MemberTypeBadge from "@components/common/MemberTypeBadge";
 
 type SortKey = "name" | "generation" | "admission_year";
 
@@ -163,9 +165,7 @@ export default function AdminMembers() {
                         {formatDate(member.created_at)}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${member.member_type === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
-                          {member.member_type === "current" ? "현역" : "졸업생"}
-                        </span>
+                        <MemberTypeBadge memberType={member.member_type} />
                       </td>
                       <td className="px-4 py-3 text-center">
                         {canEdit ? (
@@ -179,9 +179,7 @@ export default function AdminMembers() {
                             ))}
                           </select>
                         ) : (
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ROLE_META[member.role].color}`}>
-                            {ROLE_META[member.role].label}
-                          </span>
+                          <RoleBadge role={member.role} showAll />
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">

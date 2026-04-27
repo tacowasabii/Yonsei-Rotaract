@@ -2,7 +2,7 @@ import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers } from "@/api/hooks/profiles/usePendingMembers";
 import { PATHS } from "@/routes/paths";
-import { ROLE_META } from "@/pages/admin/shared";
+import RoleBadge from "@components/common/RoleBadge";
 
 const navItems = [
   { to: PATHS.ADMIN,           label: "대시보드", icon: "dashboard",          end: true  },
@@ -72,11 +72,7 @@ export default function AdminLayout() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white truncate">{profile.name}</p>
-                {role && (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${ROLE_META[role].color}`}>
-                    {ROLE_META[role].label}
-                  </span>
-                )}
+                <RoleBadge role={role} showAll variant="dark" />
               </div>
             </div>
           )}

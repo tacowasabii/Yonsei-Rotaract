@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers, useRejectedMembers, useApproveMember, useRejectMember } from "@/api/hooks/profiles/usePendingMembers";
 import { formatDate, isAdminOrAbove } from "../shared";
+import MemberTypeBadge from "@components/common/MemberTypeBadge";
 import MailIcon from "@/assets/icons/mail.svg?react";
 import { PersonIcon } from "@assets/icons";
 import CallIcon from "@/assets/icons/call.svg?react";
@@ -59,9 +60,7 @@ export default function AdminPending() {
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-bold text-on-surface">{p.name}</p>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.member_type === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
-                        {p.member_type === "current" ? "현역" : "졸업생"}
-                      </span>
+                      <MemberTypeBadge memberType={p.member_type} />
                     </div>
                     <p className="text-sm text-on-surface-variant mt-0.5">
                       {p.department ?? "-"}{p.admission_year ? ` · ${String(p.admission_year).slice(-2)}학번` : ""}
@@ -118,9 +117,7 @@ export default function AdminPending() {
                           거절됨
                         </span>
                         {p.member_type && (
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.member_type === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
-                            {p.member_type === "current" ? "현역" : "졸업생"}
-                          </span>
+                          <MemberTypeBadge memberType={p.member_type} />
                         )}
                       </div>
                       <p className="text-sm text-on-surface-variant mt-0.5">

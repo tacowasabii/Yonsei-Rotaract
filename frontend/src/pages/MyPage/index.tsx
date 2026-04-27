@@ -3,20 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/api/hooks/profiles/useMyProfile";
 import { useUnreadCount } from "@/api/hooks/messages/useMessages";
 import { PATHS } from "@/routes/paths";
-
-const ROLE_LABELS: Record<string, string> = {
-  user: "일반 회원",
-  staff: "운영진",
-  admin: "관리자",
-  super_admin: "최고 관리자",
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  user: "bg-surface-container text-on-surface-variant",
-  staff: "bg-secondary-fixed text-on-secondary-fixed",
-  admin: "bg-primary-fixed text-primary-container",
-  super_admin: "bg-error/10 text-error",
-};
+import RoleBadge from "@components/common/RoleBadge";
+import MemberTypeBadge from "@components/common/MemberTypeBadge";
 
 const NAV_ITEMS = [
   { label: "내 정보",    to: PATHS.MYPAGE,          icon: "manage_accounts", end: true  },
@@ -49,14 +37,8 @@ export default function MyPageLayout() {
                 <div>
                   <h1 className="text-base font-black font-headline text-on-surface">{profile.name}</h1>
                   <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${ROLE_COLORS[profile.role] ?? "bg-surface-container text-on-surface-variant"}`}>
-                      {ROLE_LABELS[profile.role] ?? profile.role}
-                    </span>
-                    {profile.member_type && (
-                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${profile.member_type === "current" ? "bg-secondary-fixed text-on-secondary-fixed" : "bg-tertiary-fixed text-on-tertiary-fixed-variant"}`}>
-                        {profile.member_type === "current" ? "현역" : "졸업생"}
-                      </span>
-                    )}
+                    <RoleBadge role={profile.role} showAll />
+                    <MemberTypeBadge memberType={profile.member_type} />
                   </div>
                 </div>
               </div>
