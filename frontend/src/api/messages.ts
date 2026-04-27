@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { ROLE_SEARCH_MAP } from "@/utils/role";
 import type { Message, MemberSearchResult } from "./types/message";
 
 const MESSAGE_SELECT =
@@ -76,8 +77,6 @@ export async function deleteMessageByRecipient(messageId: string): Promise<void>
     .eq("id", messageId);
   if (error) throw error;
 }
-
-const ROLE_SEARCH_MAP: Record<string, string> = { "운영진": "staff", "관리자": "admin" };
 
 export async function searchMembers(query: string): Promise<MemberSearchResult[]> {
   if (!query.trim()) return [];
