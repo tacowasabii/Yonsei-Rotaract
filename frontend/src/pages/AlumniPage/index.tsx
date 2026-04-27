@@ -28,9 +28,12 @@ function AlumniCard({ person, onMessage }: AlumniCardProps) {
         <h3 className="font-headline font-bold text-base text-on-surface">{person.name}</h3>
 
         {(person.company || person.job_title) && (
-          <div className="mt-2 flex items-center gap-1.5 justify-center flex-wrap">
+          <div className="mt-2 flex items-center gap-1.5 justify-center flex-wrap pr-5">
             {person.company && (
-              <span className="text-sm font-bold text-primary">{person.company}</span>
+              <span className="flex items-center gap-1">
+                <span className="material-symbols-outlined text-[15px] text-primary">business</span>
+                <span className="text-sm font-bold text-primary">{person.company}</span>
+              </span>
             )}
             {person.company && person.job_title && (
               <span className="text-on-surface-variant/40 text-xs">·</span>
