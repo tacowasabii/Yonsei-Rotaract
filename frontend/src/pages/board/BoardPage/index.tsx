@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { formatDate } from "@/utils/date";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import { ForumIcon, ChatBubbleIcon, FavoriteIcon } from "@assets/icons";
@@ -10,13 +11,6 @@ import { useIsLoggedIn, useIsStaff } from "@/contexts/AuthContext";
 import { BOARD_PATHS } from "@/routes/paths";
 import Pagination from "@components/common/Pagination";
 
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  const yy = String(d.getFullYear()).slice(2);
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yy}.${mm}.${dd}`;
-}
 
 export default function BoardPage() {
   const location = useLocation();

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatDateTime } from "@/utils/date";
 import { useMyPosts } from "@/api/hooks/posts/useMyPosts";
 import { MY_POSTS_PER_PAGE } from "@/api/posts";
 import Pagination from "@components/common/Pagination";
@@ -13,16 +14,6 @@ const FILTERS: { label: string; value: BoardFilter }[] = [
   { label: "자유게시판", value: "free" },
   { label: "홍보게시판", value: "promo" },
 ];
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  const yy = String(d.getFullYear()).slice(2);
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const hh = String(d.getHours()).padStart(2, "0");
-  const min = String(d.getMinutes()).padStart(2, "0");
-  return `${yy}.${mm}.${dd} ${hh}:${min}`;
-}
 
 export default function MyPosts() {
   const navigate = useNavigate();
@@ -134,7 +125,7 @@ export default function MyPosts() {
                       {commentCount}
                     </span>
                   )}
-                  <span>{formatDate(post.created_at)}</span>
+                  <span>{formatDateTime(post.created_at)}</span>
                 </div>
               </button>
             );

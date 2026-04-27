@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { formatDateTime } from "@/utils/date";
 import PageLayout from "@components/layout/PageLayout";
 import { usePost } from "@/api/hooks/posts/usePost";
 import { useDeletePost } from "@/api/hooks/posts/useDeletePost";
@@ -13,15 +14,6 @@ import { usePostLike } from "@/api/hooks/posts/usePostLike";
 import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
 import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon, PersonIcon } from "@assets/icons";
 
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const hh = String(d.getHours()).padStart(2, "0");
-  const min = String(d.getMinutes()).padStart(2, "0");
-  return `${yyyy}.${mm}.${dd} ${hh}:${min}`;
-}
 
 export default function BoardPostPage() {
   const { id } = useParams<{ id: string }>();
@@ -132,7 +124,7 @@ export default function BoardPostPage() {
               {post.title}
             </h1>
             <p className="text-sm text-on-surface-variant">
-              {formatDate(post.created_at)}
+              {formatDateTime(post.created_at)}
             </p>
           </div>
           <div className="px-8 py-16 flex flex-col items-center gap-4 text-center">
@@ -193,7 +185,7 @@ export default function BoardPostPage() {
                       {post.profiles?.name ?? "알 수 없음"}
                     </span>
                     <p className="text-xs text-on-surface-variant">
-                      {formatDate(post.created_at)}
+                      {formatDateTime(post.created_at)}
                     </p>
                   </div>
                 </div>
@@ -386,7 +378,7 @@ export default function BoardPostPage() {
                             </p>
                           )}
                           <p className="text-xs text-on-surface-variant mt-1">
-                            {formatDate(comment.created_at)}
+                            {formatDateTime(comment.created_at)}
                           </p>
                         </div>
                       </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatDate } from "@/utils/date";
 import {
   useReceivedMessages,
   useSentMessages,
@@ -9,7 +10,6 @@ import {
 import type { Message } from "@/api/types/message";
 import type { MemberSearchResult } from "@/api/types/message";
 import ComposeModal from "@components/common/ComposeModal";
-import { formatDate } from "../shared";
 
 type Box = "received" | "sent";
 
