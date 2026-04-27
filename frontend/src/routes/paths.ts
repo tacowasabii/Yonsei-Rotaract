@@ -27,10 +27,14 @@ export const PATHS = {
   REJECTED: "/rejected",
   INACTIVE: "/inactive",
 
+  // 후원
+  DONATE: "/donate",
+
   // 관리자
   ADMIN: "/admin",
   ADMIN_PENDING: "/admin/pending",
   ADMIN_MEMBERS: "/admin/members",
+  ADMIN_DONATIONS: "/admin/donations",
 } as const;
 
 export const BOARD_PATHS = {

@@ -31,6 +31,10 @@ import AdminLayout from "@components/layout/AdminLayout";
 import AdminDashboard from "@pages/admin/Dashboard";
 import AdminPending from "@pages/admin/Pending";
 import AdminMembers from "@pages/admin/Members";
+import AdminDonations from "@pages/admin/Donations";
+
+// 후원
+import DonatePage from "@pages/DonatePage";
 
 export const router = createBrowserRouter([
   {
@@ -63,6 +67,9 @@ export const router = createBrowserRouter([
       { path: PATHS.BOARD_PROMO_POST,  element: <BoardPostPage /> },
       { path: PATHS.BOARD_PROMO_EDIT,  element: <BoardWritePage /> },
 
+      // 후원
+      { path: PATHS.DONATE, element: <DonatePage /> },
+
       // 인증
       { path: PATHS.LOGIN,           element: <LoginPage /> },
       { path: PATHS.SIGNUP,          element: <SignupPage /> },
@@ -82,9 +89,10 @@ export const router = createBrowserRouter([
         path: PATHS.ADMIN,
         element: <AdminLayout />,
         children: [
-          { index: true,     element: <AdminDashboard /> },
-          { path: "pending", element: <AdminPending /> },
-          { path: "members", element: <AdminMembers /> },
+          { index: true,       element: <AdminDashboard /> },
+          { path: "pending",   element: <AdminPending /> },
+          { path: "members",   element: <AdminMembers /> },
+          { path: "donations", element: <AdminDonations /> },
         ],
       },
     ],
