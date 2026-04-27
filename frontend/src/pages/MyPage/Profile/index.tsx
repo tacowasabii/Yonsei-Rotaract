@@ -147,7 +147,7 @@ export default function MyProfile() {
                   onClick={() => setShowInfoPopover(false)}
                 />
                 <div className="absolute -left-3 top-6 z-20 w-56 bg-on-surface text-surface text-xs rounded-xl px-3.5 py-2.5 shadow-xl leading-relaxed">
-                  <span className="absolute -top-1.5 left-[14px] w-3 h-3 bg-on-surface rotate-45 rounded-sm" />
+                  <span className="absolute -top-1.5 left-3.5 w-3 h-3 bg-on-surface rotate-45 rounded-sm" />
                   기본 정보는 변경할 수 없습니다. 변경을 원하시면 관리자에게
                   문의해 주세요.
                 </div>

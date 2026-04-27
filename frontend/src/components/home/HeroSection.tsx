@@ -1,9 +1,9 @@
 export default function HeroSection() {
   return (
-    <header className="mb-8 p-8 md:p-10 rounded-3xl bg-gradient-to-br from-primary to-primary-container relative overflow-hidden">
+    <header className="mb-8 p-8 md:p-10 rounded-3xl bg-linear-to-br from-primary to-primary-container relative overflow-hidden">
       {/* Dot pattern overlay */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute -top-1/2 -left-1/5 w-[150%] h-[150%] bg-[radial-gradient(circle,white_1px,transparent_1px)] [background-size:20px_20px]" />
+        <div className="absolute -top-1/2 -left-1/5 w-[150%] h-[150%] bg-[radial-gradient(circle,white_1px,transparent_1px)] bg-size-[20px_20px]" />
       </div>
       <div className="relative z-10 text-white">
         <h1 className="text-3xl md:text-5xl font-black mb-3 tracking-tight font-headline">
