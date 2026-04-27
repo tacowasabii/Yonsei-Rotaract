@@ -81,7 +81,9 @@ const ROLE_SEARCH_MAP: Record<string, string> = { "운영진": "staff", "관리�
 
 export async function searchMembers(query: string): Promise<MemberSearchResult[]> {
   if (!query.trim()) return [];
-  const mappedRole = ROLE_SEARCH_MAP[query.trim()];
+  const mappedRole = Object.entries(ROLE_SEARCH_MAP).find(([label]) =>
+    label.startsWith(query.trim())
+  )?.[1];
   let qb = supabase
     .from("profiles")
     .select("id, name, department, admission_year, generation, role")

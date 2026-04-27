@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatDate } from "@/utils/date";
+import { formatDateTime } from "@/utils/date";
+import { ROLE_BADGE } from "@/utils/role";
 import {
   useReceivedMessages,
   useSentMessages,
@@ -10,6 +11,9 @@ import {
 import type { Message } from "@/api/types/message";
 import type { MemberSearchResult } from "@/api/types/message";
 import ComposeModal from "@components/common/ComposeModal";
+import Pagination from "@components/common/Pagination";
+
+const PER_PAGE = 15;
 
 type Box = "received" | "sent";
 
@@ -74,6 +78,11 @@ function MessageRow({ message, box, isExpanded, userId, onToggle, onReply }: Mes
             <span className={`text-sm ${isUnread ? "font-black text-on-surface" : "font-semibold text-on-surface"}`}>
               {counterpart}
             </span>
+            {counterpartProfile?.role && ROLE_BADGE[counterpartProfile.role] && (
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${ROLE_BADGE[counterpartProfile.role].color}`}>
+                {ROLE_BADGE[counterpartProfile.role].label}
+              </span>
+            )}
             {counterpartSub && (
               <span className="text-xs text-on-surface-variant">{counterpartSub}</span>
             )}
@@ -86,7 +95,7 @@ function MessageRow({ message, box, isExpanded, userId, onToggle, onReply }: Mes
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs text-on-surface-variant">{formatDate(message.created_at)}</span>
+          <span className="text-xs text-on-surface-variant">{formatDateTime(message.created_at)}</span>
           <span className={`material-symbols-outlined text-[18px] text-on-surface-variant transition-transform ${isExpanded ? "rotate-180" : ""}`}>
             expand_more
           </span>
@@ -131,6 +140,7 @@ export default function MyMessages() {
   const { user } = useAuth();
   const [activeBox, setActiveBox] = useState<Box>("received");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [composeOpen, setComposeOpen] = useState(false);
   const [replyRecipient, setReplyRecipient] = useState<MemberSearchResult | null>(null);
 
@@ -139,6 +149,8 @@ export default function MyMessages() {
 
   const messages = activeBox === "received" ? received : sent;
   const isLoading = activeBox === "received" ? loadingReceived : loadingSent;
+  const totalPages = Math.ceil(messages.length / PER_PAGE);
+  const pagedMessages = messages.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   function handleToggle(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -157,6 +169,7 @@ export default function MyMessages() {
   function handleTabChange(box: Box) {
     setActiveBox(box);
     setExpandedId(null);
+    setPage(1);
   }
 
   return (
@@ -200,7 +213,7 @@ export default function MyMessages() {
               </p>
             </div>
           ) : (
-            messages.map((msg) => (
+            pagedMessages.map((msg) => (
               <MessageRow
                 key={msg.id}
                 message={msg}
@@ -213,6 +226,11 @@ export default function MyMessages() {
             ))
           )}
         </div>
+        {totalPages > 1 && (
+          <div className="flex justify-center pt-4">
+            <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+          </div>
+        )}
       </div>
 
       {composeOpen && user && (
