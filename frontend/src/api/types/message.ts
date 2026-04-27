@@ -15,4 +15,7 @@ export interface Message {
 export interface MemberSearchResult {
   id: string;
   name: string;
+  department?: string | null;
+  admission_year?: number | null;
+  generation?: string | null;
 }

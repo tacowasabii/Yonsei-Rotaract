@@ -93,7 +93,7 @@ function MessageRow({ message, box, isExpanded, userId, onToggle, onReply }: Mes
             <div className="flex justify-end gap-2 pt-2 border-t border-outline-variant/30">
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-on-surface-variant hover:bg-error/10 hover:text-error transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-error hover:bg-error/10 transition-colors"
               >
                 <span className="material-symbols-outlined text-[16px]">delete</span>
                 삭제

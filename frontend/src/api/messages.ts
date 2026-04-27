@@ -81,7 +81,7 @@ export async function searchMembers(query: string): Promise<MemberSearchResult[]
   if (!query.trim()) return [];
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, name")
+    .select("id, name, department, admission_year, generation")
     .eq("status", "active")
     .ilike("name", `%${query.trim()}%`)
     .limit(10);

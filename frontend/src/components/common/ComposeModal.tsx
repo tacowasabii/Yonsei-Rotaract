@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/contexts/ToastContext";
 import { useSendMessage, useSearchMembers } from "@/api/hooks/messages/useMessages";
 import type { MemberSearchResult } from "@/api/types/message";
 import { CloseIcon } from "@assets/icons";
+import { useOutsideClick } from "@/hooks/useOutsideClick";
 
 interface Props {
   senderId: string;
@@ -19,21 +20,15 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const modalRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const { addToast } = useToast();
   const { data: searchResults = [] } = useSearchMembers(!recipient ? searchQuery : "");
   const { mutate: send, isPending } = useSendMessage();
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useOutsideClick(modalRef, onClose);
+  useOutsideClick(searchRef, () => setShowDropdown(false));
 
   function handleSelectRecipient(member: MemberSearchResult) {
     setRecipient(member);
@@ -66,7 +61,7 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-surface-container-lowest rounded-2xl shadow-card w-full max-w-lg flex flex-col gap-5 p-6">
+      <div ref={modalRef} className="bg-surface-container-lowest rounded-2xl shadow-card w-full max-w-lg flex flex-col gap-5 p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-black text-on-surface">쪽지 쓰기</h2>
           <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface transition-colors">
@@ -105,9 +100,18 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
                     <button
                       key={m.id}
                       onClick={() => handleSelectRecipient(m)}
-                      className="w-full text-left px-4 py-3 text-sm font-semibold text-on-surface hover:bg-surface-container transition-colors"
+                      className="w-full text-left px-4 py-3 hover:bg-surface-container transition-colors"
                     >
-                      {m.name}
+                      <span className="text-sm font-semibold text-on-surface">{m.name}</span>
+                      <span className="ml-2 text-xs text-on-surface-variant">
+                        {[
+                          m.department,
+                          m.admission_year ? `${String(m.admission_year).slice(-2)}학번` : null,
+                          m.generation ?? null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
                     </button>
                   ))
                 )}
