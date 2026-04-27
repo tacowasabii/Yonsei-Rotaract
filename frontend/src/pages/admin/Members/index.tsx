@@ -9,12 +9,15 @@ import MemberTypeBadge from "@components/common/MemberTypeBadge";
 
 type SortKey = "name" | "generation" | "admission_year";
 
+const PAGE_SIZE = 20;
+
 export default function AdminMembers() {
   const { role: viewerRole } = useAuth();
   const [memberSearch, setMemberSearch] = useState("");
   const [filterType, setFilterType] = useState("전체");
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [page, setPage] = useState(1);
 
   const { data: members = [], isLoading: membersLoading, isError } = useMembers();
   const updateRole = useUpdateMemberRole();
@@ -24,6 +27,17 @@ export default function AdminMembers() {
     if (sortKey !== key) { setSortKey(key); setSortDir("asc"); }
     else if (sortDir === "asc") setSortDir("desc");
     else { setSortKey(null); setSortDir("asc"); }
+    setPage(1);
+  }
+
+  function handleSearchChange(value: string) {
+    setMemberSearch(value);
+    setPage(1);
+  }
+
+  function handleFilterChange(value: string) {
+    setFilterType(value);
+    setPage(1);
   }
 
   function handleRoleChange(memberId: string, newRole: AppRole) {
@@ -65,6 +79,9 @@ export default function AdminMembers() {
       return sortDir === "asc" ? av.localeCompare(bv, "ko") : bv.localeCompare(av, "ko");
     });
 
+  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
+  const pagedMembers = filteredMembers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <div className="space-y-4">
       <div>
@@ -86,7 +103,7 @@ export default function AdminMembers() {
             type="text"
             placeholder="이름, 학과, 기수, 학번, 연락처 검색..."
             value={memberSearch}
-            onChange={(e) => setMemberSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary-container/30 shadow-card"
           />
         </div>
@@ -94,7 +111,7 @@ export default function AdminMembers() {
           {["전체", "현역", "졸업생", "운영진", "관리자"].map((f) => (
             <button
               key={f}
-              onClick={() => setFilterType(f)}
+              onClick={() => handleFilterChange(f)}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                 filterType === f
                   ? "bg-primary-container text-white"
@@ -108,6 +125,7 @@ export default function AdminMembers() {
       </div>
 
       <p className="text-xs text-on-surface-variant">총 {filteredMembers.length}명</p>
+
 
       {membersLoading ? (
         <div className="flex items-center justify-center py-16 text-on-surface-variant">
@@ -138,7 +156,7 @@ export default function AdminMembers() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/10">
-                {filteredMembers.map((member) => {
+                {pagedMembers.map((member) => {
                   const roleOptions = viewerRole ? assignableRoles(viewerRole, member.role) : [];
                   const canEdit = roleOptions.length > 0;
 
@@ -203,6 +221,38 @@ export default function AdminMembers() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="p-2 rounded-lg text-on-surface-variant hover:bg-primary-fixed/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <span className="material-symbols-outlined text-xl">chevron_left</span>
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className={`w-8 h-8 rounded-lg text-sm font-semibold transition-colors ${
+                p === page
+                  ? "bg-primary-container text-white"
+                  : "text-on-surface-variant hover:bg-primary-fixed/20"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="p-2 rounded-lg text-on-surface-variant hover:bg-primary-fixed/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <span className="material-symbols-outlined text-xl">chevron_right</span>
+          </button>
         </div>
       )}
     </div>
