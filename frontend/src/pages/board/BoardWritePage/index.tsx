@@ -2,11 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { PersonIcon } from "@assets/icons";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, useIsStaff } from "@/contexts/AuthContext";
 import { useCreatePost } from "@/api/hooks/posts/useCreatePost";
 import { useUpdatePost } from "@/api/hooks/posts/useUpdatePost";
 import { usePost } from "@/api/hooks/posts/usePost";
-import { BOARD_PATHS } from "@/routes/paths";
+import { BOARD_PATHS, PATHS } from "@/routes/paths";
 import RoleBadge from "@components/common/RoleBadge";
 
 type Visibility = "public" | "members";
@@ -17,13 +17,15 @@ export default function BoardWritePage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
 
-  const isAnon  = location.pathname.includes("/anon/");
-  const isPromo = location.pathname.includes("/promo/");
-  const boardType  = isAnon ? "anon" : isPromo ? "promo" : "free";
-  const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : "자유게시판";
+  const isAnon        = location.pathname.includes("/anon/");
+  const isPromo       = location.pathname.includes("/promo/");
+  const isNoticeBoard = location.pathname.startsWith("/notice");
+  const boardType  = isAnon ? "anon" : isPromo ? "promo" : isNoticeBoard ? "notice" : "free";
+  const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : isNoticeBoard ? "공지사항" : "자유게시판";
   const isEditMode = location.pathname.endsWith("/edit") && !!id;
 
   const { profile } = useAuth();
+  const isStaff = useIsStaff();
   const { mutate: createPost, isPending: isCreating, error: createError } = useCreatePost();
   const { mutate: updatePost, isPending: isUpdating, error: updateError } = useUpdatePost(boardType);
 
@@ -35,7 +37,10 @@ export default function BoardWritePage() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [visibility, setVisibility] = useState<Visibility>(isNotice ? "members" : "public");
+  const [visibility, setVisibility] = useState<Visibility>(
+    isNoticeBoard || isNotice ? "members" : "public"
+  );
+  const [isPinned, setIsPinned] = useState(false);
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -48,8 +53,9 @@ export default function BoardWritePage() {
       setContent(existingPost.content);
       setVisibility(existingPost.visibility);
       setExistingImageUrls(existingPost.image_urls ?? []);
+      if (isNoticeBoard) setIsPinned(existingPost.is_pinned ?? false);
     }
-  }, [existingPost]);
+  }, [existingPost, isNoticeBoard]);
 
   const totalImages = existingImageUrls.length + newImages.length;
   const isPending = isCreating || isUpdating;
@@ -72,13 +78,27 @@ export default function BoardWritePage() {
     if (isEditMode && id) {
       updatePost(
         { id, params: { title, content, visibility, existingImageUrls, newImages } },
-        { onSuccess: (post) => navigate(BOARD_PATHS.post(boardType, post.id)) }
+        {
+          onSuccess: (post) =>
+            navigate(isNoticeBoard ? `/notice/${post.id}` : BOARD_PATHS.post(boardType, post.id)),
+        }
       );
     } else {
-      const effectiveVisibility: Visibility = isNotice ? "members" : visibility;
+      const effectiveVisibility: Visibility = isNoticeBoard || isNotice ? "members" : visibility;
       createPost(
-        { board_type: boardType, title, content, visibility: effectiveVisibility, images: newImages, is_notice: isNotice },
-        { onSuccess: (post) => navigate(BOARD_PATHS.post(boardType, post.id)) }
+        {
+          board_type: boardType,
+          title,
+          content,
+          visibility: effectiveVisibility,
+          images: newImages,
+          is_notice: isNotice,
+          is_pinned: isNoticeBoard ? isPinned : false,
+        },
+        {
+          onSuccess: (post) =>
+            navigate(isNoticeBoard ? `/notice/${post.id}` : BOARD_PATHS.post(boardType, post.id)),
+        }
       );
     }
   };
@@ -87,7 +107,13 @@ export default function BoardWritePage() {
     <PageLayout>
       <div className="flex items-center gap-2 mb-6 text-sm text-on-surface-variant">
         <button
-          onClick={() => navigate(isEditMode && id ? BOARD_PATHS.post(boardType, id) : BOARD_PATHS.root(boardType))}
+          onClick={() => {
+            if (isEditMode && id) {
+              navigate(isNoticeBoard ? `/notice/${id}` : BOARD_PATHS.post(boardType, id));
+            } else {
+              navigate(isNoticeBoard ? PATHS.NOTICE : BOARD_PATHS.root(boardType));
+            }
+          }}
           className="flex items-center gap-1 hover:text-primary-container transition-colors font-semibold"
         >
           <span className="material-symbols-outlined text-lg">arrow_back</span>
@@ -209,7 +235,13 @@ export default function BoardWritePage() {
 
           <div className="px-8 pb-7 flex justify-end gap-3">
             <button
-              onClick={() => navigate(isEditMode && id ? BOARD_PATHS.post(boardType, id) : BOARD_PATHS.root(boardType))}
+              onClick={() => {
+                if (isEditMode && id) {
+                  navigate(isNoticeBoard ? `/notice/${id}` : BOARD_PATHS.post(boardType, id));
+                } else {
+                  navigate(isNoticeBoard ? PATHS.NOTICE : BOARD_PATHS.root(boardType));
+                }
+              }}
               disabled={isPending}
               className="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all disabled:opacity-40"
             >
@@ -246,14 +278,45 @@ export default function BoardWritePage() {
             </div>
           </div>
 
-          {isNotice ? (
+          {isNoticeBoard && isStaff && (
+            <div className="bg-white rounded-2xl shadow-card px-6 py-5">
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">고정 설정</p>
+              <button
+                onClick={() => setIsPinned((prev) => !prev)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
+                  isPinned
+                    ? "border-error bg-error/5"
+                    : "border-transparent bg-surface-container-low hover:bg-surface-container"
+                }`}
+              >
+                <span className={`material-symbols-outlined text-xl ${isPinned ? "text-error" : "text-on-surface-variant"}`}>
+                  {isPinned ? "keep" : "keep_off"}
+                </span>
+                <div>
+                  <p className={`text-sm font-semibold ${isPinned ? "text-error" : "text-on-surface"}`}>
+                    {isPinned ? "고정됨" : "고정 안 함"}
+                  </p>
+                  <p className="text-xs text-on-surface-variant">중요 공지로 상단에 표시됩니다</p>
+                </div>
+                {isPinned && (
+                  <span className="material-symbols-outlined text-error text-lg ml-auto" style={{ fontVariationSettings: '"FILL" 1' }}>
+                    check_circle
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
+          {isNoticeBoard || isNotice ? (
             <div className="bg-white rounded-2xl shadow-card px-6 py-5">
               <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">공개 범위</p>
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-primary-container bg-primary-fixed/20">
                 <span className="material-symbols-outlined text-xl text-primary-container">lock</span>
                 <div>
                   <p className="text-sm font-semibold text-primary-container">회원만 공개</p>
-                  <p className="text-xs text-on-surface-variant">공지글은 회원만 공개로 고정됩니다</p>
+                  <p className="text-xs text-on-surface-variant">
+                    {isNoticeBoard ? "공지사항은 회원만 공개로 고정됩니다" : "공지글은 회원만 공개로 고정됩니다"}
+                  </p>
                 </div>
               </div>
             </div>

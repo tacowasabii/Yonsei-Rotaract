@@ -1,175 +1,178 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import { CampaignIcon } from "@assets/icons";
+import { usePosts } from "@/api/hooks/posts/usePosts";
+import { usePinnedPosts } from "@/api/hooks/posts/usePinnedPosts";
+import { useIsStaff } from "@/contexts/AuthContext";
+import { NOTICE_POSTS_PER_PAGE, type Post } from "@/api/posts";
+import { PATHS } from "@/routes/paths";
+import Pagination from "@components/common/Pagination";
+import RoleBadge from "@components/common/RoleBadge";
+import { formatDate } from "@/utils/date";
 
-const notices = [
-  {
-    id: 1,
-    important: true,
-    category: "중요",
-    title: "신입 회원 환영회 장소 변경 안내",
-    date: "2025. 04. 08",
-    views: 342,
-    author: "운영진",
-    content:
-      "4월 15일 예정된 신입 회원 환영회 장소가 '공학원 세미나실'에서 '학생회관 소강당'으로 변경되었습니다. 주차는 학생회관 지하 1층을 이용해 주세요.",
-  },
-  {
-    id: 2,
-    important: true,
-    category: "중요",
-    title: "2025년 연간 회원비 납부 안내",
-    date: "2025. 04. 05",
-    views: 281,
-    author: "총무",
-    content:
-      "2025년도 연간 회원비 납부 기한이 4월 30일로 연장되었습니다. 계좌번호: 신한은행 110-000-000000 (예금주: 연세로타랙트). 납부 후 카톡으로 인증해주세요.",
-  },
-  {
-    id: 3,
-    important: false,
-    category: "일반",
-    title: "시험기간 스터디룸 대여 신청 방법",
-    date: "2025. 04. 02",
-    views: 198,
-    author: "학술부",
-    content:
-      "중간고사 기간(4/21~4/25) 스터디룸 대여를 원하시는 분들은 구글폼을 통해 신청해 주세요. 선착순 배정이며, 팀당 최대 4시간입니다.",
-  },
-  {
-    id: 4,
-    important: false,
-    category: "일반",
-    title: "4월 정기 집회 아젠다 및 참석 확인",
-    date: "2025. 03. 28",
-    views: 254,
-    author: "운영진",
-    content:
-      "4월 정기 집회(4/15, 19:00)에 참석 여부를 댓글로 남겨주세요. 아젠다: ① 신입 회원 소개 ② 봉사활동 계획 논의 ③ 기타 안건",
-  },
-  {
-    id: 5,
-    important: false,
-    category: "일반",
-    title: "로타랙트 공식 SNS 채널 리뉴얼 안내",
-    date: "2025. 03. 25",
-    views: 173,
-    author: "홍보부",
-    content: "공식 인스타그램 계정이 @yonsei_rotaract_official로 변경되었습니다. 팔로우하시면 소식을 빠르게 받아보실 수 있습니다.",
-  },
-  {
-    id: 6,
-    important: false,
-    category: "일반",
-    title: "동아리방 냉장고 청소의 날 공지",
-    date: "2025. 03. 20",
-    views: 112,
-    author: "총무",
-    content: "3월 25일(화) 오후 6시에 동아리방 냉장고 정리를 진행합니다. 보관 물품이 있으신 분들은 미리 가져가 주시기 바랍니다.",
-  },
-];
+const FILTERS = ["전체", "중요", "일반"] as const;
+type Filter = (typeof FILTERS)[number];
 
-const filters = ["전체", "중요", "일반"];
+function NoticeCard({ notice, onClick }: { notice: Post; onClick: () => void }) {
+  return (
+    <div className="bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden">
+      <button
+        className="w-full text-left p-5 hover:bg-primary-fixed/10 transition-colors"
+        onClick={onClick}
+      >
+        <div className="flex items-start gap-3">
+          <div className="flex flex-col items-center justify-center shrink-0 w-8 h-8 rounded-full bg-surface-container mt-0.5">
+            <span className="text-xs font-bold text-on-surface-variant">{notice.post_number}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              {notice.is_pinned && (
+                <span className="text-[10px] font-bold text-error bg-error/10 px-2 py-0.5 rounded">
+                  IMPORTANT
+                </span>
+              )}
+              <span className="text-[11px] text-on-surface-variant">
+                {notice.is_pinned ? "중요" : "일반"}
+              </span>
+            </div>
+            <h3 className="font-semibold text-on-surface">{notice.title}</h3>
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <span className="text-[11px] text-on-surface-variant">
+                {notice.profiles?.name ?? "—"}
+              </span>
+              <RoleBadge role={notice.profiles?.role} />
+              <span className="text-[11px] text-on-surface-variant">
+                {formatDate(notice.created_at)}
+              </span>
+            </div>
+          </div>
+          <span className="material-symbols-outlined text-on-surface-variant shrink-0 mt-0.5">
+            chevron_right
+          </span>
+        </div>
+      </button>
+    </div>
+  );
+}
 
 export default function NoticePage() {
-  const [activeFilter, setActiveFilter] = useState("전체");
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const navigate = useNavigate();
+  const isStaff = useIsStaff();
+  const [activeFilter, setActiveFilter] = useState<Filter>("전체");
+  const [page, setPage] = useState(1);
 
-  const filtered =
-    activeFilter === "전체"
-      ? notices
-      : notices.filter((n) =>
-          activeFilter === "중요" ? n.important : !n.important
-        );
+  const { data, isLoading, isError } = usePosts("notice", page, "", NOTICE_POSTS_PER_PAGE);
+  const { data: pinnedPosts = [] } = usePinnedPosts();
+
+  const regularPosts = data?.posts ?? [];
+  const totalPages = Math.ceil((data?.totalCount ?? 0) / NOTICE_POSTS_PER_PAGE);
+
+  const showPinned = activeFilter === "전체" || activeFilter === "중요";
+  const showRegular = activeFilter === "전체" || activeFilter === "일반";
+  const showPagination = activeFilter !== "중요";
+
+  const handleFilterChange = (f: Filter) => {
+    setActiveFilter(f);
+    setPage(1);
+  };
 
   return (
     <PageLayout>
       <PageHeader iconNode={<CampaignIcon />} title="공지사항" subtitle="중요한 공지와 안내사항을 확인하세요." />
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6">
-        {filters.map((f) => (
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex gap-2">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => handleFilterChange(f)}
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                activeFilter === f
+                  ? "bg-primary-container text-white"
+                  : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        {isStaff && (
           <button
-            key={f}
-            onClick={() => setActiveFilter(f)}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
-              activeFilter === f
-                ? "bg-primary-container text-white"
-                : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
-            }`}
+            onClick={() => navigate(PATHS.NOTICE_WRITE)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
           >
-            {f}
+            <span className="material-symbols-outlined text-[18px]">edit</span>
+            글쓰기
           </button>
-        ))}
+        )}
       </div>
 
-      {/* Notice List */}
       <div className="space-y-3">
-        {filtered.map((notice) => (
-          <div
-            key={notice.id}
-            className="bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden"
-          >
-            <button
-              className="w-full text-left p-5 hover:bg-primary-fixed/10 transition-colors"
-              onClick={() => setExpanded(expanded === notice.id ? null : notice.id)}
-            >
-              <div className="flex items-start gap-3">
-                <div className="flex flex-col items-center justify-center shrink-0 w-8 h-8 rounded-full bg-surface-container mt-0.5">
-                  <span className="text-xs font-bold text-on-surface-variant">{notice.id}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    {notice.important && (
-                      <span className="text-[10px] font-bold text-error bg-error/10 px-2 py-0.5 rounded">
-                        IMPORTANT
-                      </span>
-                    )}
-                    <span className="text-[11px] text-on-surface-variant">{notice.category}</span>
-                  </div>
-                  <h3 className="font-semibold text-on-surface">{notice.title}</h3>
-                  <div className="flex items-center gap-3 mt-1 text-[11px] text-on-surface-variant">
-                    <span>{notice.author}</span>
-                    <span>{notice.date}</span>
-                    <div className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-xs">visibility</span>
-                      <span>{notice.views}</span>
-                    </div>
-                  </div>
-                </div>
-                <span className="material-symbols-outlined text-on-surface-variant transition-transform shrink-0" style={{ transform: expanded === notice.id ? "rotate(180deg)" : "rotate(0deg)" }}>
-                  expand_more
-                </span>
-              </div>
-            </button>
+        {/* 고정글 */}
+        {showPinned &&
+          pinnedPosts.map((notice) => (
+            <NoticeCard
+              key={notice.id}
+              notice={notice}
+              onClick={() => navigate(`/notice/${notice.id}`)}
+            />
+          ))}
 
-            {expanded === notice.id && (
-              <div className="px-5 pb-5 pt-0 border-t border-outline-variant/20">
-                <p className="text-sm text-on-surface leading-relaxed mt-4">
-                  {notice.content}
-                </p>
+        {/* "중요" 탭에서 고정글 없음 */}
+        {activeFilter === "중요" && pinnedPosts.length === 0 && (
+          <div className="text-center py-12 text-sm text-on-surface-variant">
+            고정된 공지가 없습니다.
+          </div>
+        )}
+
+        {/* 일반 공지글 */}
+        {showRegular && (
+          <>
+            {isLoading &&
+              Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-surface-container-lowest rounded-2xl shadow-card p-5 animate-pulse"
+                >
+                  <div className="h-4 bg-surface-container rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-surface-container rounded w-1/3" />
+                </div>
+              ))}
+
+            {isError && (
+              <div className="text-center py-12 text-sm text-on-surface-variant">
+                공지사항을 불러오지 못했습니다.
               </div>
             )}
-          </div>
-        ))}
+
+            {!isLoading &&
+              !isError &&
+              regularPosts.length === 0 &&
+              (activeFilter === "일반" || pinnedPosts.length === 0) && (
+                <div className="text-center py-12 text-sm text-on-surface-variant">
+                  아직 공지사항이 없습니다.
+                </div>
+              )}
+
+            {!isLoading &&
+              regularPosts.map((notice) => (
+                <NoticeCard
+                  key={notice.id}
+                  notice={notice}
+                  onClick={() => navigate(`/notice/${notice.id}`)}
+                />
+              ))}
+          </>
+        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center gap-2 mt-10">
-        {[1, 2, 3].map((p) => (
-          <button
-            key={p}
-            className={`w-9 h-9 rounded-full text-sm font-semibold transition-all ${
-              p === 1
-                ? "bg-primary-container text-white"
-                : "text-on-surface-variant hover:bg-surface-container"
-            }`}
-          >
-            {p}
-          </button>
-        ))}
-      </div>
+      {showPagination && totalPages > 1 && (
+        <div className="flex justify-center mt-10">
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+        </div>
+      )}
     </PageLayout>
   );
 }

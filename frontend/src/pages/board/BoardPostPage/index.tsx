@@ -11,8 +11,9 @@ import { useAnonComments } from "@/api/hooks/comments/useAnonComments";
 import { useCreateComment } from "@/api/hooks/comments/useCreateComment";
 import { useUpdateComment } from "@/api/hooks/comments/useUpdateComment";
 import { useDeleteComment } from "@/api/hooks/comments/useDeleteComment";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, useIsStaff } from "@/contexts/AuthContext";
 import { PATHS, BOARD_PATHS } from "@/routes/paths";
+import { useTogglePin } from "@/api/hooks/posts/useTogglePin";
 import { usePostLike } from "@/api/hooks/posts/usePostLike";
 import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
 import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon, PersonIcon } from "@assets/icons";
@@ -22,12 +23,15 @@ export default function BoardPostPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const isAnon  = location.pathname.includes("/anon/");
-  const isPromo = location.pathname.includes("/promo/");
-  const boardType  = isAnon ? "anon" : isPromo ? "promo" : "free";
-  const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : "자유게시판";
+  const isAnon        = location.pathname.includes("/anon/");
+  const isPromo       = location.pathname.includes("/promo/");
+  const isNoticeBoard = location.pathname.startsWith("/notice/");
+  const boardType  = isAnon ? "anon" : isPromo ? "promo" : isNoticeBoard ? "notice" : "free";
+  const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : isNoticeBoard ? "공지사항" : "자유게시판";
 
   const { user } = useAuth();
+  const isStaff = useIsStaff();
+  const { mutate: togglePin } = useTogglePin(id ?? "");
 
   // 일반 게시판 데이터 (anon일 때 비활성)
   const { data: post, isLoading: isPostLoading, isError: isPostError } = usePost(isAnon ? undefined : id);
@@ -86,7 +90,7 @@ export default function BoardPostPage() {
   const handleDelete = () => {
     if (!id) return;
     deletePost(id, {
-      onSuccess: () => navigate(BOARD_PATHS.root(boardType)),
+      onSuccess: () => navigate(isNoticeBoard ? PATHS.NOTICE : BOARD_PATHS.root(boardType)),
     });
   };
 
@@ -94,7 +98,7 @@ export default function BoardPostPage() {
     <PageLayout>
       <div className="flex items-center gap-2 mb-6 text-sm text-on-surface-variant">
         <button
-          onClick={() => navigate(BOARD_PATHS.root(boardType))}
+          onClick={() => navigate(isNoticeBoard ? PATHS.NOTICE : BOARD_PATHS.root(boardType))}
           className="flex items-center gap-1 hover:text-primary-container transition-colors font-semibold"
         >
           <span className="material-symbols-outlined text-lg">arrow_back</span>
@@ -127,7 +131,12 @@ export default function BoardPostPage() {
               <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-fixed text-primary-container">
                 {boardLabel}
               </span>
-              {resolvedPost.is_notice && (
+              {isNoticeBoard && resolvedPost.is_pinned && (
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-error/10 text-error">
+                  IMPORTANT
+                </span>
+              )}
+              {!isNoticeBoard && resolvedPost.is_notice && (
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-white">
                   공지
                 </span>
@@ -179,7 +188,12 @@ export default function BoardPostPage() {
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-fixed text-primary-container">
                   {boardLabel}
                 </span>
-                {resolvedPost.is_notice && (
+                {isNoticeBoard && resolvedPost.is_pinned && (
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-error/10 text-error">
+                    IMPORTANT
+                  </span>
+                )}
+                {!isNoticeBoard && resolvedPost.is_notice && (
                   <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-white">
                     공지
                   </span>
@@ -203,12 +217,28 @@ export default function BoardPostPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
+                  {/* 고정/해제 버튼 (staff+, 공지사항 게시판만) */}
+                  {isStaff && isNoticeBoard && post && (
+                    <button
+                      onClick={() => togglePin(post.is_pinned)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all"
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        {post.is_pinned ? "keep_off" : "keep"}
+                      </span>
+                      {post.is_pinned ? "고정 해제" : "고정"}
+                    </button>
+                  )}
                   {/* 수정/삭제 버튼 (작성자만) */}
                   {isAuthor && (
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() =>
-                          id && navigate(BOARD_PATHS.edit(boardType, id))
+                          id && navigate(
+                            isNoticeBoard
+                              ? `/notice/${id}/edit`
+                              : BOARD_PATHS.edit(boardType, id)
+                          )
                         }
                         className="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-all"
                       >

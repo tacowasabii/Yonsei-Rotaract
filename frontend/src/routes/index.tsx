@@ -43,7 +43,6 @@ export const router = createBrowserRouter([
       // 메인
       { path: PATHS.HOME,   element: <HomePage /> },
       { path: PATHS.NEWS,   element: <NewsPage /> },
-      { path: PATHS.NOTICE, element: <NoticePage /> },
       { path: PATHS.ALUMNI, element: <AlumniPage /> },
       { path: PATHS.GALLERY,element: <GalleryPage /> },
       {
@@ -70,6 +69,23 @@ export const router = createBrowserRouter([
       { path: PATHS.BOARD_ANON_WRITE,  element: <BoardWritePage /> },
       { path: PATHS.BOARD_ANON_POST,   element: <BoardPostPage /> },
       { path: PATHS.BOARD_ANON_EDIT,   element: <BoardWritePage /> },
+
+      // 공지사항 (로그인 필요)
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: PATHS.NOTICE,      element: <NoticePage /> },
+          { path: PATHS.NOTICE_POST, element: <BoardPostPage /> },
+        ],
+      },
+      // 공지사항 작성/수정 (staff 이상)
+      {
+        element: <ProtectedRoute requiredRole="staff" />,
+        children: [
+          { path: PATHS.NOTICE_WRITE, element: <BoardWritePage /> },
+          { path: PATHS.NOTICE_EDIT,  element: <BoardWritePage /> },
+        ],
+      },
 
       // 후원
       { path: PATHS.DONATE, element: <DonatePage /> },

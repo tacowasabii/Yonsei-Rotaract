@@ -37,18 +37,20 @@ function compressImage(file: File): Promise<Blob> {
 export interface Post {
   id: string;
   post_number: number;
-  board_type: "free" | "promo" | "anon";
+  board_type: "free" | "promo" | "anon" | "notice";
   title: string;
   content: string;
   author_id: string;
   visibility: "public" | "members";
   is_notice: boolean;
+  is_pinned: boolean;
   image_urls: string[];
   created_at: string;
   updated_at: string;
   profiles: {
     name: string;
     role: string;
+    member_type?: string | null;
   } | null;
   comments: Array<{ count: number }> | null;
   post_likes: Array<{ count: number }> | null;
@@ -66,6 +68,7 @@ export interface AnonPost {
   content: string;
   visibility: "public" | "members";
   is_notice: boolean;
+  is_pinned: boolean;
   image_urls: string[];
   created_at: string;
   updated_at: string;
@@ -75,28 +78,31 @@ export interface AnonPost {
 }
 
 export interface CreatePostParams {
-  board_type: "free" | "promo" | "anon";
+  board_type: "free" | "promo" | "anon" | "notice";
   title: string;
   content: string;
   visibility: "public" | "members";
   images: File[];
   is_notice?: boolean;
+  is_pinned?: boolean;
 }
 
 export const POSTS_PER_PAGE = 15;
+export const NOTICE_POSTS_PER_PAGE = 8;
 
 export async function fetchPosts(
-  boardType: "free" | "promo" | "anon",
+  boardType: "free" | "promo" | "anon" | "notice",
   page: number = 1,
-  search: string = ""
+  search: string = "",
+  pageSize: number = POSTS_PER_PAGE
 ): Promise<{ posts: Post[]; totalCount: number }> {
-  const from = (page - 1) * POSTS_PER_PAGE;
-  const to = from + POSTS_PER_PAGE - 1;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   if (boardType === "anon") {
     const { data, error } = await supabase.rpc("get_anon_posts_list", {
       p_page: page,
-      p_per_page: POSTS_PER_PAGE,
+      p_per_page: pageSize,
       p_search: search.trim(),
     });
     if (error) throw error;
@@ -106,11 +112,16 @@ export async function fetchPosts(
 
   let query = supabase
     .from("posts")
-    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)", { count: "exact" })
+    .select("*, profiles!posts_author_id_fkey(name, role, member_type), comments(count), post_likes(count)", { count: "exact" })
     .eq("board_type", boardType)
-    .eq("is_notice", false)
     .order("created_at", { ascending: false })
     .range(from, to);
+
+  if (boardType === "notice") {
+    query = query.eq("is_pinned", false);
+  } else {
+    query = query.eq("is_notice", false);
+  }
 
   if (search.trim()) {
     query = query.ilike("title", `%${search.trim()}%`);
@@ -130,13 +141,33 @@ export async function fetchNoticePosts(boardType: "free" | "promo" | "anon"): Pr
 
   const { data, error } = await supabase
     .from("posts")
-    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)")
+    .select("*, profiles!posts_author_id_fkey(name, role, member_type), comments(count), post_likes(count)")
     .eq("board_type", boardType)
     .eq("is_notice", true)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
   return (data ?? []) as unknown as Post[];
+}
+
+export async function fetchPinnedPosts(): Promise<Post[]> {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*, profiles!posts_author_id_fkey(name, role, member_type), comments(count), post_likes(count)")
+    .eq("board_type", "notice")
+    .eq("is_pinned", true)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as unknown as Post[];
+}
+
+export async function togglePinPost(id: string, isPinned: boolean): Promise<void> {
+  const { error } = await supabase
+    .from("posts")
+    .update({ is_pinned: !isPinned })
+    .eq("id", id);
+  if (error) throw error;
 }
 
 export const MY_POSTS_PER_PAGE = 15;
@@ -151,7 +182,7 @@ export async function fetchMyPosts(
 
   let query = supabase
     .from("posts")
-    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)", { count: "exact" })
+    .select("*, profiles!posts_author_id_fkey(name, role, member_type), comments(count), post_likes(count)", { count: "exact" })
     .eq("author_id", authorId)
     .order("created_at", { ascending: false })
     .range(from, to);
@@ -174,7 +205,7 @@ export async function fetchAnonPost(id: string): Promise<AnonPost | null> {
 export async function fetchPost(id: string): Promise<Post> {
   const { data, error } = await supabase
     .from("posts")
-    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)")
+    .select("*, profiles!posts_author_id_fkey(name, role, member_type), comments(count), post_likes(count)")
     .eq("id", id)
     .single();
 
@@ -204,14 +235,12 @@ export async function togglePostLike(postId: string, userId: string): Promise<bo
 }
 
 export async function deletePost(id: string): Promise<void> {
-  // 먼저 image_urls 조회
   const { data: post } = await supabase
     .from("posts")
     .select("image_urls")
     .eq("id", id)
     .single();
 
-  // Storage 이미지 삭제
   if (post?.image_urls?.length) {
     const bucketUrl = supabase.storage.from("post-images").getPublicUrl("").data.publicUrl.replace(/\/$/, "");
     const paths = (post.image_urls as string[])
@@ -257,7 +286,7 @@ export async function updatePost(id: string, params: UpdatePostParams): Promise<
       image_urls: [...params.existingImageUrls, ...newUrls],
     })
     .eq("id", id)
-    .select("*, profiles!posts_author_id_fkey(name, role)")
+    .select("*, profiles!posts_author_id_fkey(name, role, member_type)")
     .single();
 
   if (error) throw error;
@@ -296,9 +325,10 @@ export async function createPost(
       author_id: authorId,
       visibility: params.visibility,
       is_notice: params.is_notice ?? false,
+      is_pinned: params.is_pinned ?? false,
       image_urls: imageUrls,
     })
-    .select("*, profiles!posts_author_id_fkey(name, role)")
+    .select("*, profiles!posts_author_id_fkey(name, role, member_type)")
     .single();
 
   if (error) throw error;

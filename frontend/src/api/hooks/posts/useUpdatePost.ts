@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updatePost, type UpdatePostParams } from "@/api/posts";
 
-export function useUpdatePost(boardType: "free" | "promo" | "anon") {
+export function useUpdatePost(boardType: "free" | "promo" | "anon" | "notice") {
   const queryClient = useQueryClient();
 
   return useMutation({
