@@ -21,15 +21,15 @@ const ICONS: Record<ToastType, string> = {
 };
 
 const STYLES: Record<ToastType, string> = {
-  success: "bg-surface-container-lowest text-on-surface border-outline-variant shadow-card",
-  error: "bg-surface-container-lowest text-on-surface border-outline-variant shadow-card",
-  info: "bg-surface-container-lowest text-on-surface border-outline-variant shadow-card",
+  success: "bg-emerald-500 text-white shadow-lg",
+  error: "bg-error text-white shadow-lg",
+  info: "bg-primary-container text-white shadow-lg",
 };
 
 const ICON_STYLES: Record<ToastType, string> = {
-  success: "text-emerald-500",
-  error: "text-error",
-  info: "text-primary-container",
+  success: "text-white",
+  error: "text-white",
+  info: "text-white",
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -54,7 +54,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-lg text-sm font-semibold animate-slide-up ${STYLES[toast.type]}`}
+            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold animate-slide-up ${STYLES[toast.type]}`}
           >
             <span className={`material-symbols-outlined text-[20px] shrink-0 ${ICON_STYLES[toast.type]}`}>
               {ICONS[toast.type]}
@@ -62,7 +62,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <span>{toast.message}</span>
             <button
               onClick={() => dismiss(toast.id)}
-              className="ml-1 text-on-surface-variant hover:text-on-surface transition-colors"
+              className="ml-1 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined text-[16px]">close</span>
             </button>
