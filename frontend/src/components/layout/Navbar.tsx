@@ -8,6 +8,7 @@ const navLinks = [
   { label: "공지사항", to: PATHS.NOTICE },
   { label: "선배님", to: PATHS.ALUMNI },
   { label: "사진첩", to: PATHS.GALLERY },
+  { label: "후원", to: PATHS.DONATE },
 ];
 
 const boardLinks = [

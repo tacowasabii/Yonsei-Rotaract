@@ -5,9 +5,10 @@ import { PATHS } from "@/routes/paths";
 import { ROLE_META } from "@/pages/admin/shared";
 
 const navItems = [
-  { to: PATHS.ADMIN,         label: "대시보드", icon: "dashboard",  end: true  },
-  { to: PATHS.ADMIN_PENDING, label: "가입 신청", icon: "person_add", end: false },
-  { to: PATHS.ADMIN_MEMBERS, label: "회원 관리", icon: "group",      end: false },
+  { to: PATHS.ADMIN,           label: "대시보드", icon: "dashboard",          end: true  },
+  { to: PATHS.ADMIN_PENDING,   label: "가입 신청", icon: "person_add",         end: false },
+  { to: PATHS.ADMIN_MEMBERS,   label: "회원 관리", icon: "group",              end: false },
+  { to: PATHS.ADMIN_DONATIONS, label: "후원 관리", icon: "volunteer_activism", end: false },
 ];
 
 export default function AdminLayout() {
