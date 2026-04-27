@@ -14,10 +14,13 @@ import Pagination from "@components/common/Pagination";
 
 export default function BoardPage() {
   const location = useLocation();
+  const isAnon  = location.pathname === "/board/anon";
   const isPromo = location.pathname === "/board/promo";
-  const boardType = isPromo ? "promo" : "free";
-  const boardLabel = isPromo ? "홍보게시판" : "자유게시판";
-  const boardDesc = isPromo
+  const boardType  = isAnon ? "anon" : isPromo ? "promo" : "free";
+  const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : "자유게시판";
+  const boardDesc  = isAnon
+    ? "익명으로 자유롭게 소통하는 공간입니다."
+    : isPromo
     ? "모집·홍보·나눔 등 공유하고 싶은 소식을 올려보세요."
     : "회원들과 자유롭게 소통하는 공간입니다.";
 
@@ -107,7 +110,7 @@ export default function BoardPage() {
                       <span className="truncate">{post.title}</span>
                     </div>
                   </td>
-                  <td className="py-4 px-4 text-center text-on-surface-variant hidden sm:table-cell">{post.profiles?.name ?? "—"}</td>
+                  <td className="py-4 px-4 text-center text-on-surface-variant hidden sm:table-cell">{isAnon ? "익명" : (post.profiles?.name ?? "—")}</td>
                   <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">{formatDate(post.created_at)}</td>
                 </tr>
               ))}
@@ -173,7 +176,7 @@ export default function BoardPage() {
                       </div>
                     </td>
                     <td className="py-4 px-4 text-center hidden sm:table-cell">
-                      <span className="text-on-surface-variant">{post.profiles?.name ?? "—"}</span>
+                      <span className="text-on-surface-variant">{isAnon ? "익명" : (post.profiles?.name ?? "—")}</span>
                     </td>
                     <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">
                       {formatDate(post.created_at)}

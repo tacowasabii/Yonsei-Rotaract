@@ -3,8 +3,10 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { formatDateTime } from "@/utils/date";
 import PageLayout from "@components/layout/PageLayout";
 import { usePost } from "@/api/hooks/posts/usePost";
+import { useAnonPost } from "@/api/hooks/posts/useAnonPost";
 import { useDeletePost } from "@/api/hooks/posts/useDeletePost";
 import { useComments } from "@/api/hooks/comments/useComments";
+import { useAnonComments } from "@/api/hooks/comments/useAnonComments";
 import { useCreateComment } from "@/api/hooks/comments/useCreateComment";
 import { useUpdateComment } from "@/api/hooks/comments/useUpdateComment";
 import { useDeleteComment } from "@/api/hooks/comments/useDeleteComment";
@@ -19,34 +21,47 @@ export default function BoardPostPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const isAnon  = location.pathname.includes("/anon/");
   const isPromo = location.pathname.includes("/promo/");
-  const boardType = isPromo ? "promo" : "free";
-  const boardLabel = isPromo ? "홍보게시판" : "자유게시판";
+  const boardType  = isAnon ? "anon" : isPromo ? "promo" : "free";
+  const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : "자유게시판";
 
   const { user } = useAuth();
-  const { data: post, isLoading, isError } = usePost(id);
-  const { mutate: deletePost, isPending: isDeleting } =
-    useDeletePost(boardType);
-  const { data: comments = [], isLoading: isCommentsLoading } = useComments(id);
-  const { mutate: createComment, isPending: isCreating } = useCreateComment(
-    id ?? "",
-  );
-  const { mutate: updateComment, isPending: isUpdating } = useUpdateComment(
-    id ?? "",
-  );
+
+  // 일반 게시판 데이터 (anon일 때 비활성)
+  const { data: post, isLoading: isPostLoading, isError: isPostError } = usePost(isAnon ? undefined : id);
+  // 익명 게시판 데이터 (anon일 때만 활성) — author_id/name 미포함
+  const { data: anonPost, isLoading: isAnonLoading, isError: isAnonError } = useAnonPost(isAnon ? id : undefined);
+  const { data: comments = [], isLoading: isCommentsLoading } = useComments(isAnon ? undefined : id);
+  const { data: anonComments = [], isLoading: isAnonCommentsLoading } = useAnonComments(isAnon ? id : undefined);
+
+  const isLoading = isAnon ? isAnonLoading : isPostLoading;
+  const isError   = isAnon ? isAnonError  : isPostError;
+  const resolvedComments      = isAnon ? anonComments : comments;
+  const resolvedCommentsLoading = isAnon ? isAnonCommentsLoading : isCommentsLoading;
+
+  const { mutate: deletePost, isPending: isDeleting } = useDeletePost(boardType);
+  const { mutate: createComment, isPending: isCreating } = useCreateComment(id ?? "");
+  const { mutate: updateComment, isPending: isUpdating } = useUpdateComment(id ?? "");
   const { mutate: deleteComment } = useDeleteComment(id ?? "");
 
   const { liked, toggle: toggleLike } = usePostLike(id);
-  const likeCount = post?.post_likes?.[0]?.count ?? 0;
+  const likeCount = isAnon
+    ? (anonPost?.like_count ?? 0)
+    : (post?.post_likes?.[0]?.count ?? 0);
+
   const [commentText, setCommentText] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
-  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
-    null,
-  );
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
 
-  const isAuthor = !!user && !!post && user.id === post.author_id;
+  const isAuthor = isAnon
+    ? (anonPost?.is_mine ?? false)
+    : (!!user && !!post && user.id === post.author_id);
+
+  // 공통 필드만 사용하는 resolved 뷰 — author_id/profiles 불포함
+  const resolvedPost = isAnon ? anonPost : post;
 
   const handleCreateComment = () => {
     const trimmed = commentText.trim();
@@ -104,27 +119,27 @@ export default function BoardPostPage() {
         </div>
       )}
 
-      {post && !user && post.visibility === "members" && (
+      {resolvedPost && !user && resolvedPost.visibility === "members" && (
         <div className="bg-white rounded-2xl shadow-card overflow-hidden">
           <div className="px-8 pt-8 pb-6 border-b border-surface-container">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-fixed text-primary-container">
                 {boardLabel}
               </span>
-              {post.is_notice && (
+              {resolvedPost.is_notice && (
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-white">
                   공지
                 </span>
               )}
               <span className="text-xs text-on-surface-variant">
-                #{post.post_number}
+                #{resolvedPost.post_number}
               </span>
             </div>
             <h1 className="text-2xl font-black text-on-surface font-headline leading-snug mb-1">
-              {post.title}
+              {resolvedPost.title}
             </h1>
             <p className="text-sm text-on-surface-variant">
-              {formatDateTime(post.created_at)}
+              {formatDateTime(resolvedPost.created_at)}
             </p>
           </div>
           <div className="px-8 py-16 flex flex-col items-center gap-4 text-center">
@@ -154,7 +169,7 @@ export default function BoardPostPage() {
         </div>
       )}
 
-      {post && (user || post.visibility === "public") && (
+      {resolvedPost && (user || resolvedPost.visibility === "public") && (
         <div>
           <div className="bg-white rounded-2xl shadow-card overflow-hidden">
             {/* Header */}
@@ -163,17 +178,17 @@ export default function BoardPostPage() {
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-fixed text-primary-container">
                   {boardLabel}
                 </span>
-                {post.is_notice && (
+                {resolvedPost.is_notice && (
                   <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-white">
                     공지
                   </span>
                 )}
                 <span className="text-xs text-on-surface-variant">
-                  #{post.post_number}
+                  #{resolvedPost.post_number}
                 </span>
               </div>
               <h1 className="text-2xl font-black text-on-surface font-headline leading-snug mb-4">
-                {post.title}
+                {resolvedPost.title}
               </h1>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -182,10 +197,10 @@ export default function BoardPostPage() {
                   </div>
                   <div>
                     <span className="text-sm font-semibold text-on-surface">
-                      {post.profiles?.name ?? "알 수 없음"}
+                      {isAnon ? "익명" : (post?.profiles?.name ?? "알 수 없음")}
                     </span>
                     <p className="text-xs text-on-surface-variant">
-                      {formatDateTime(post.created_at)}
+                      {formatDateTime(resolvedPost.created_at)}
                     </p>
                   </div>
                 </div>
@@ -220,12 +235,12 @@ export default function BoardPostPage() {
             {/* Body */}
             <div className="px-8 py-8 min-h-37.5">
               <p className="text-on-surface leading-relaxed whitespace-pre-line text-[15px]">
-                {post.content}
+                {resolvedPost.content}
               </p>
 
-              {post.image_urls && post.image_urls.length > 0 && (
+              {resolvedPost.image_urls && resolvedPost.image_urls.length > 0 && (
                 <div className="mt-6 flex flex-col gap-3">
-                  {post.image_urls.map((url, i) => (
+                  {resolvedPost.image_urls.map((url, i) => (
                     <img
                       key={i}
                       src={url}
@@ -260,7 +275,7 @@ export default function BoardPostPage() {
                 </button>
                 <span className="flex items-center gap-1.5 text-sm text-on-surface-variant">
                   <ChatBubbleIcon className="w-4.5 h-4.5" />
-                  댓글 {comments.length}
+                  댓글 {resolvedComments.length}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-sm text-on-surface-variant">
@@ -279,7 +294,7 @@ export default function BoardPostPage() {
 
             {/* 댓글 목록 */}
             <div className="divide-y divide-surface-container">
-              {isCommentsLoading &&
+              {resolvedCommentsLoading &&
                 Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="px-8 py-4 animate-pulse flex gap-3">
                     <div className="w-9 h-9 rounded-full bg-surface-container shrink-0" />
@@ -291,17 +306,23 @@ export default function BoardPostPage() {
                   </div>
                 ))}
 
-              {!isCommentsLoading && comments.length === 0 && (
+              {!resolvedCommentsLoading && resolvedComments.length === 0 && (
                 <div className="px-8 py-10 text-center text-sm text-on-surface-variant">
                   아직 댓글이 없습니다.
                 </div>
               )}
 
-              {!isCommentsLoading &&
-                comments.map((comment) => {
-                    const isCommentAuthor =
-                      !!user && user.id === comment.author_id;
-                    const canDelete = isCommentAuthor || isAuthor;
+              {!resolvedCommentsLoading &&
+                resolvedComments.map((comment) => {
+                    const isCommentAuthor = 'is_mine' in comment
+                      ? comment.is_mine
+                      : (!!user && user.id === comment.author_id);
+                    const canDelete = 'can_delete' in comment
+                      ? comment.can_delete
+                      : (isCommentAuthor || isAuthor);
+                    const displayName = 'anon_label' in comment
+                      ? comment.anon_label
+                      : (comment.profiles?.name ?? "알 수 없음");
                     const isEditingThis = editingId === comment.id;
 
                     return (
@@ -315,7 +336,7 @@ export default function BoardPostPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-bold text-on-surface">
-                              {comment.profiles?.name ?? "알 수 없음"}
+                              {displayName}
                             </span>
                             <div className="flex items-center gap-0.5 shrink-0">
                               {isCommentAuthor && (

@@ -10,6 +10,23 @@ export interface Comment {
   profiles: { name: string } | null;
 }
 
+export interface AnonComment {
+  id: string;
+  post_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  anon_label: string;
+  is_mine: boolean;
+  can_delete: boolean;
+}
+
+export async function fetchAnonComments(postId: string): Promise<AnonComment[]> {
+  const { data, error } = await supabase.rpc("get_anon_comments", { p_post_id: postId });
+  if (error) throw error;
+  return (data ?? []) as AnonComment[];
+}
+
 export async function fetchComments(postId: string): Promise<Comment[]> {
   const { data, error } = await supabase
     .from("comments")

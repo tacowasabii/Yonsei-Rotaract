@@ -19,6 +19,10 @@ export const PATHS = {
   BOARD_PROMO_WRITE: "/board/promo/write",
   BOARD_PROMO_POST: "/board/promo/:id",
   BOARD_PROMO_EDIT: "/board/promo/:id/edit",
+  BOARD_ANON: "/board/anon",
+  BOARD_ANON_WRITE: "/board/anon/write",
+  BOARD_ANON_POST: "/board/anon/:id",
+  BOARD_ANON_EDIT: "/board/anon/:id/edit",
 
   // 인증
   LOGIN: "/login",

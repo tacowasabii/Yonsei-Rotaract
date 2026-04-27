@@ -16,9 +16,10 @@ export default function BoardWritePage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
 
+  const isAnon  = location.pathname.includes("/anon/");
   const isPromo = location.pathname.includes("/promo/");
-  const boardType = isPromo ? "promo" : "free";
-  const boardLabel = isPromo ? "홍보게시판" : "자유게시판";
+  const boardType  = isAnon ? "anon" : isPromo ? "promo" : "free";
+  const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : "자유게시판";
   const isEditMode = location.pathname.endsWith("/edit") && !!id;
 
   const { profile } = useAuth();
@@ -234,7 +235,7 @@ export default function BoardWritePage() {
               </div>
               <div>
                 <div className="flex items-center gap-1">
-                  <span className="font-bold text-on-surface">{profile?.name ?? "—"}</span>
+                  <span className="font-bold text-on-surface">{isAnon ? "익명" : (profile?.name ?? "—")}</span>
                   {profile?.status === "active" && (
                     <span className="material-symbols-outlined text-sm text-surface-tint" style={{ fontVariationSettings: '"FILL" 1' }}>
                       verified

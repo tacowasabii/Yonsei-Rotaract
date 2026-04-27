@@ -37,7 +37,7 @@ function compressImage(file: File): Promise<Blob> {
 export interface Post {
   id: string;
   post_number: number;
-  board_type: "free" | "promo";
+  board_type: "free" | "promo" | "anon";
   title: string;
   content: string;
   author_id: string;
@@ -54,8 +54,24 @@ export interface Post {
   post_likes: Array<{ count: number }> | null;
 }
 
+export interface AnonPost {
+  id: string;
+  post_number: number;
+  board_type: "anon";
+  title: string;
+  content: string;
+  visibility: "public" | "members";
+  is_notice: boolean;
+  image_urls: string[];
+  created_at: string;
+  updated_at: string;
+  is_mine: boolean;
+  comment_count: number;
+  like_count: number;
+}
+
 export interface CreatePostParams {
-  board_type: "free" | "promo";
+  board_type: "free" | "promo" | "anon";
   title: string;
   content: string;
   visibility: "public" | "members";
@@ -66,16 +82,20 @@ export interface CreatePostParams {
 export const POSTS_PER_PAGE = 15;
 
 export async function fetchPosts(
-  boardType: "free" | "promo",
+  boardType: "free" | "promo" | "anon",
   page: number = 1,
   search: string = ""
 ): Promise<{ posts: Post[]; totalCount: number }> {
   const from = (page - 1) * POSTS_PER_PAGE;
   const to = from + POSTS_PER_PAGE - 1;
 
+  const selectFields = boardType === "anon"
+    ? "id, post_number, board_type, title, content, visibility, is_notice, image_urls, created_at, updated_at, comments(count), post_likes(count)"
+    : "*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)";
+
   let query = supabase
     .from("posts")
-    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)", { count: "exact" })
+    .select(selectFields, { count: "exact" })
     .eq("board_type", boardType)
     .eq("is_notice", false)
     .order("created_at", { ascending: false })
@@ -87,19 +107,23 @@ export async function fetchPosts(
 
   const { data, error, count } = await query;
   if (error) throw error;
-  return { posts: (data ?? []) as Post[], totalCount: count ?? 0 };
+  return { posts: (data ?? []) as unknown as Post[], totalCount: count ?? 0 };
 }
 
-export async function fetchNoticePosts(boardType: "free" | "promo"): Promise<Post[]> {
+export async function fetchNoticePosts(boardType: "free" | "promo" | "anon"): Promise<Post[]> {
+  const selectFields = boardType === "anon"
+    ? "id, post_number, board_type, title, content, visibility, is_notice, image_urls, created_at, updated_at, comments(count), post_likes(count)"
+    : "*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)";
+
   const { data, error } = await supabase
     .from("posts")
-    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)")
+    .select(selectFields)
     .eq("board_type", boardType)
     .eq("is_notice", true)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return (data ?? []) as Post[];
+  return (data ?? []) as unknown as Post[];
 }
 
 export const MY_POSTS_PER_PAGE = 15;
@@ -126,6 +150,12 @@ export async function fetchMyPosts(
   const { data, error, count } = await query;
   if (error) throw error;
   return { posts: (data ?? []) as Post[], totalCount: count ?? 0 };
+}
+
+export async function fetchAnonPost(id: string): Promise<AnonPost | null> {
+  const { data, error } = await supabase.rpc("get_anon_post", { p_post_id: id });
+  if (error) throw error;
+  return (data as AnonPost[])?.[0] ?? null;
 }
 
 export async function fetchPost(id: string): Promise<Post> {

@@ -66,6 +66,10 @@ export const router = createBrowserRouter([
       { path: PATHS.BOARD_PROMO_WRITE, element: <BoardWritePage /> },
       { path: PATHS.BOARD_PROMO_POST,  element: <BoardPostPage /> },
       { path: PATHS.BOARD_PROMO_EDIT,  element: <BoardWritePage /> },
+      { path: PATHS.BOARD_ANON,        element: <BoardPage /> },
+      { path: PATHS.BOARD_ANON_WRITE,  element: <BoardWritePage /> },
+      { path: PATHS.BOARD_ANON_POST,   element: <BoardPostPage /> },
+      { path: PATHS.BOARD_ANON_EDIT,   element: <BoardWritePage /> },
 
       // 후원
       { path: PATHS.DONATE, element: <DonatePage /> },

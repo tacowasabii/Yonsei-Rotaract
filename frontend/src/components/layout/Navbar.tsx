@@ -14,6 +14,7 @@ const navLinks = [
 const boardLinks = [
   { label: "자유게시판", to: PATHS.BOARD_FREE },
   { label: "홍보게시판", to: PATHS.BOARD_PROMO },
+  { label: "익명게시판", to: PATHS.BOARD_ANON },
 ];
 
 export default function Navbar() {

@@ -9,6 +9,7 @@ export function useUpdateComment(postId: string) {
       updateComment(id, content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      queryClient.invalidateQueries({ queryKey: ["anon_comments", postId] });
     },
   });
 }
