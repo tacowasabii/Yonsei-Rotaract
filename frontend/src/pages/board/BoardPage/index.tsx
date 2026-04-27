@@ -112,7 +112,9 @@ export default function BoardPage() {
                     </div>
                   </td>
                   <td className="py-4 px-4 text-center text-on-surface-variant hidden sm:table-cell">
-                    {isAnon ? "익명" : (
+                    {isAnon ? (
+                      post.is_mine ? "익명(나)" : "익명"
+                    ) : (
                       <div className="flex items-center justify-center gap-1.5">
                         <span>{post.profiles?.name ?? "—"}</span>
                         <RoleBadge role={post.profiles?.role} />
@@ -157,8 +159,8 @@ export default function BoardPage() {
 
               {/* 게시글 목록 */}
               {!isLoading && posts.map((post) => {
-                const commentCount = post.comments?.[0]?.count ?? 0;
-                const likeCount = post.post_likes?.[0]?.count ?? 0;
+                const commentCount = post.comments?.[0]?.count ?? post.comment_count ?? 0;
+                const likeCount = post.post_likes?.[0]?.count ?? post.like_count ?? 0;
                 return (
                   <tr
                     key={post.id}
@@ -185,7 +187,9 @@ export default function BoardPage() {
                     </td>
                     <td className="py-4 px-4 text-center hidden sm:table-cell">
                       {isAnon ? (
-                        <span className="text-on-surface-variant">익명</span>
+                        <span className="text-on-surface-variant">
+                          {post.is_mine ? "익명(나)" : "익명"}
+                        </span>
                       ) : (
                         <div className="flex items-center justify-center gap-1.5">
                           <span className="text-on-surface-variant">{post.profiles?.name ?? "—"}</span>

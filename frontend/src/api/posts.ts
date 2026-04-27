@@ -52,6 +52,10 @@ export interface Post {
   } | null;
   comments: Array<{ count: number }> | null;
   post_likes: Array<{ count: number }> | null;
+  // anon board RPC 전용 필드
+  is_mine?: boolean;
+  comment_count?: number;
+  like_count?: number;
 }
 
 export interface AnonPost {
@@ -89,13 +93,20 @@ export async function fetchPosts(
   const from = (page - 1) * POSTS_PER_PAGE;
   const to = from + POSTS_PER_PAGE - 1;
 
-  const selectFields = boardType === "anon"
-    ? "id, post_number, board_type, title, content, visibility, is_notice, image_urls, created_at, updated_at, comments(count), post_likes(count)"
-    : "*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)";
+  if (boardType === "anon") {
+    const { data, error } = await supabase.rpc("get_anon_posts_list", {
+      p_page: page,
+      p_per_page: POSTS_PER_PAGE,
+      p_search: search.trim(),
+    });
+    if (error) throw error;
+    const rows = (data ?? []) as Array<Post & { total_count: number }>;
+    return { posts: rows, totalCount: rows[0]?.total_count ?? 0 };
+  }
 
   let query = supabase
     .from("posts")
-    .select(selectFields, { count: "exact" })
+    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)", { count: "exact" })
     .eq("board_type", boardType)
     .eq("is_notice", false)
     .order("created_at", { ascending: false })
@@ -111,13 +122,15 @@ export async function fetchPosts(
 }
 
 export async function fetchNoticePosts(boardType: "free" | "promo" | "anon"): Promise<Post[]> {
-  const selectFields = boardType === "anon"
-    ? "id, post_number, board_type, title, content, visibility, is_notice, image_urls, created_at, updated_at, comments(count), post_likes(count)"
-    : "*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)";
+  if (boardType === "anon") {
+    const { data, error } = await supabase.rpc("get_anon_notice_posts");
+    if (error) throw error;
+    return (data ?? []) as unknown as Post[];
+  }
 
   const { data, error } = await supabase
     .from("posts")
-    .select(selectFields)
+    .select("*, profiles!posts_author_id_fkey(name, role), comments(count), post_likes(count)")
     .eq("board_type", boardType)
     .eq("is_notice", true)
     .order("created_at", { ascending: false });
