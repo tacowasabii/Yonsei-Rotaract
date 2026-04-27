@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { PATHS } from "@/routes/paths";
+import PageLayout from "@components/layout/PageLayout";
+import PageHeader from "@components/layout/PageHeader";
+import { FavoriteFillIcon, PersonIcon } from "@assets/icons";
 import DonationFormModal from "./components/DonationFormModal";
 
 interface DonationEntry {
@@ -18,6 +21,29 @@ interface DonationEntry {
 }
 
 const MOCK_DONATIONS: DonationEntry[] = [
+  // 2026
+  {
+    id: "7",
+    is_anonymous: false,
+    message: "올해도 로타랙트와 함께합니다!",
+    approved_at: "2026-01-10T10:00:00Z",
+    profile: { name: "정다은", department: "간호학과", admission_year: 2022, generation: "37기" },
+  },
+  {
+    id: "8",
+    is_anonymous: true,
+    message: "늘 응원합니다.",
+    approved_at: "2026-02-14T10:00:00Z",
+    profile: null,
+  },
+  {
+    id: "9",
+    is_anonymous: false,
+    message: null,
+    approved_at: "2026-03-05T10:00:00Z",
+    profile: { name: "한승우", department: "전기전자공학과", admission_year: 2021, generation: "36기" },
+  },
+  // 2025
   {
     id: "1",
     is_anonymous: false,
@@ -62,6 +88,12 @@ const MOCK_DONATIONS: DonationEntry[] = [
   },
 ];
 
+const CURRENT_YEAR = new Date().getFullYear();
+
+const YEARS = Array.from(
+  new Set(MOCK_DONATIONS.map((d) => new Date(d.approved_at).getFullYear()))
+).sort((a, b) => b - a);
+
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
@@ -71,6 +103,11 @@ export default function DonatePage() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
+
+  const filtered = MOCK_DONATIONS.filter(
+    (d) => new Date(d.approved_at).getFullYear() === selectedYear
+  );
 
   function handleDonateClick() {
     if (!profile) {
@@ -81,88 +118,103 @@ export default function DonatePage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-16">
-      {/* 히어로 배너 */}
-      <header className="p-8 md:p-10 rounded-3xl bg-linear-to-br from-primary to-primary-container relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute -top-1/2 -left-1/5 w-[150%] h-[150%] bg-[radial-gradient(circle,white_1px,transparent_1px)] bg-size-[20px_20px]" />
-        </div>
-        <div className="relative z-10 text-white">
-          <div className="flex items-center gap-2.5 mb-3">
-            <span
-              className="material-symbols-outlined text-3xl"
-              style={{ fontVariationSettings: '"FILL" 1' }}
-            >
-              favorite
-            </span>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight font-headline">
-              명예의 전당
-            </h1>
-          </div>
-          <p className="text-on-primary-container text-base opacity-90 max-w-xl mb-6">
-            연세 로타랙트는 오직 후원금으로 운영됩니다. 소중한 후원으로
-            함께해 주신 분들을 기억합니다.
-          </p>
-
-          {/* 계좌 안내 */}
-          <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur rounded-2xl px-5 py-3 mb-6">
-            <span className="material-symbols-outlined text-xl">
-              account_balance
-            </span>
-            <div>
-              <p className="text-xs font-bold opacity-60 mb-0.5">후원 계좌</p>
-              <p className="text-sm font-black tracking-wide">
-                신한은행 110-000-000000
-              </p>
-              <p className="text-xs opacity-60">예금주: 연세대학교 로타랙트</p>
-            </div>
-          </div>
-
-          <div>
-            <button
-              onClick={handleDonateClick}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary-container font-black rounded-2xl shadow-lg hover:opacity-90 active:scale-95 transition-all text-sm"
-            >
-              <span
-                className="material-symbols-outlined text-lg"
-                style={{ fontVariationSettings: '"FILL" 1' }}
-              >
-                volunteer_activism
-              </span>
-              후원 신청하기
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* 후원자 목록 */}
-      <section>
-        <div className="flex items-center gap-2 mb-5">
+    <PageLayout>
+      <PageHeader
+        iconNode={<FavoriteFillIcon />}
+        title="명예의 전당"
+        subtitle="연세 로타랙트는 오직 후원금으로 운영됩니다. 소중한 후원으로 함께해 주신 분들을 기억합니다."
+      >
+        <button
+          onClick={handleDonateClick}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-2xl shadow-card hover:opacity-90 active:scale-95 transition-all text-sm shrink-0"
+        >
           <span
-            className="material-symbols-outlined text-primary-container"
+            className="material-symbols-outlined text-lg"
             style={{ fontVariationSettings: '"FILL" 1' }}
           >
-            workspace_premium
+            volunteer_activism
           </span>
-          <h2 className="text-lg font-black font-headline text-on-surface">
-            후원자 명단
-          </h2>
-          <span className="ml-auto text-sm text-on-surface-variant">
-            {MOCK_DONATIONS.length}명이 함께하고 있습니다
+          후원 신청하기
+        </button>
+      </PageHeader>
+
+      {/* 계좌 안내 배너 */}
+      <div className="flex items-center gap-4 bg-primary-fixed/30 border border-primary-fixed rounded-2xl px-6 py-4 mb-8">
+        <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+          <span className="material-symbols-outlined text-white text-xl">
+            account_balance
           </span>
         </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-primary-container mb-0.5">
+            후원 계좌
+          </p>
+          <p className="font-black text-primary-container tracking-wide">
+            신한은행 110-000-000000
+          </p>
+          <p className="text-xs text-on-surface-variant">
+            예금주: 연세대학교 로타랙트
+          </p>
+        </div>
+        <p className="text-xs text-on-surface-variant text-right hidden sm:block leading-relaxed">
+          입금 후 후원 신청하시면
+          <br />
+          관리자 확인 후 등록됩니다
+        </p>
+      </div>
 
+      {/* 연도 필터 */}
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        {YEARS.map((year) => (
+          <button
+            key={year}
+            onClick={() => setSelectedYear(year)}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+              selectedYear === year
+                ? "bg-primary-container text-white"
+                : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+            }`}
+          >
+            {year}년
+          </button>
+        ))}
+      </div>
+
+      {/* 후원자 목록 */}
+      <div className="flex items-center gap-2 mb-5">
+        <span
+          className="material-symbols-outlined text-primary-container"
+          style={{ fontVariationSettings: '"FILL" 1' }}
+        >
+          workspace_premium
+        </span>
+        <h2 className="text-lg font-black font-headline text-on-surface">
+          {selectedYear}년 후원자 명단
+        </h2>
+        <span className="ml-auto text-sm text-on-surface-variant">
+          {filtered.length}명
+        </span>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-2">
+          <span className="material-symbols-outlined text-4xl">inbox</span>
+          <p className="text-sm font-semibold">
+            {selectedYear}년 후원자가 없습니다
+          </p>
+        </div>
+      ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {MOCK_DONATIONS.map((d) => (
+          {filtered.map((d) => (
             <DonationCard key={d.id} donation={d} />
           ))}
         </div>
-      </section>
+      )}
 
       {showModal && (
         <DonationFormModal onClose={() => setShowModal(false)} />
       )}
-    </div>
+    </PageLayout>
   );
 }
 
@@ -184,25 +236,18 @@ function DonationCard({ donation }: { donation: DonationEntry }) {
       : null;
 
   return (
-    <div className="bg-surface-container-lowest rounded-2xl shadow-card p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
+    <div className="bg-surface-container-lowest rounded-2xl shadow-card p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-0.5 transition-all">
       <div className="flex items-center gap-3">
         <div
           className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
             is_anonymous ? "bg-surface-container" : "bg-primary-fixed"
           }`}
         >
-          <span
-            className={`material-symbols-outlined text-lg ${
-              is_anonymous ? "text-on-surface-variant" : "text-primary-container"
-            }`}
-            style={
-              is_anonymous
-                ? undefined
-                : { fontVariationSettings: '"FILL" 1' }
-            }
-          >
-            {is_anonymous ? "person" : "favorite"}
-          </span>
+          {is_anonymous ? (
+            <PersonIcon className="w-5 h-5 text-on-surface-variant" />
+          ) : (
+            <FavoriteFillIcon className="w-5 h-5 text-primary-container" />
+          )}
         </div>
         <div className="min-w-0">
           <p className="font-bold text-on-surface truncate">{displayName}</p>
