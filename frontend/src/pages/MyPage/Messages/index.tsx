@@ -226,7 +226,7 @@ export default function MyMessages() {
             ))
           )}
         </div>
-        {totalPages > 1 && (
+        {totalPages >= 1 && (
           <div className="flex justify-center pt-4">
             <Pagination page={page} totalPages={totalPages} onChange={setPage} />
           </div>
