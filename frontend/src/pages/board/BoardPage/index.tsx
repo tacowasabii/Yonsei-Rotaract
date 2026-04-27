@@ -54,7 +54,7 @@ export default function BoardPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="검색어를 입력하세요..."
+            placeholder="제목을 입력하세요..."
             className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-container/30 transition-all placeholder:text-on-surface-variant shadow-card"
           />
         </div>
