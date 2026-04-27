@@ -192,21 +192,15 @@ export default function BoardPostPage() {
                 {resolvedPost.title}
               </h1>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center">
-                    <PersonIcon className="w-4 h-4 text-primary-container" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-semibold text-on-surface">
-                        {isAnon ? "익명" : (post?.profiles?.name ?? "알 수 없음")}
-                      </span>
-                      {!isAnon && <RoleBadge role={post?.profiles?.role} />}
-                    </div>
-                    <p className="text-xs text-on-surface-variant">
-                      {formatDateTime(resolvedPost.created_at)}
-                    </p>
-                  </div>
+                <div className="flex items-end gap-1.5">
+                  <span className="text-sm font-semibold text-on-surface">
+                    {isAnon ? "익명" : (post?.profiles?.name ?? "알 수 없음")}
+                  </span>
+                  {!isAnon && <RoleBadge role={post?.profiles?.role} />}
+                  <span className="text-xs text-on-surface-variant">·</span>
+                  <span className="text-xs text-on-surface-variant">
+                    {formatDateTime(resolvedPost.created_at)}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
                   {/* 수정/삭제 버튼 (작성자만) */}
