@@ -17,6 +17,7 @@ export function usePostLike(postId: string | undefined) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["postLike", postId, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
+      queryClient.invalidateQueries({ queryKey: ["anon_post", postId] });
     },
   });
 
