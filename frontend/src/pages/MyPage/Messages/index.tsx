@@ -48,10 +48,17 @@ function MessageRow({ message, box, isExpanded, userId, onToggle, onReply }: Mes
     }
   }
 
-  const counterpart =
-    box === "received"
-      ? (message.sender?.name ?? "알 수 없음")
-      : (message.recipient?.name ?? "알 수 없음");
+  const counterpartProfile = box === "received" ? message.sender : message.recipient;
+  const counterpart = counterpartProfile?.name ?? "알 수 없음";
+  const counterpartSub = [
+    counterpartProfile?.department,
+    counterpartProfile?.admission_year
+      ? `${String(counterpartProfile.admission_year).slice(-2)}학번`
+      : null,
+    counterpartProfile?.generation ?? null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div className={`border-b border-outline-variant/30 last:border-0 transition-colors ${isExpanded ? "bg-surface-container/40" : "hover:bg-surface-container/30"}`}>
@@ -67,6 +74,9 @@ function MessageRow({ message, box, isExpanded, userId, onToggle, onReply }: Mes
             <span className={`text-sm ${isUnread ? "font-black text-on-surface" : "font-semibold text-on-surface"}`}>
               {counterpart}
             </span>
+            {counterpartSub && (
+              <span className="text-xs text-on-surface-variant">{counterpartSub}</span>
+            )}
             {isUnread && (
               <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
             )}

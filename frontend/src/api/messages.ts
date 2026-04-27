@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import type { Message, MemberSearchResult } from "./types/message";
 
 const MESSAGE_SELECT =
-  "*, sender:profiles!messages_sender_id_fkey(name), recipient:profiles!messages_recipient_id_fkey(name)";
+  "*, sender:profiles!messages_sender_id_fkey(name, department, admission_year, generation), recipient:profiles!messages_recipient_id_fkey(name, department, admission_year, generation)";
 
 export async function fetchReceivedMessages(userId: string): Promise<Message[]> {
   const { data, error } = await supabase
