@@ -8,8 +8,8 @@ export interface Message {
   is_deleted_by_sender: boolean;
   is_deleted_by_recipient: boolean;
   created_at: string;
-  sender: { name: string; department?: string | null; admission_year?: number | null; generation?: string | null } | null;
-  recipient: { name: string; department?: string | null; admission_year?: number | null; generation?: string | null } | null;
+  sender: { name: string; department?: string | null; admission_year?: number | null; generation?: string | null; role?: string | null } | null;
+  recipient: { name: string; department?: string | null; admission_year?: number | null; generation?: string | null; role?: string | null } | null;
 }
 
 export interface MemberSearchResult {
@@ -18,4 +18,5 @@ export interface MemberSearchResult {
   department?: string | null;
   admission_year?: number | null;
   generation?: string | null;
+  role?: string | null;
 }

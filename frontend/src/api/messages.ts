@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import type { Message, MemberSearchResult } from "./types/message";
 
 const MESSAGE_SELECT =
-  "*, sender:profiles!messages_sender_id_fkey(name, department, admission_year, generation), recipient:profiles!messages_recipient_id_fkey(name, department, admission_year, generation)";
+  "*, sender:profiles!messages_sender_id_fkey(name, department, admission_year, generation, role), recipient:profiles!messages_recipient_id_fkey(name, department, admission_year, generation, role)";
 
 export async function fetchReceivedMessages(userId: string): Promise<Message[]> {
   const { data, error } = await supabase
@@ -77,14 +77,23 @@ export async function deleteMessageByRecipient(messageId: string): Promise<void>
   if (error) throw error;
 }
 
+const ROLE_SEARCH_MAP: Record<string, string> = { "운영진": "staff", "관리자": "admin" };
+
 export async function searchMembers(query: string): Promise<MemberSearchResult[]> {
   if (!query.trim()) return [];
-  const { data, error } = await supabase
+  const mappedRole = ROLE_SEARCH_MAP[query.trim()];
+  let qb = supabase
     .from("profiles")
-    .select("id, name, department, admission_year, generation")
+    .select("id, name, department, admission_year, generation, role")
     .eq("status", "active")
-    .ilike("name", `%${query.trim()}%`)
+    .neq("role", "super_admin")
     .limit(10);
+  if (mappedRole) {
+    qb = qb.or(`name.ilike.%${query.trim()}%,role.eq.${mappedRole}`);
+  } else {
+    qb = qb.ilike("name", `%${query.trim()}%`);
+  }
+  const { data, error } = await qb;
   if (error) throw error;
   return (data ?? []) as MemberSearchResult[];
 }

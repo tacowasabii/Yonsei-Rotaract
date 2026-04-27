@@ -4,6 +4,7 @@ import { useSendMessage, useSearchMembers } from "@/api/hooks/messages/useMessag
 import type { MemberSearchResult } from "@/api/types/message";
 import { CloseIcon } from "@assets/icons";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { ROLE_BADGE } from "@/utils/role";
 
 interface Props {
   senderId: string;
@@ -102,16 +103,23 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
                       onClick={() => handleSelectRecipient(m)}
                       className="w-full text-left px-4 py-3 hover:bg-surface-container transition-colors"
                     >
-                      <span className="text-sm font-semibold text-on-surface">{m.name}</span>
-                      <span className="ml-2 text-xs text-on-surface-variant">
-                        {[
-                          m.department,
-                          m.admission_year ? `${String(m.admission_year).slice(-2)}학번` : null,
-                          m.generation ?? null,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-semibold text-on-surface">{m.name}</span>
+                        {m.role && ROLE_BADGE[m.role] && (
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${ROLE_BADGE[m.role].color}`}>
+                            {ROLE_BADGE[m.role].label}
+                          </span>
+                        )}
+                        <span className="text-xs text-on-surface-variant">
+                          {[
+                            m.department,
+                            m.admission_year ? `${String(m.admission_year).slice(-2)}학번` : null,
+                            m.generation ?? null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
+                      </div>
                     </button>
                   ))
                 )}
