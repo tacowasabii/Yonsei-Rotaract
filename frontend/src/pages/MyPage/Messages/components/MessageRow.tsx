@@ -1,5 +1,5 @@
 import { formatDateTime } from "@/utils/date";
-import { ROLE_BADGE } from "@/utils/role";
+import RoleBadge from "@components/common/RoleBadge";
 import {
   useMarkAsRead,
   useDeleteMessage,
@@ -81,14 +81,7 @@ export default function MessageRow({
             >
               {counterpart}
             </span>
-            {counterpartProfile?.role &&
-              ROLE_BADGE[counterpartProfile.role] && (
-                <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${ROLE_BADGE[counterpartProfile.role].color}`}
-                >
-                  {ROLE_BADGE[counterpartProfile.role].label}
-                </span>
-              )}
+            <RoleBadge role={counterpartProfile?.role} />
             {counterpartSub && (
               <span className="text-xs text-on-surface-variant">
                 {counterpartSub}

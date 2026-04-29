@@ -1,23 +1,5 @@
-const ROLE_LABELS: Record<string, string> = {
-  user: "일반 회원",
-  staff: "운영진",
-  admin: "관리자",
-  super_admin: "최고 관리자",
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  user: "bg-surface-container text-on-surface-variant",
-  staff: "bg-secondary-fixed text-on-secondary-fixed",
-  admin: "bg-primary-fixed text-primary-container",
-  super_admin: "bg-error/10 text-error",
-};
-
-const ROLE_COLORS_DARK: Record<string, string> = {
-  user: "bg-white/15 text-white/70",
-  staff: "bg-white/25 text-white",
-  admin: "bg-white/30 text-white",
-  super_admin: "bg-error/60 text-white",
-};
+import { ROLE_LABELS, ROLE_COLORS, ROLE_COLORS_DARK } from "@/constants/roles";
+import type { AppRole } from "@/contexts/AuthContext";
 
 interface Props {
   role: string | null | undefined;
@@ -28,14 +10,14 @@ interface Props {
 }
 
 export default function RoleBadge({ role, showAll = false, variant = "light" }: Props) {
-  if (!role || !ROLE_LABELS[role]) return null;
+  if (!role || !(role in ROLE_LABELS)) return null;
   if (!showAll && role === "user") return null;
 
   const colors = variant === "dark" ? ROLE_COLORS_DARK : ROLE_COLORS;
 
   return (
-    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${colors[role]}`}>
-      {ROLE_LABELS[role]}
+    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${colors[role as AppRole]}`}>
+      {ROLE_LABELS[role as AppRole]}
     </span>
   );
 }

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { formatDate } from "@/utils/date";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
@@ -11,39 +11,42 @@ import { useIsLoggedIn, useIsStaff } from "@/contexts/AuthContext";
 import RoleBadge from "@components/common/RoleBadge";
 import { BOARD_PATHS } from "@/routes/paths";
 import Pagination from "@components/common/Pagination";
-
+import { useBoardType } from "@/hooks/useBoardType";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function BoardPage() {
-  const location = useLocation();
-  const isAnon  = location.pathname === "/board/anon";
-  const isPromo = location.pathname === "/board/promo";
-  const boardType  = isAnon ? "anon" : isPromo ? "promo" : "free";
-  const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : "자유게시판";
-  const boardDesc  = isAnon
-    ? "익명으로 자유롭게 소통하는 공간입니다."
-    : isPromo
-    ? "모집·홍보·나눔 등 공유하고 싶은 소식을 올려보세요."
-    : "회원들과 자유롭게 소통하는 공간입니다.";
-
   const navigate = useNavigate();
+  const { boardType, boardLabel, boardDesc, isAnon } = useBoardType();
   const isLoggedIn = useIsLoggedIn();
   const isStaff = useIsStaff();
+
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
+  const debouncedSearch = useDebounce(search, 300);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [search]);
-
+  type NonNoticeBoardType = "free" | "promo" | "anon";
   const { data, isLoading, isError } = usePosts(boardType, page, debouncedSearch);
-  const { data: noticePosts = [] } = useNoticePosts(boardType);
+  const { data: noticePosts = [] } = useNoticePosts(boardType as NonNoticeBoardType);
   const posts = data?.posts ?? [];
   const totalPages = Math.ceil((data?.totalCount ?? 0) / POSTS_PER_PAGE);
+
+  function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setSearch(e.target.value);
+    setPage(1);
+  }
+
+  function handlePageChange(p: number) {
+    setPage(p);
+    setSearch("");
+  }
+
+  function handleWriteClick() {
+    navigate(BOARD_PATHS.write(boardType));
+  }
+
+  function handleNoticeWriteClick() {
+    navigate(`${BOARD_PATHS.write(boardType)}?notice=true`);
+  }
 
   return (
     <PageLayout>
@@ -57,7 +60,7 @@ export default function BoardPage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={handleSearchChange}
             placeholder="제목을 입력하세요..."
             className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-container/30 transition-all placeholder:text-on-surface-variant shadow-card"
           />
@@ -65,7 +68,7 @@ export default function BoardPage() {
         <div className="flex items-center gap-2 shrink-0">
           {isStaff && (
             <button
-              onClick={() => navigate(`${BOARD_PATHS.write(boardType)}?notice=true`)}
+              onClick={handleNoticeWriteClick}
               className="flex items-center gap-2 px-5 py-2.5 bg-secondary-fixed text-primary-container font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
             >
               <span className="material-symbols-outlined text-[18px]">campaign</span>
@@ -74,10 +77,10 @@ export default function BoardPage() {
           )}
           {isLoggedIn && (
             <button
-              onClick={() => navigate(BOARD_PATHS.write(boardType))}
+              onClick={handleWriteClick}
               className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+              <span className="material-symbols-outlined text-[18px]">edit</span>
               글쓰기
             </button>
           )}
@@ -96,7 +99,6 @@ export default function BoardPage() {
               </tr>
             </thead>
             <tbody className="text-sm">
-              {/* 공지 */}
               {noticePosts.map((post) => (
                 <tr
                   key={post.id}
@@ -121,25 +123,23 @@ export default function BoardPage() {
                       </div>
                     )}
                   </td>
-                  <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">{formatDate(post.created_at)}</td>
+                  <td className="py-4 px-4 text-center text-on-surface-variant hidden md:table-cell">
+                    {formatDate(post.created_at)}
+                  </td>
                 </tr>
               ))}
 
               <tr><td colSpan={4} className="h-px bg-outline-variant/20 p-0" /></tr>
 
-              {/* 로딩 */}
-              {isLoading && (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="bg-white animate-pulse">
-                    <td className="py-4 px-4"><div className="h-4 bg-surface-container rounded mx-auto w-8" /></td>
-                    <td className="py-4 px-4"><div className="h-4 bg-surface-container rounded w-3/4" /></td>
-                    <td className="py-4 px-4 hidden sm:table-cell"><div className="h-4 bg-surface-container rounded mx-auto w-16" /></td>
-                    <td className="py-4 px-4 hidden md:table-cell"><div className="h-4 bg-surface-container rounded mx-auto w-16" /></td>
-                  </tr>
-                ))
-              )}
+              {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="bg-white animate-pulse">
+                  <td className="py-4 px-4"><div className="h-4 bg-surface-container rounded mx-auto w-8" /></td>
+                  <td className="py-4 px-4"><div className="h-4 bg-surface-container rounded w-3/4" /></td>
+                  <td className="py-4 px-4 hidden sm:table-cell"><div className="h-4 bg-surface-container rounded mx-auto w-16" /></td>
+                  <td className="py-4 px-4 hidden md:table-cell"><div className="h-4 bg-surface-container rounded mx-auto w-16" /></td>
+                </tr>
+              ))}
 
-              {/* 에러 */}
               {isError && (
                 <tr>
                   <td colSpan={4} className="py-12 text-center text-on-surface-variant text-sm">
@@ -148,7 +148,6 @@ export default function BoardPage() {
                 </tr>
               )}
 
-              {/* 데이터 없음 */}
               {!isLoading && !isError && posts.length === 0 && (
                 <tr>
                   <td colSpan={4} className="py-12 text-center text-on-surface-variant text-sm">
@@ -157,10 +156,9 @@ export default function BoardPage() {
                 </tr>
               )}
 
-              {/* 게시글 목록 */}
               {!isLoading && posts.map((post) => {
                 const commentCount = post.comments?.[0]?.count ?? post.comment_count ?? 0;
-                const likeCount = post.post_likes?.[0]?.count ?? post.like_count ?? 0;
+                const likeCount    = post.post_likes?.[0]?.count ?? post.like_count ?? 0;
                 return (
                   <tr
                     key={post.id}
@@ -208,7 +206,7 @@ export default function BoardPage() {
         </div>
 
         <div className="p-5 bg-surface-container-low flex justify-center">
-          <Pagination page={page} totalPages={totalPages} onChange={(p) => { setPage(p); setSearch(""); }} />
+          <Pagination page={page} totalPages={totalPages} onChange={handlePageChange} />
         </div>
       </div>
     </PageLayout>

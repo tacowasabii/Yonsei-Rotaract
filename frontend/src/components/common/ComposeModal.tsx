@@ -4,7 +4,7 @@ import { useSendMessage, useSearchMembers } from "@/api/hooks/messages/useMessag
 import type { MemberSearchResult } from "@/api/types/message";
 import { CloseIcon } from "@assets/icons";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
-import { ROLE_BADGE } from "@/utils/role";
+import RoleBadge from "@components/common/RoleBadge";
 
 interface Props {
   senderId: string;
@@ -105,11 +105,7 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm font-semibold text-on-surface">{m.name}</span>
-                        {m.role && ROLE_BADGE[m.role] && (
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${ROLE_BADGE[m.role].color}`}>
-                            {ROLE_BADGE[m.role].label}
-                          </span>
-                        )}
+                        <RoleBadge role={m.role} />
                         <span className="text-xs text-on-surface-variant">
                           {[
                             m.department,

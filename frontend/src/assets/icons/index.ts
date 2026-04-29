@@ -15,3 +15,6 @@ export { default as FavoriteFillIcon } from './favorite_fill.svg?react';
 export { default as HelpIcon } from './help.svg?react';
 export { default as CloseIcon } from './close.svg?react';
 export { default as KeepIcon } from './keep.svg?react';
+export { default as EditIcon } from './edit.svg?react';
+export { default as DeleteIcon } from './delete.svg?react';
+export { default as KeepOffIcon } from './keep_off.svg?react';

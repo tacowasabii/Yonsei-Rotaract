@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AppRole } from "@/api/types/member";
 import { useMembers, useUpdateMemberRole, useUpdateMemberStatus } from "@/api/hooks/profiles/useMembers";
-import { ROLE_META, assignableRoles, formatDate, formatPhone, isAdminOrAbove } from "../shared";
+import { ROLE_LABELS, assignableRoles, formatDate, formatPhone, isAdminOrAbove } from "../shared";
 import SortHeaderButton from "./components/SortHeaderButton";
 import RoleBadge from "@components/common/RoleBadge";
 import MemberTypeBadge from "@components/common/MemberTypeBadge";
@@ -193,7 +193,7 @@ export default function AdminMembers() {
                             className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-outline-variant/30 bg-surface-container-lowest text-on-surface outline-none cursor-pointer"
                           >
                             {roleOptions.map((r) => (
-                              <option key={r} value={r}>{ROLE_META[r].label}</option>
+                              <option key={r} value={r}>{ROLE_LABELS[r]}</option>
                             ))}
                           </select>
                         ) : (
