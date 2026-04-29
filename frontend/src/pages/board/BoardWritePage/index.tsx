@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { PersonIcon } from "@assets/icons";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
@@ -8,11 +8,9 @@ import { useUpdatePost } from "@/api/hooks/posts/useUpdatePost";
 import { usePost } from "@/api/hooks/posts/usePost";
 import { BOARD_PATHS, PATHS } from "@/routes/paths";
 import RoleBadge from "@components/common/RoleBadge";
-
-type Visibility = "public" | "members";
+import type { Post } from "@/api/posts";
 
 export default function BoardWritePage() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
@@ -20,42 +18,70 @@ export default function BoardWritePage() {
   const isAnon        = location.pathname.includes("/anon/");
   const isPromo       = location.pathname.includes("/promo/");
   const isNoticeBoard = location.pathname.startsWith("/notice");
-  const boardType  = isAnon ? "anon" : isPromo ? "promo" : isNoticeBoard ? "notice" : "free";
+  const boardType  = isAnon ? "anon" : isPromo ? "promo" : isNoticeBoard ? "notice" : "free" as const;
   const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : isNoticeBoard ? "공지사항" : "자유게시판";
   const isEditMode = location.pathname.endsWith("/edit") && !!id;
 
+  const isNoticeNew = searchParams.get("notice") === "true" && !isEditMode;
+  const { data: existingPost } = usePost(isEditMode ? id : undefined);
+  const isNoticeEdit = isEditMode && !!existingPost?.is_notice;
+  const isNotice = isNoticeNew || isNoticeEdit;
+
+  if (isEditMode && !existingPost) {
+    return (
+      <PageLayout>
+        <div className="flex justify-center py-20">
+          <span className="w-8 h-8 border-2 border-primary-container/30 border-t-primary-container rounded-full animate-spin" />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  return (
+    <WriteForm
+      key={existingPost?.id ?? "new"}
+      existingPost={existingPost}
+      isEditMode={isEditMode}
+      boardType={boardType}
+      boardLabel={boardLabel}
+      isAnon={isAnon}
+      isNotice={isNotice}
+      isNoticeBoard={isNoticeBoard}
+      id={id}
+    />
+  );
+}
+
+type Visibility = "public" | "members";
+
+interface WriteFormProps {
+  existingPost: Post | undefined;
+  isEditMode: boolean;
+  boardType: "free" | "promo" | "anon" | "notice";
+  boardLabel: string;
+  isAnon: boolean;
+  isNotice: boolean;
+  isNoticeBoard: boolean;
+  id: string | undefined;
+}
+
+function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, isNotice, isNoticeBoard, id }: WriteFormProps) {
+  const navigate = useNavigate();
   const { profile } = useAuth();
   const isStaff = useIsStaff();
   const { mutate: createPost, isPending: isCreating, error: createError } = useCreatePost();
   const { mutate: updatePost, isPending: isUpdating, error: updateError } = useUpdatePost(boardType);
 
-  const { data: existingPost } = usePost(isEditMode ? id : undefined);
-
-  const isNoticeNew = searchParams.get("notice") === "true" && !isEditMode;
-  const isNoticeEdit = isEditMode && !!existingPost?.is_notice;
-  const isNotice = isNoticeNew || isNoticeEdit;
-
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState(existingPost?.title ?? "");
+  const [content, setContent] = useState(existingPost?.content ?? "");
   const [visibility, setVisibility] = useState<Visibility>(
-    isNoticeBoard || isNotice ? "members" : "public"
+    existingPost?.visibility ?? (isNoticeBoard || isNotice ? "members" : "public")
   );
-  const [isPinned, setIsPinned] = useState(false);
-  const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
+  const [isPinned, setIsPinned] = useState(existingPost?.is_pinned ?? false);
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>(existingPost?.image_urls ?? []);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // 수정 모드: 기존 데이터 채우기
-  useEffect(() => {
-    if (existingPost) {
-      setTitle(existingPost.title);
-      setContent(existingPost.content);
-      setVisibility(existingPost.visibility);
-      setExistingImageUrls(existingPost.image_urls ?? []);
-      if (isNoticeBoard) setIsPinned(existingPost.is_pinned ?? false);
-    }
-  }, [existingPost, isNoticeBoard]);
 
   const totalImages = existingImageUrls.length + newImages.length;
   const isPending = isCreating || isUpdating;

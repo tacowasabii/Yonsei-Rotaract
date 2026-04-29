@@ -114,12 +114,11 @@ export async function fetchPosts(
     .from("posts")
     .select("*, profiles!posts_author_id_fkey(name, role, member_type), comments(count), post_likes(count)", { count: "exact" })
     .eq("board_type", boardType)
+    .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (boardType === "notice") {
-    query = query.eq("is_pinned", false);
-  } else {
+  if (boardType !== "notice") {
     query = query.eq("is_notice", false);
   }
 
@@ -150,17 +149,6 @@ export async function fetchNoticePosts(boardType: "free" | "promo" | "anon"): Pr
   return (data ?? []) as unknown as Post[];
 }
 
-export async function fetchPinnedPosts(): Promise<Post[]> {
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*, profiles!posts_author_id_fkey(name, role, member_type), comments(count), post_likes(count)")
-    .eq("board_type", "notice")
-    .eq("is_pinned", true)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return (data ?? []) as unknown as Post[];
-}
 
 export async function togglePinPost(id: string, isPinned: boolean): Promise<void> {
   const { error } = await supabase

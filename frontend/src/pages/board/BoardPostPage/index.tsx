@@ -16,38 +16,73 @@ import { PATHS, BOARD_PATHS } from "@/routes/paths";
 import { useTogglePin } from "@/api/hooks/posts/useTogglePin";
 import { usePostLike } from "@/api/hooks/posts/usePostLike";
 import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
-import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon, PersonIcon } from "@assets/icons";
-
+import {
+  ChatBubbleIcon,
+  FavoriteIcon,
+  FavoriteFillIcon,
+  PersonIcon,
+  KeepIcon,
+} from "@assets/icons";
 
 export default function BoardPostPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const isAnon        = location.pathname.includes("/anon/");
-  const isPromo       = location.pathname.includes("/promo/");
+  const isAnon = location.pathname.includes("/anon/");
+  const isPromo = location.pathname.includes("/promo/");
   const isNoticeBoard = location.pathname.startsWith("/notice/");
-  const boardType  = isAnon ? "anon" : isPromo ? "promo" : isNoticeBoard ? "notice" : "free";
-  const boardLabel = isAnon ? "익명게시판" : isPromo ? "홍보게시판" : isNoticeBoard ? "공지사항" : "자유게시판";
+  const boardType = isAnon
+    ? "anon"
+    : isPromo
+      ? "promo"
+      : isNoticeBoard
+        ? "notice"
+        : "free";
+  const boardLabel = isAnon
+    ? "익명게시판"
+    : isPromo
+      ? "홍보게시판"
+      : isNoticeBoard
+        ? "공지사항"
+        : "자유게시판";
 
   const { user } = useAuth();
   const isStaff = useIsStaff();
   const { mutate: togglePin } = useTogglePin(id ?? "");
 
   // 일반 게시판 데이터 (anon일 때 비활성)
-  const { data: post, isLoading: isPostLoading, isError: isPostError } = usePost(isAnon ? undefined : id);
+  const {
+    data: post,
+    isLoading: isPostLoading,
+    isError: isPostError,
+  } = usePost(isAnon ? undefined : id);
   // 익명 게시판 데이터 (anon일 때만 활성) — author_id/name 미포함
-  const { data: anonPost, isLoading: isAnonLoading, isError: isAnonError } = useAnonPost(isAnon ? id : undefined);
-  const { data: comments = [], isLoading: isCommentsLoading } = useComments(isAnon ? undefined : id);
-  const { data: anonComments = [], isLoading: isAnonCommentsLoading } = useAnonComments(isAnon ? id : undefined);
+  const {
+    data: anonPost,
+    isLoading: isAnonLoading,
+    isError: isAnonError,
+  } = useAnonPost(isAnon ? id : undefined);
+  const { data: comments = [], isLoading: isCommentsLoading } = useComments(
+    isAnon ? undefined : id,
+  );
+  const { data: anonComments = [], isLoading: isAnonCommentsLoading } =
+    useAnonComments(isAnon ? id : undefined);
 
   const isLoading = isAnon ? isAnonLoading : isPostLoading;
-  const isError   = isAnon ? isAnonError  : isPostError;
-  const resolvedComments      = isAnon ? anonComments : comments;
-  const resolvedCommentsLoading = isAnon ? isAnonCommentsLoading : isCommentsLoading;
+  const isError = isAnon ? isAnonError : isPostError;
+  const resolvedComments = isAnon ? anonComments : comments;
+  const resolvedCommentsLoading = isAnon
+    ? isAnonCommentsLoading
+    : isCommentsLoading;
 
-  const { mutate: deletePost, isPending: isDeleting } = useDeletePost(boardType);
-  const { mutate: createComment, isPending: isCreating } = useCreateComment(id ?? "");
-  const { mutate: updateComment, isPending: isUpdating } = useUpdateComment(id ?? "");
+  const { mutate: deletePost, isPending: isDeleting } =
+    useDeletePost(boardType);
+  const { mutate: createComment, isPending: isCreating } = useCreateComment(
+    id ?? "",
+  );
+  const { mutate: updateComment, isPending: isUpdating } = useUpdateComment(
+    id ?? "",
+  );
   const { mutate: deleteComment } = useDeleteComment(id ?? "");
 
   const { liked, toggle: toggleLike } = usePostLike(id);
@@ -59,11 +94,13 @@ export default function BoardPostPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
-  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
+    null,
+  );
 
   const isAuthor = isAnon
     ? (anonPost?.is_mine ?? false)
-    : (!!user && !!post && user.id === post.author_id);
+    : !!user && !!post && user.id === post.author_id;
 
   // 공통 필드만 사용하는 resolved 뷰 — author_id/profiles 불포함
   const resolvedPost = isAnon ? anonPost : post;
@@ -90,7 +127,8 @@ export default function BoardPostPage() {
   const handleDelete = () => {
     if (!id) return;
     deletePost(id, {
-      onSuccess: () => navigate(isNoticeBoard ? PATHS.NOTICE : BOARD_PATHS.root(boardType)),
+      onSuccess: () =>
+        navigate(isNoticeBoard ? PATHS.NOTICE : BOARD_PATHS.root(boardType)),
     });
   };
 
@@ -98,7 +136,9 @@ export default function BoardPostPage() {
     <PageLayout>
       <div className="flex items-center gap-2 mb-6 text-sm text-on-surface-variant">
         <button
-          onClick={() => navigate(isNoticeBoard ? PATHS.NOTICE : BOARD_PATHS.root(boardType))}
+          onClick={() =>
+            navigate(isNoticeBoard ? PATHS.NOTICE : BOARD_PATHS.root(boardType))
+          }
           className="flex items-center gap-1 hover:text-primary-container transition-colors font-semibold"
         >
           <span className="material-symbols-outlined text-lg">arrow_back</span>
@@ -132,9 +172,7 @@ export default function BoardPostPage() {
                 {boardLabel}
               </span>
               {isNoticeBoard && resolvedPost.is_pinned && (
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-error/10 text-error">
-                  IMPORTANT
-                </span>
+                <KeepIcon className="w-4 h-4 text-primary-container fill-current" />
               )}
               {!isNoticeBoard && resolvedPost.is_notice && (
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-white">
@@ -189,9 +227,7 @@ export default function BoardPostPage() {
                   {boardLabel}
                 </span>
                 {isNoticeBoard && resolvedPost.is_pinned && (
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-error/10 text-error">
-                    IMPORTANT
-                  </span>
+                  <KeepIcon className="w-5 h-5 text-primary-container fill-current" />
                 )}
                 {!isNoticeBoard && resolvedPost.is_notice && (
                   <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-container text-white">
@@ -234,10 +270,11 @@ export default function BoardPostPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() =>
-                          id && navigate(
+                          id &&
+                          navigate(
                             isNoticeBoard
                               ? `/notice/${id}/edit`
-                              : BOARD_PATHS.edit(boardType, id)
+                              : BOARD_PATHS.edit(boardType, id),
                           )
                         }
                         className="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-all"
@@ -266,18 +303,19 @@ export default function BoardPostPage() {
                 {resolvedPost.content}
               </p>
 
-              {resolvedPost.image_urls && resolvedPost.image_urls.length > 0 && (
-                <div className="mt-6 flex flex-col gap-3">
-                  {resolvedPost.image_urls.map((url, i) => (
-                    <img
-                      key={i}
-                      src={url}
-                      alt=""
-                      className="max-w-sm w-full rounded-xl object-cover"
-                    />
-                  ))}
-                </div>
-              )}
+              {resolvedPost.image_urls &&
+                resolvedPost.image_urls.length > 0 && (
+                  <div className="mt-6 flex flex-col gap-3">
+                    {resolvedPost.image_urls.map((url, i) => (
+                      <img
+                        key={i}
+                        src={url}
+                        alt=""
+                        className="max-w-sm w-full rounded-xl object-cover"
+                      />
+                    ))}
+                  </div>
+                )}
             </div>
 
             {/* Actions */}
@@ -285,7 +323,10 @@ export default function BoardPostPage() {
               <div className="flex items-center gap-5">
                 <button
                   onClick={() => {
-                    if (!user) { navigate(PATHS.LOGIN); return; }
+                    if (!user) {
+                      navigate(PATHS.LOGIN);
+                      return;
+                    }
                     toggleLike();
                   }}
                   className={`flex items-center gap-1.5 text-sm font-semibold transition-colors ${
@@ -342,97 +383,98 @@ export default function BoardPostPage() {
 
               {!resolvedCommentsLoading &&
                 resolvedComments.map((comment) => {
-                    const isCommentAuthor = 'is_mine' in comment
+                  const isCommentAuthor =
+                    "is_mine" in comment
                       ? comment.is_mine
-                      : (!!user && user.id === comment.author_id);
-                    const canDelete = 'can_delete' in comment
+                      : !!user && user.id === comment.author_id;
+                  const canDelete =
+                    "can_delete" in comment
                       ? comment.can_delete
-                      : (isCommentAuthor || isAuthor);
-                    const displayName = 'anon_label' in comment
+                      : isCommentAuthor || isAuthor;
+                  const displayName =
+                    "anon_label" in comment
                       ? comment.anon_label
                       : (comment.profiles?.name ?? "알 수 없음");
-                    const isEditingThis = editingId === comment.id;
+                  const isEditingThis = editingId === comment.id;
 
-                    return (
-                      <div
-                        key={comment.id}
-                        className="px-8 py-4 flex items-start gap-3"
-                      >
-                        <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center shrink-0 mt-0.5">
-                          <PersonIcon className="w-4 h-4 text-on-surface-variant" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-bold text-on-surface">
-                              {displayName}
-                            </span>
-                            <div className="flex items-center gap-0.5 shrink-0">
-                              {isCommentAuthor && (
-                                <button
-                                  onClick={() =>
-                                    handleStartEdit(comment.id, comment.content)
-                                  }
-                                  className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container transition-all"
-                                >
-                                  <span className="material-symbols-outlined text-sm">
-                                    edit
-                                  </span>
-                                </button>
-                              )}
-                              {canDelete && (
-                                <button
-                                  onClick={() =>
-                                    setDeletingCommentId(comment.id)
-                                  }
-                                  className="p-1 rounded-lg text-red-400 hover:bg-red-50 transition-all"
-                                >
-                                  <span className="material-symbols-outlined text-sm">
-                                    delete
-                                  </span>
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          {isEditingThis ? (
-                            <div className="flex gap-2 mt-2">
-                              <input
-                                type="text"
-                                value={editText}
-                                onChange={(e) => setEditText(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") handleSaveEdit();
-                                  if (e.key === "Escape") setEditingId(null);
-                                }}
-                                className="flex-1 px-3 py-2 bg-surface-container-low rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
-                                autoFocus
-                              />
-                              <button
-                                onClick={handleSaveEdit}
-                                disabled={!editText.trim() || isUpdating}
-                                className="px-3 py-2 bg-primary-container text-white font-bold rounded-xl text-xs hover:opacity-90 transition-all disabled:opacity-40"
-                              >
-                                저장
-                              </button>
-                              <button
-                                onClick={() => setEditingId(null)}
-                                className="px-3 py-2 bg-surface-container text-on-surface-variant font-semibold rounded-xl text-xs hover:bg-surface-container-high transition-all"
-                              >
-                                취소
-                              </button>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-on-surface leading-relaxed mt-0.5">
-                              {comment.content}
-                            </p>
-                          )}
-                          <p className="text-xs text-on-surface-variant mt-1">
-                            {formatDateTime(comment.created_at)}
-                          </p>
-                        </div>
+                  return (
+                    <div
+                      key={comment.id}
+                      className="px-8 py-4 flex items-start gap-3"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center shrink-0 mt-0.5">
+                        <PersonIcon className="w-4 h-4 text-on-surface-variant" />
                       </div>
-                    );
-                  })}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-bold text-on-surface">
+                            {displayName}
+                          </span>
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            {isCommentAuthor && (
+                              <button
+                                onClick={() =>
+                                  handleStartEdit(comment.id, comment.content)
+                                }
+                                className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container transition-all"
+                              >
+                                <span className="material-symbols-outlined text-sm">
+                                  edit
+                                </span>
+                              </button>
+                            )}
+                            {canDelete && (
+                              <button
+                                onClick={() => setDeletingCommentId(comment.id)}
+                                className="p-1 rounded-lg text-red-400 hover:bg-red-50 transition-all"
+                              >
+                                <span className="material-symbols-outlined text-sm">
+                                  delete
+                                </span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {isEditingThis ? (
+                          <div className="flex gap-2 mt-2">
+                            <input
+                              type="text"
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") handleSaveEdit();
+                                if (e.key === "Escape") setEditingId(null);
+                              }}
+                              className="flex-1 px-3 py-2 bg-surface-container-low rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"
+                              autoFocus
+                            />
+                            <button
+                              onClick={handleSaveEdit}
+                              disabled={!editText.trim() || isUpdating}
+                              className="px-3 py-2 bg-primary-container text-white font-bold rounded-xl text-xs hover:opacity-90 transition-all disabled:opacity-40"
+                            >
+                              저장
+                            </button>
+                            <button
+                              onClick={() => setEditingId(null)}
+                              className="px-3 py-2 bg-surface-container text-on-surface-variant font-semibold rounded-xl text-xs hover:bg-surface-container-high transition-all"
+                            >
+                              취소
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-on-surface leading-relaxed mt-0.5">
+                            {comment.content}
+                          </p>
+                        )}
+                        <p className="text-xs text-on-surface-variant mt-1">
+                          {formatDateTime(comment.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
 
             {/* 댓글 입력 */}

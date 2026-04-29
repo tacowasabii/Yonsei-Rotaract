@@ -70,11 +70,12 @@ export const router = createBrowserRouter([
       { path: PATHS.BOARD_ANON_POST,   element: <BoardPostPage /> },
       { path: PATHS.BOARD_ANON_EDIT,   element: <BoardWritePage /> },
 
-      // 공지사항 (로그인 필요)
+      // 공지사항 목록 (누구나 접근 가능)
+      { path: PATHS.NOTICE, element: <NoticePage /> },
+      // 공지사항 상세 (로그인 필요)
       {
         element: <ProtectedRoute />,
         children: [
-          { path: PATHS.NOTICE,      element: <NoticePage /> },
           { path: PATHS.NOTICE_POST, element: <BoardPostPage /> },
         ],
       },
