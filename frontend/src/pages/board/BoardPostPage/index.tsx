@@ -259,9 +259,7 @@ export default function BoardPostPage() {
                       onClick={() => togglePin(post.is_pinned)}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all"
                     >
-                      <span className="material-symbols-outlined text-sm">
-                        {post.is_pinned ? "keep_off" : "keep"}
-                      </span>
+                      <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M680-840v80h-40v327l-80-80v-247H400v87l-87-87-33-33v-47h400ZM480-40l-40-40v-240H240v-80l80-80v-46L56-792l56-56 736 736-58 56-264-264h-6v240l-40 40ZM354-400h92l-44-44-2-2-46 46Zm126-193Zm-78 149Z"/></svg>
                       {post.is_pinned ? "고정 해제" : "고정"}
                     </button>
                   )}
@@ -279,17 +277,13 @@ export default function BoardPostPage() {
                         }
                         className="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-all"
                       >
-                        <span className="material-symbols-outlined text-sm">
-                          edit
-                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
                       </button>
                       <button
                         onClick={() => setShowDeleteConfirm(true)}
                         className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-all"
                       >
-                        <span className="material-symbols-outlined text-sm">
-                          delete
-                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
                       </button>
                     </div>
                   )}
@@ -418,9 +412,7 @@ export default function BoardPostPage() {
                                 }
                                 className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container transition-all"
                               >
-                                <span className="material-symbols-outlined text-sm">
-                                  edit
-                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
                               </button>
                             )}
                             {canDelete && (
@@ -428,9 +420,7 @@ export default function BoardPostPage() {
                                 onClick={() => setDeletingCommentId(comment.id)}
                                 className="p-1 rounded-lg text-red-400 hover:bg-red-50 transition-all"
                               >
-                                <span className="material-symbols-outlined text-sm">
-                                  delete
-                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
                               </button>
                             )}
                           </div>
