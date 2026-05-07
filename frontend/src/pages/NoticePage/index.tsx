@@ -112,7 +112,7 @@ export default function NoticePage() {
           ))}
       </div>
 
-      {totalPages > 1 && (
+      {totalPages > 0 && (
         <div className="flex justify-center mt-10">
           <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
