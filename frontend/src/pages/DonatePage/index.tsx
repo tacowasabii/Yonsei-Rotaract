@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { DONATION_ACCOUNT } from "@/constants/donation";
 import { useAuth } from "@/contexts/AuthContext";
 import { PATHS } from "@/routes/paths";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
-import { FavoriteFillIcon, PersonIcon } from "@assets/icons";
+import { FavoriteFillIcon, PersonIcon, AccountBalanceIcon, CheckIcon, ContentCopyIcon, VolunteerActivismIcon } from "@assets/icons";
 import DonationFormModal from "./components/DonationFormModal";
 
 interface DonationEntry {
@@ -104,6 +105,14 @@ export default function DonatePage() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
+  const [copiedAccount, setCopiedAccount] = useState(false);
+
+  function handleCopyAccount() {
+    navigator.clipboard.writeText(DONATION_ACCOUNT.number).then(() => {
+      setCopiedAccount(true);
+      setTimeout(() => setCopiedAccount(false), 2000);
+    });
+  }
 
   const filtered = MOCK_DONATIONS.filter(
     (d) => new Date(d.approved_at).getFullYear() === selectedYear
@@ -128,12 +137,7 @@ export default function DonatePage() {
           onClick={handleDonateClick}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-2xl shadow-card hover:opacity-90 active:scale-95 transition-all text-sm shrink-0"
         >
-          <span
-            className="material-symbols-outlined text-lg"
-            style={{ fontVariationSettings: '"FILL" 1' }}
-          >
-            volunteer_activism
-          </span>
+          <VolunteerActivismIcon className="w-5 h-5" />
           후원 신청하기
         </button>
       </PageHeader>
@@ -141,19 +145,24 @@ export default function DonatePage() {
       {/* 계좌 안내 배너 */}
       <div className="flex items-center gap-4 bg-primary-fixed/30 border border-primary-fixed rounded-2xl px-6 py-4 mb-8">
         <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-          <span className="material-symbols-outlined text-white text-xl">
-            account_balance
-          </span>
+          <AccountBalanceIcon className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold text-primary-container mb-0.5">
             후원 계좌
           </p>
-          <p className="font-black text-primary-container tracking-wide">
-            신한은행 110-000-000000
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="font-black text-primary-container tracking-wide">
+              {DONATION_ACCOUNT.bank} {DONATION_ACCOUNT.number}
+            </p>
+            <button onClick={handleCopyAccount} className="text-primary-container/60 hover:text-primary-container transition-colors shrink-0">
+              {copiedAccount
+                ? <CheckIcon className="w-4 h-4" />
+                : <ContentCopyIcon className="w-4 h-4" />}
+            </button>
+          </div>
           <p className="text-xs text-on-surface-variant">
-            예금주: 연세대학교 로타랙트
+            예금주: {DONATION_ACCOUNT.holder}
           </p>
         </div>
         <p className="text-xs text-on-surface-variant text-right hidden sm:block leading-relaxed">

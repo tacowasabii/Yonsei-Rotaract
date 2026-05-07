@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { DONATION_ACCOUNT } from "@/constants/donation";
+import { AccountBalanceIcon, CheckIcon, ContentCopyIcon } from "@assets/icons";
 
 interface Props {
   onClose: () => void;
@@ -9,7 +11,15 @@ export default function DonationFormModal({ onClose }: Props) {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [copiedAccount, setCopiedAccount] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  function handleCopyAccount() {
+    navigator.clipboard.writeText(DONATION_ACCOUNT.number).then(() => {
+      setCopiedAccount(true);
+      setTimeout(() => setCopiedAccount(false), 2000);
+    });
+  }
 
   useOutsideClick(modalRef, onClose);
 
@@ -65,18 +75,23 @@ export default function DonationFormModal({ onClose }: Props) {
 
         {/* 계좌 안내 */}
         <div className="bg-primary-fixed/30 rounded-xl px-4 py-3 flex items-start gap-3">
-          <span className="material-symbols-outlined text-primary-container text-xl mt-0.5">
-            account_balance
-          </span>
+          <AccountBalanceIcon className="w-5 h-5 text-primary-container mt-0.5 shrink-0" />
           <div>
             <p className="text-xs font-bold text-primary-container mb-0.5">
               후원 계좌
             </p>
-            <p className="text-sm font-black text-primary-container">
-              신한은행 110-000-000000
-            </p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-black text-primary-container">
+                {DONATION_ACCOUNT.bank} {DONATION_ACCOUNT.number}
+              </p>
+              <button onClick={handleCopyAccount} className="text-primary-container/60 hover:text-primary-container transition-colors shrink-0">
+                {copiedAccount
+                  ? <CheckIcon className="w-4 h-4" />
+                  : <ContentCopyIcon className="w-4 h-4" />}
+              </button>
+            </div>
             <p className="text-xs text-on-surface-variant">
-              예금주: 연세대학교 로타랙트
+              예금주: {DONATION_ACCOUNT.holder}
             </p>
           </div>
         </div>

@@ -3,12 +3,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers } from "@/api/hooks/profiles/usePendingMembers";
 import { PATHS } from "@/routes/paths";
 import RoleBadge from "@components/common/RoleBadge";
+import { VolunteerActivismIcon, DashboardIcon, PersonAddIcon, GroupIcon } from "@assets/icons";
 
 const navItems = [
-  { to: PATHS.ADMIN,           label: "대시보드", icon: "dashboard",          end: true  },
-  { to: PATHS.ADMIN_PENDING,   label: "가입 신청", icon: "person_add",         end: false },
-  { to: PATHS.ADMIN_MEMBERS,   label: "회원 관리", icon: "group",              end: false },
-  { to: PATHS.ADMIN_DONATIONS, label: "후원 관리", icon: "volunteer_activism", end: false },
+  { to: PATHS.ADMIN,           label: "대시보드", icon: <DashboardIcon className="w-5 h-5" />,          end: true,  showBadge: false },
+  { to: PATHS.ADMIN_PENDING,   label: "가입 신청", icon: <PersonAddIcon className="w-5 h-5" />,          end: false, showBadge: true  },
+  { to: PATHS.ADMIN_MEMBERS,   label: "회원 관리", icon: <GroupIcon className="w-5 h-5" />,              end: false, showBadge: false },
+  { to: PATHS.ADMIN_DONATIONS, label: "후원 관리", icon: <VolunteerActivismIcon className="w-5 h-5" />,  end: false, showBadge: false },
 ];
 
 export default function AdminLayout() {
@@ -52,9 +53,9 @@ export default function AdminLayout() {
                 }`
               }
             >
-              <span className="material-symbols-outlined text-xl">{item.icon}</span>
+              {item.icon}
               <span>{item.label}</span>
-              {item.icon === "person_add" && pendingCount > 0 && (
+              {item.showBadge && pendingCount > 0 && (
                 <span className="ml-auto w-5 h-5 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
                   {pendingCount}
                 </span>

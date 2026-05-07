@@ -1,3 +1,5 @@
+import { VolunteerActivismIcon } from "@assets/icons";
+
 export default function HeroSection() {
   return (
     <header className="mb-8 p-8 md:p-10 rounded-3xl bg-linear-to-br from-primary to-primary-container relative overflow-hidden">
@@ -21,9 +23,7 @@ export default function HeroSection() {
             활동 회원 124명
           </span>
           <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-white/10 backdrop-blur rounded-full text-sm font-semibold">
-            <span className="material-symbols-outlined text-[18px]">
-              volunteer_activism
-            </span>
+            <VolunteerActivismIcon className="w-4.5 h-4.5" />
             누적 봉사 5,240시간
           </span>
         </div>
