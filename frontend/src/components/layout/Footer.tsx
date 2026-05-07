@@ -1,5 +1,14 @@
+import { useState } from "react";
+import ReportModal from "@components/common/ReportModal";
+import { AgreementModal } from "@components/common/AgreementModal";
+import type { AgreementType } from "@components/common/agreementContents";
+
 export default function Footer() {
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [agreementModal, setAgreementModal] = useState<AgreementType | null>(null);
+
   return (
+    <>
     <footer className="bg-surface-container w-full py-16 px-6 md:px-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
         <div className="space-y-4">
@@ -22,20 +31,28 @@ export default function Footer() {
             </h5>
             <ul className="space-y-2">
               <li>
-                <a
+                <button
+                  onClick={() => setAgreementModal("terms")}
                   className="text-on-surface-variant hover:text-primary-container text-sm transition-colors"
-                  href="#"
                 >
                   이용약관
-                </a>
+                </button>
               </li>
               <li>
-                <a
-                  className="text-primary-container font-bold text-sm hover:underline"
-                  href="#"
+                <button
+                  onClick={() => setAgreementModal("privacy")}
+                  className="text-on-surface-variant hover:text-primary-container text-sm transition-colors"
                 >
                   개인정보처리방침
-                </a>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => setShowReportModal(true)}
+                  className="text-on-surface-variant hover:text-primary-container text-sm transition-colors"
+                >
+                  신고하기
+                </button>
               </li>
             </ul>
           </div>
@@ -65,5 +82,11 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+
+      {showReportModal && (
+        <ReportModal onClose={() => setShowReportModal(false)} />
+      )}
+      <AgreementModal type={agreementModal} onClose={() => setAgreementModal(null)} />
+    </>
   );
 }

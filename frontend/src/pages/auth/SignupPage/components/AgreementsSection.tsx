@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { AgreementModal } from "./AgreementModal";
-import type { AgreementType } from "./agreementContents";
+import { AgreementModal } from "@components/common/AgreementModal";
+import type { AgreementType } from "@components/common/agreementContents";
 
 const errorClass = "mt-1 text-xs text-error";
 
