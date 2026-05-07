@@ -9,7 +9,7 @@ const navItems = [
   { to: PATHS.ADMIN,           label: "대시보드", icon: <DashboardIcon className="w-5 h-5" />,          end: true,  showBadge: false },
   { to: PATHS.ADMIN_PENDING,   label: "가입 신청", icon: <PersonAddIcon className="w-5 h-5" />,          end: false, showBadge: true  },
   { to: PATHS.ADMIN_MEMBERS,   label: "회원 관리", icon: <GroupIcon className="w-5 h-5" />,              end: false, showBadge: false },
-  { to: PATHS.ADMIN_DONATIONS, label: "후원 관리", icon: <VolunteerActivismIcon className="w-5 h-5" />,  end: false, showBadge: false },
+  { to: PATHS.ADMIN_DONATIONS, label: "후원자 관리", icon: <VolunteerActivismIcon className="w-5 h-5" />,  end: false, showBadge: false },
 ];
 
 export default function AdminLayout() {

@@ -11,6 +11,7 @@ import DonationFormModal from "./components/DonationFormModal";
 interface DonationEntry {
   id: string;
   is_anonymous: boolean;
+  is_hidden: boolean;
   message: string | null;
   approved_at: string;
   profile: {
@@ -26,6 +27,7 @@ const MOCK_DONATIONS: DonationEntry[] = [
   {
     id: "7",
     is_anonymous: false,
+    is_hidden: false,
     message: "올해도 로타랙트와 함께합니다!",
     approved_at: "2026-01-10T10:00:00Z",
     profile: { name: "정다은", department: "간호학과", admission_year: 2022, generation: "37기" },
@@ -33,6 +35,7 @@ const MOCK_DONATIONS: DonationEntry[] = [
   {
     id: "8",
     is_anonymous: true,
+    is_hidden: false,
     message: "늘 응원합니다.",
     approved_at: "2026-02-14T10:00:00Z",
     profile: null,
@@ -40,6 +43,7 @@ const MOCK_DONATIONS: DonationEntry[] = [
   {
     id: "9",
     is_anonymous: false,
+    is_hidden: false,
     message: null,
     approved_at: "2026-03-05T10:00:00Z",
     profile: { name: "한승우", department: "전기전자공학과", admission_year: 2021, generation: "36기" },
@@ -48,6 +52,7 @@ const MOCK_DONATIONS: DonationEntry[] = [
   {
     id: "1",
     is_anonymous: false,
+    is_hidden: false,
     message: "로타랙트 화이팅! 앞으로도 좋은 활동 많이 해주세요.",
     approved_at: "2025-03-15T10:00:00Z",
     profile: { name: "김민준", department: "경영학과", admission_year: 2020, generation: "35기" },
@@ -55,6 +60,7 @@ const MOCK_DONATIONS: DonationEntry[] = [
   {
     id: "2",
     is_anonymous: true,
+    is_hidden: false,
     message: "항상 응원합니다. 좋은 활동 계속 이어가세요!",
     approved_at: "2025-03-20T10:00:00Z",
     profile: null,
@@ -62,6 +68,7 @@ const MOCK_DONATIONS: DonationEntry[] = [
   {
     id: "3",
     is_anonymous: false,
+    is_hidden: false,
     message: null,
     approved_at: "2025-04-01T10:00:00Z",
     profile: { name: "이서연", department: "심리학과", admission_year: 2019, generation: "34기" },
@@ -69,6 +76,7 @@ const MOCK_DONATIONS: DonationEntry[] = [
   {
     id: "4",
     is_anonymous: true,
+    is_hidden: false,
     message: "작은 도움이 큰 변화를 만들 수 있다고 믿습니다.",
     approved_at: "2025-04-10T10:00:00Z",
     profile: null,
@@ -76,6 +84,7 @@ const MOCK_DONATIONS: DonationEntry[] = [
   {
     id: "5",
     is_anonymous: false,
+    is_hidden: false,
     message: "졸업 후에도 항상 응원하고 있어요!",
     approved_at: "2025-04-15T10:00:00Z",
     profile: { name: "박지호", department: "컴퓨터과학과", admission_year: 2018, generation: "33기" },
@@ -83,6 +92,7 @@ const MOCK_DONATIONS: DonationEntry[] = [
   {
     id: "6",
     is_anonymous: false,
+    is_hidden: false,
     message: "봉사의 가치를 믿습니다.",
     approved_at: "2025-04-18T10:00:00Z",
     profile: { name: "최유진", department: "사회학과", admission_year: 2021, generation: "36기" },
@@ -115,7 +125,7 @@ export default function DonatePage() {
   }
 
   const filtered = MOCK_DONATIONS.filter(
-    (d) => new Date(d.approved_at).getFullYear() === selectedYear
+    (d) => new Date(d.approved_at).getFullYear() === selectedYear && !d.is_hidden
   );
 
   function handleDonateClick() {
