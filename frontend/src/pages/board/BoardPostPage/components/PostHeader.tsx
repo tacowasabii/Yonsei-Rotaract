@@ -13,7 +13,6 @@ interface Props {
   isAnon: boolean;
   isNoticeBoard: boolean;
   isAuthor: boolean;
-  isStaff: boolean;
   onDeleteClick: () => void;
   onTogglePin: (isPinned: boolean) => void;
 }
@@ -25,7 +24,6 @@ export default function PostHeader({
   isAnon,
   isNoticeBoard,
   isAuthor,
-  isStaff,
   onDeleteClick,
   onTogglePin,
 }: Props) {
@@ -73,7 +71,7 @@ export default function PostHeader({
         </div>
 
         <div className="flex items-center gap-3">
-          {isStaff && isNoticeBoard && regularPost && (
+          {isAuthor && isNoticeBoard && regularPost && (
             <button
               onClick={() => onTogglePin(regularPost.is_pinned)}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all"

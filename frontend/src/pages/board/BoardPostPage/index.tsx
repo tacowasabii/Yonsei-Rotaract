@@ -9,7 +9,7 @@ import { useAnonComments } from "@/api/hooks/comments/useAnonComments";
 import { useCreateComment } from "@/api/hooks/comments/useCreateComment";
 import { useUpdateComment } from "@/api/hooks/comments/useUpdateComment";
 import { useDeleteComment } from "@/api/hooks/comments/useDeleteComment";
-import { useAuth, useIsStaff } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { PATHS, BOARD_PATHS } from "@/routes/paths";
 import { useTogglePin } from "@/api/hooks/posts/useTogglePin";
 import { usePostLike } from "@/api/hooks/posts/usePostLike";
@@ -26,7 +26,6 @@ export default function BoardPostPage() {
   const { boardType, boardLabel, isAnon, isNoticeBoard } = useBoardType();
 
   const { user } = useAuth();
-  const isStaff = useIsStaff();
   const { mutate: togglePin } = useTogglePin(id ?? "");
 
   const { data: post, isLoading: isPostLoading, isError: isPostError } =
@@ -196,7 +195,6 @@ export default function BoardPostPage() {
             isAnon={isAnon}
             isNoticeBoard={isNoticeBoard}
             isAuthor={isAuthor}
-            isStaff={isStaff}
             onDeleteClick={() => setShowDeleteConfirm(true)}
             onTogglePin={(isPinned) => togglePin(isPinned)}
           />
