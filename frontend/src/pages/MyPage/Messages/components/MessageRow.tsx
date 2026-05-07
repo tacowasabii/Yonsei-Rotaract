@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { formatDateTime } from "@/utils/date";
 import RoleBadge from "@components/common/RoleBadge";
+import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
 import {
   useMarkAsRead,
   useDeleteMessage,
@@ -25,9 +27,10 @@ export default function MessageRow({
   onToggle,
   onReply,
 }: MessageRowProps) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const isUnread = box === "received" && !message.read_at;
   const { mutate: markAsRead } = useMarkAsRead();
-  const { mutate: deleteMsg } = useDeleteMessage();
+  const { mutate: deleteMsg, isPending: isDeleting } = useDeleteMessage();
 
   function handleToggle() {
     if (isUnread) {
@@ -38,7 +41,14 @@ export default function MessageRow({
 
   function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
-    deleteMsg({ messageId: message.id, box, userId });
+    setShowDeleteModal(true);
+  }
+
+  function handleConfirmDelete() {
+    deleteMsg(
+      { messageId: message.id, box, userId },
+      { onSuccess: () => setShowDeleteModal(false) }
+    );
   }
 
   function handleReply(e: React.MouseEvent) {
@@ -62,6 +72,7 @@ export default function MessageRow({
     .join(" · ");
 
   return (
+    <>
     <div
       className={`border-b border-outline-variant/30 last:border-0 transition-colors ${isExpanded ? "bg-surface-container/40" : "hover:bg-surface-container/30"}`}
     >
@@ -111,7 +122,7 @@ export default function MessageRow({
 
       {isExpanded && (
         <div className="px-5 pb-5">
-          <div className="bg-surface-container rounded-xl p-4 space-y-3">
+          <div className="bg-white rounded-xl p-4 space-y-3">
             <p className="text-sm font-black text-on-surface">
               {message.title}
             </p>
@@ -144,5 +155,16 @@ export default function MessageRow({
         </div>
       )}
     </div>
+
+      {showDeleteModal && (
+        <DeleteConfirmModal
+          title="쪽지 삭제"
+          description="이 쪽지를 삭제하면 복구할 수 없습니다. 삭제하시겠습니까?"
+          isPending={isDeleting}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
+    </>
   );
 }

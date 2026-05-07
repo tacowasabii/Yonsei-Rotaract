@@ -5,6 +5,7 @@ import type { MemberSearchResult } from "@/api/types/message";
 import { CloseIcon } from "@assets/icons";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 import RoleBadge from "@components/common/RoleBadge";
+import ModalLayout from "@components/common/ModalLayout";
 
 interface Props {
   senderId: string;
@@ -21,14 +22,12 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [submitError, setSubmitError] = useState("");
-  const modalRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const { addToast } = useToast();
   const { data: searchResults = [] } = useSearchMembers(!recipient ? searchQuery : "");
   const { mutate: send, isPending } = useSendMessage();
 
-  useOutsideClick(modalRef, onClose);
   useOutsideClick(searchRef, () => setShowDropdown(false));
 
   function handleSelectRecipient(member: MemberSearchResult) {
@@ -61,8 +60,7 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div ref={modalRef} className="bg-surface-container-lowest rounded-2xl shadow-card w-full max-w-lg flex flex-col gap-5 p-6">
+    <ModalLayout onClose={onClose} variant="form">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-black text-on-surface">쪽지 쓰기</h2>
           <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface transition-colors">
@@ -71,8 +69,8 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
         </div>
 
         {/* 수신자 검색 */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-on-surface-variant">수신자</label>
+        <div className="">
+          <label className="text-xs font-bold text-on-surface-variant mb-1 block">수신자</label>
           <div ref={searchRef} className="relative">
             <div className="flex items-center gap-2 border border-outline-variant rounded-xl px-3 py-2.5 bg-surface-container focus-within:border-primary transition-colors">
               {recipient ? (
@@ -125,8 +123,8 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
         </div>
 
         {/* 제목 */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-on-surface-variant">제목</label>
+        <div className="">
+          <label className="text-xs font-bold text-on-surface-variant mb-1 block">제목</label>
           <input
             className="w-full border border-outline-variant rounded-xl px-3 py-2.5 text-sm bg-surface-container text-on-surface placeholder:text-on-surface-variant/50 outline-none focus:border-primary transition-colors"
             placeholder="제목을 입력하세요"
@@ -137,8 +135,8 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
         </div>
 
         {/* 내용 */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-on-surface-variant">내용</label>
+        <div className="">
+          <label className="text-xs font-bold text-on-surface-variant mb-1 block">내용</label>
           <textarea
             className="w-full border border-outline-variant rounded-xl px-3 py-2.5 text-sm bg-surface-container text-on-surface placeholder:text-on-surface-variant/50 outline-none focus:border-primary transition-colors resize-none"
             placeholder="내용을 입력하세요"
@@ -169,7 +167,6 @@ export default function ComposeModal({ senderId, initialRecipient, onClose }: Pr
             {isPending ? "전송 중..." : "보내기"}
           </button>
         </div>
-      </div>
-    </div>
+    </ModalLayout>
   );
 }
