@@ -1,18 +1,23 @@
 import { useState, useRef } from "react";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { useAuth } from "@/contexts/AuthContext";
 import { DONATION_ACCOUNT } from "@/constants/donation";
 import { AccountBalanceIcon, CheckIcon, ContentCopyIcon } from "@assets/icons";
+import { useSubmitDonation } from "@/api/hooks/donations/useSubmitDonation";
 
 interface Props {
   onClose: () => void;
 }
 
 export default function DonationFormModal({ onClose }: Props) {
+  const { user } = useAuth();
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  const submitMutation = useSubmitDonation();
 
   function handleCopyAccount() {
     navigator.clipboard.writeText(DONATION_ACCOUNT.number).then(() => {
@@ -22,6 +27,14 @@ export default function DonationFormModal({ onClose }: Props) {
   }
 
   useOutsideClick(modalRef, onClose);
+
+  function handleSubmit() {
+    if (!user) return;
+    submitMutation.mutate(
+      { userId: user.id, params: { isAnonymous, message: message.trim() || undefined } },
+      { onSuccess: () => setSubmitted(true) }
+    );
+  }
 
   if (submitted) {
     return (
@@ -149,6 +162,12 @@ export default function DonationFormModal({ onClose }: Props) {
           </ul>
         </div>
 
+        {submitMutation.isError && (
+          <p className="text-xs text-error text-center">
+            신청 중 오류가 발생했습니다. 다시 시도해주세요.
+          </p>
+        )}
+
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
@@ -157,10 +176,11 @@ export default function DonationFormModal({ onClose }: Props) {
             취소
           </button>
           <button
-            onClick={() => setSubmitted(true)}
-            className="px-5 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:opacity-90 transition-opacity"
+            onClick={handleSubmit}
+            disabled={submitMutation.isPending}
+            className="px-5 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            신청하기
+            {submitMutation.isPending ? "신청 중..." : "신청하기"}
           </button>
         </div>
       </div>

@@ -7,103 +7,9 @@ import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import { FavoriteFillIcon, PersonIcon, AccountBalanceIcon, CheckIcon, ContentCopyIcon, VolunteerActivismIcon } from "@assets/icons";
 import DonationFormModal from "./components/DonationFormModal";
-
-interface DonationEntry {
-  id: string;
-  is_anonymous: boolean;
-  is_hidden: boolean;
-  message: string | null;
-  approved_at: string;
-  profile: {
-    name: string;
-    department: string | null;
-    admission_year: number | null;
-    generation: string | null;
-  } | null;
-}
-
-const MOCK_DONATIONS: DonationEntry[] = [
-  // 2026
-  {
-    id: "7",
-    is_anonymous: false,
-    is_hidden: false,
-    message: "올해도 로타랙트와 함께합니다!",
-    approved_at: "2026-01-10T10:00:00Z",
-    profile: { name: "정다은", department: "간호학과", admission_year: 2022, generation: "37기" },
-  },
-  {
-    id: "8",
-    is_anonymous: true,
-    is_hidden: false,
-    message: "늘 응원합니다.",
-    approved_at: "2026-02-14T10:00:00Z",
-    profile: null,
-  },
-  {
-    id: "9",
-    is_anonymous: false,
-    is_hidden: false,
-    message: null,
-    approved_at: "2026-03-05T10:00:00Z",
-    profile: { name: "한승우", department: "전기전자공학과", admission_year: 2021, generation: "36기" },
-  },
-  // 2025
-  {
-    id: "1",
-    is_anonymous: false,
-    is_hidden: false,
-    message: "로타랙트 화이팅! 앞으로도 좋은 활동 많이 해주세요.",
-    approved_at: "2025-03-15T10:00:00Z",
-    profile: { name: "김민준", department: "경영학과", admission_year: 2020, generation: "35기" },
-  },
-  {
-    id: "2",
-    is_anonymous: true,
-    is_hidden: false,
-    message: "항상 응원합니다. 좋은 활동 계속 이어가세요!",
-    approved_at: "2025-03-20T10:00:00Z",
-    profile: null,
-  },
-  {
-    id: "3",
-    is_anonymous: false,
-    is_hidden: false,
-    message: null,
-    approved_at: "2025-04-01T10:00:00Z",
-    profile: { name: "이서연", department: "심리학과", admission_year: 2019, generation: "34기" },
-  },
-  {
-    id: "4",
-    is_anonymous: true,
-    is_hidden: false,
-    message: "작은 도움이 큰 변화를 만들 수 있다고 믿습니다.",
-    approved_at: "2025-04-10T10:00:00Z",
-    profile: null,
-  },
-  {
-    id: "5",
-    is_anonymous: false,
-    is_hidden: false,
-    message: "졸업 후에도 항상 응원하고 있어요!",
-    approved_at: "2025-04-15T10:00:00Z",
-    profile: { name: "박지호", department: "컴퓨터과학과", admission_year: 2018, generation: "33기" },
-  },
-  {
-    id: "6",
-    is_anonymous: false,
-    is_hidden: false,
-    message: "봉사의 가치를 믿습니다.",
-    approved_at: "2025-04-18T10:00:00Z",
-    profile: { name: "최유진", department: "사회학과", admission_year: 2021, generation: "36기" },
-  },
-];
-
-const CURRENT_YEAR = new Date().getFullYear();
-
-const YEARS = Array.from(
-  new Set(MOCK_DONATIONS.map((d) => new Date(d.approved_at).getFullYear()))
-).sort((a, b) => b - a);
+import { usePublicDonations } from "@/api/hooks/donations/usePublicDonations";
+import { usePublicDonationYears } from "@/api/hooks/donations/usePublicDonationYears";
+import type { PublicDonation } from "@/api/types/donation";
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
@@ -114,8 +20,15 @@ export default function DonatePage() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
-  const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
+  const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
   const [copiedAccount, setCopiedAccount] = useState(false);
+
+  const { data: years = [] } = usePublicDonationYears();
+
+  // 연도 목록이 로드되면 가장 최근 연도를 기본값으로 설정
+  const currentYear = selectedYear ?? years[0];
+
+  const { data: donations = [], isLoading } = usePublicDonations(currentYear);
 
   function handleCopyAccount() {
     navigator.clipboard.writeText(DONATION_ACCOUNT.number).then(() => {
@@ -123,10 +36,6 @@ export default function DonatePage() {
       setTimeout(() => setCopiedAccount(false), 2000);
     });
   }
-
-  const filtered = MOCK_DONATIONS.filter(
-    (d) => new Date(d.approved_at).getFullYear() === selectedYear && !d.is_hidden
-  );
 
   function handleDonateClick() {
     if (!profile) {
@@ -183,21 +92,23 @@ export default function DonatePage() {
       </div>
 
       {/* 연도 필터 */}
-      <div className="flex items-center gap-2 mb-6 flex-wrap">
-        {YEARS.map((year) => (
-          <button
-            key={year}
-            onClick={() => setSelectedYear(year)}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
-              selectedYear === year
-                ? "bg-primary-container text-white"
-                : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
-            }`}
-          >
-            {year}년
-          </button>
-        ))}
-      </div>
+      {years.length > 0 && (
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
+          {years.map((year) => (
+            <button
+              key={year}
+              onClick={() => setSelectedYear(year)}
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                currentYear === year
+                  ? "bg-primary-container text-white"
+                  : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+              }`}
+            >
+              {year}년
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 후원자 목록 */}
       <div className="flex items-center gap-2 mb-5">
@@ -208,23 +119,27 @@ export default function DonatePage() {
           workspace_premium
         </span>
         <h2 className="text-lg font-black font-headline text-on-surface">
-          {selectedYear}년 후원자 명단
+          {currentYear ? `${currentYear}년 후원자 명단` : "후원자 명단"}
         </h2>
         <span className="ml-auto text-sm text-on-surface-variant">
-          {filtered.length}명
+          {isLoading ? "..." : `${donations.length}명`}
         </span>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20 text-on-surface-variant">
+          <span className="material-symbols-outlined text-3xl animate-spin">progress_activity</span>
+        </div>
+      ) : donations.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-2">
           <span className="material-symbols-outlined text-4xl">inbox</span>
           <p className="text-sm font-semibold">
-            {selectedYear}년 후원자가 없습니다
+            {currentYear ? `${currentYear}년 후원자가 없습니다` : "아직 등록된 후원자가 없습니다"}
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((d) => (
+          {donations.map((d) => (
             <DonationCard key={d.id} donation={d} />
           ))}
         </div>
@@ -237,18 +152,18 @@ export default function DonatePage() {
   );
 }
 
-function DonationCard({ donation }: { donation: DonationEntry }) {
-  const { is_anonymous, message, approved_at, profile } = donation;
-  const displayName = is_anonymous ? "익명의 후원자" : (profile?.name ?? "-");
+function DonationCard({ donation }: { donation: PublicDonation }) {
+  const { is_anonymous, message, approved_at, profiles } = donation;
+  const displayName = is_anonymous ? "익명의 후원자" : (profiles?.name ?? "-");
 
   const meta =
-    !is_anonymous && profile
+    !is_anonymous && profiles
       ? [
-          profile.department,
-          profile.admission_year
-            ? `${String(profile.admission_year).slice(-2)}학번`
+          profiles.department,
+          profiles.admission_year
+            ? `${String(profiles.admission_year).slice(-2)}학번`
             : null,
-          profile.generation ?? null,
+          profiles.generation ?? null,
         ]
           .filter(Boolean)
           .join(" · ")
