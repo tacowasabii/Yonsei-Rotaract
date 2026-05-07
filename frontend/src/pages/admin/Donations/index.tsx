@@ -380,9 +380,7 @@ function DonationTable({
                   공개 여부
                 </th>
               )}
-              <th className="text-center px-4 py-3 text-xs font-bold text-on-surface-variant">
-                액션
-              </th>
+              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10">
