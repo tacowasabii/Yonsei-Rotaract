@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMyProfile, useUpdateMyMemberType } from "@/api/hooks/profiles/useMyProfile";
+import { useMyProfile, useUpdateMyMemberType, useUpdateMarketingAgree } from "@/api/hooks/profiles/useMyProfile";
+import { AgreementModal } from "@components/common/AgreementModal";
 import {
   updateMyPhone,
   updatePassword,
@@ -48,6 +49,11 @@ export default function MyProfile() {
 
   const companyPublic = watch("companyPublic");
 
+  const updateMarketing = useUpdateMarketingAgree();
+  const [marketingAgree, setMarketingAgree] = useState(false);
+  const [marketingSaved, setMarketingSaved] = useState(false);
+  const [showMarketingModal, setShowMarketingModal] = useState(false);
+
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showTypeModal, setShowTypeModal] = useState(false);
@@ -59,7 +65,24 @@ export default function MyProfile() {
     setValue("company", profile.company ?? "");
     setValue("jobTitle", profile.job_title ?? "");
     setValue("companyPublic", profile.is_company_public ?? true);
+    setMarketingAgree(profile.marketing_agree ?? false);
   }, [profile, setValue]);
+
+  function handleMarketingToggle() {
+    if (!user?.id) return;
+    const next = !marketingAgree;
+    setMarketingAgree(next);
+    updateMarketing.mutate(
+      { userId: user.id, value: next },
+      {
+        onSuccess: () => {
+          setMarketingSaved(true);
+          setTimeout(() => setMarketingSaved(false), 1500);
+        },
+        onError: () => setMarketingAgree(!next),
+      }
+    );
+  }
 
   if (!profile) return null;
 
@@ -170,6 +193,43 @@ export default function MyProfile() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* 마케팅 동의 */}
+        <div className="bg-surface-container-lowest rounded-2xl shadow-card px-6 py-5">
+          <div className="flex items-center gap-1.5 mb-3">
+            <h2 className="text-xs font-bold text-on-surface-variant">알림 수신</h2>
+            <button
+              type="button"
+              onClick={() => setShowMarketingModal(true)}
+              className="text-xs text-on-surface-variant/50 hover:text-primary-container underline underline-offset-2 transition-colors"
+            >
+              내용 보기
+            </button>
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-on-surface">마케팅 정보 수신 동의</p>
+              <p className="text-xs text-on-surface-variant mt-0.5">
+                동아리 소식 및 행사 안내를 이메일·문자로 받습니다
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={marketingAgree}
+              onClick={handleMarketingToggle}
+              disabled={updateMarketing.isPending}
+              className={`w-12 h-7 rounded-full transition-colors relative shrink-0 disabled:opacity-60 ${marketingAgree ? "bg-primary-container" : "bg-surface-container-highest"}`}
+            >
+              <span
+                className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${marketingAgree ? "translate-x-5" : "translate-x-0"}`}
+              />
+            </button>
+          </div>
+          {marketingSaved && (
+            <p className="text-xs text-primary-container mt-2">저장되었습니다.</p>
+          )}
         </div>
 
         {/* 정보 수정 */}
@@ -336,6 +396,7 @@ export default function MyProfile() {
           onClose={() => setShowTypeModal(false)}
         />
       )}
+      <AgreementModal type={showMarketingModal ? "optional" : null} onClose={() => setShowMarketingModal(false)} />
     </>
   );
 }

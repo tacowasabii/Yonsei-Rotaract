@@ -56,6 +56,7 @@ export default function SignupPage() {
         admissionYear: data.admissionYear,
         department: data.department,
         generation: data.generation,
+        marketingAgree: agreements.optional,
       },
       {
         onSuccess: () => navigate(PATHS.PENDING_APPROVAL),

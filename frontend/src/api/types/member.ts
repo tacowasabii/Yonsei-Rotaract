@@ -17,6 +17,7 @@ export interface Member {
   company: string | null;
   job_title: string | null;
   is_company_public: boolean;
+  marketing_agree: boolean;
 }
 
 export interface PendingMember {

@@ -119,7 +119,7 @@ export const AGREEMENT_CONTENTS: Record<AgreementType, AgreementContent> = {
       {
         heading: "1. 수신 동의 항목",
         paragraphs: [
-          "이메일을 통한 동아리 소식 및 행사 안내",
+          "이메일·문자(SMS)를 통한 동아리 소식 및 행사 안내",
           "연세 로타랙트 클럽 관련 공지 및 뉴스레터",
         ],
       },
@@ -135,7 +135,7 @@ export const AGREEMENT_CONTENTS: Record<AgreementType, AgreementContent> = {
       {
         heading: "3. 수신 방법 및 주기",
         paragraphs: [
-          "수신 방법: 이메일",
+          "수신 방법: 이메일, 문자(SMS)",
           "발송 주기: 필요 시 비정기적으로 발송 (과도한 광고성 메일 미발송)",
         ],
       },

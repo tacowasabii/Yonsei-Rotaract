@@ -9,6 +9,7 @@ export interface SignupParams {
   admissionYear?: string;
   department?: string;
   generation?: string;
+  marketingAgree: boolean;
 }
 
 export async function signIn(email: string, password: string): Promise<void> {

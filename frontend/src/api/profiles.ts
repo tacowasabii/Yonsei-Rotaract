@@ -86,7 +86,7 @@ export async function approveAllPendingMembers(): Promise<void> {
 export async function fetchMyFullProfile(userId: string): Promise<Member> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at, company, job_title, is_company_public")
+    .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at, company, job_title, is_company_public, marketing_agree")
     .eq("id", userId)
     .single();
   if (error) throw error;
@@ -144,6 +144,14 @@ export async function verifyCurrentPassword(email: string, password: string): Pr
   return !error;
 }
 
+export async function updateMarketingAgree(userId: string, value: boolean): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ marketing_agree: value })
+    .eq("id", userId);
+  if (error) throw error;
+}
+
 export async function upsertProfile(profile: {
   id: string;
   name: string;
@@ -155,6 +163,7 @@ export async function upsertProfile(profile: {
   generation: string | null;
   role: string;
   status: string;
+  marketing_agree?: boolean;
 }): Promise<void> {
   const { error } = await supabase.from("profiles").upsert(profile);
   if (error) throw error;

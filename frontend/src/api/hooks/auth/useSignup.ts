@@ -31,6 +31,7 @@ export function useSignup() {
           generation: params.memberType === "alumni" ? params.generation ?? null : null,
           role: "user",
           status: "pending",
+          marketing_agree: params.marketingAgree,
         });
       }
     },
