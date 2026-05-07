@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DeleteIcon } from "@assets/icons";
 
 interface DonationRecord {
   id: string;
@@ -305,23 +306,15 @@ export default function AdminDonations() {
             emptyMessage={`${selectedYear}년 후원자 명단이 없습니다`}
             showApprovedAt
             showVisibility
+            onToggleHidden={handleToggleHidden}
             actions={(d) => (
-              <div className="flex items-center justify-center gap-2">
-                <button
-                  onClick={() => handleToggleHidden(d.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    d.is_hidden
-                      ? "bg-primary-fixed text-primary-container hover:bg-primary-container hover:text-white"
-                      : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
-                  }`}
-                >
-                  {d.is_hidden ? "공개" : "비공개"}
-                </button>
+              <div className="flex items-center justify-center">
                 <button
                   onClick={() => handleDeleteRoster(d.id)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-error/10 hover:text-error transition-all"
+                  className="p-1.5 rounded-lg text-on-surface-variant hover:bg-error/10 hover:text-error transition-all"
+                  title="삭제"
                 >
-                  삭제
+                  <DeleteIcon className="w-4 h-4" />
                 </button>
               </div>
             )}
@@ -337,12 +330,14 @@ function DonationTable({
   emptyMessage,
   showApprovedAt = false,
   showVisibility = false,
+  onToggleHidden,
   actions,
 }: {
   list: DonationRecord[];
   emptyMessage: string;
   showApprovedAt?: boolean;
   showVisibility?: boolean;
+  onToggleHidden?: (id: string) => void;
   actions: (d: DonationRecord) => React.ReactNode;
 }) {
   if (list.length === 0) {
@@ -394,9 +389,7 @@ function DonationTable({
             {list.map((d) => (
               <tr
                 key={d.id}
-                className={`hover:bg-primary-fixed/10 transition-colors ${
-                  d.is_hidden ? "opacity-60" : ""
-                }`}
+                className="hover:bg-primary-fixed/10 transition-colors"
               >
                 <td className="px-5 py-3 text-xs text-on-surface-variant whitespace-nowrap">
                   {formatDate(d.created_at)}
@@ -440,15 +433,16 @@ function DonationTable({
                 )}
                 {showVisibility && (
                   <td className="px-4 py-3 text-center">
-                    {d.is_hidden ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-error/10 text-error">
-                        비공개
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
-                        공개
-                      </span>
-                    )}
+                    <button
+                      onClick={() => onToggleHidden?.(d.id)}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-70 ${
+                        d.is_hidden
+                          ? "bg-surface-container text-on-surface-variant"
+                          : "bg-primary-fixed text-primary-container"
+                      }`}
+                    >
+                      {d.is_hidden ? "비공개" : "공개"}
+                    </button>
                   </td>
                 )}
                 <td className="px-4 py-3">{actions(d)}</td>
