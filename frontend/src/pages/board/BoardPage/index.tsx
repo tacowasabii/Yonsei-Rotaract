@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { formatDate } from "@/utils/date";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
-import { ForumIcon, ChatBubbleIcon, FavoriteIcon } from "@assets/icons";
+import { ForumIcon, ChatBubbleIcon, FavoriteIcon, SearchIcon, CampaignIcon, EditIcon } from "@assets/icons";
 import { usePosts } from "@/api/hooks/posts/usePosts";
 import { useNoticePosts } from "@/api/hooks/posts/useNoticePosts";
 import { POSTS_PER_PAGE } from "@/api/posts";
@@ -54,9 +54,7 @@ export default function BoardPage() {
 
       <div className="flex items-center justify-between gap-4 mb-5">
         <div className="relative w-full max-w-sm">
-          <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
-            search
-          </span>
+          <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" />
           <input
             type="text"
             value={search}
@@ -71,7 +69,7 @@ export default function BoardPage() {
               onClick={handleNoticeWriteClick}
               className="flex items-center gap-2 px-5 py-2.5 bg-secondary-fixed text-primary-container font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
             >
-              <span className="material-symbols-outlined text-[18px]">campaign</span>
+              <CampaignIcon className="w-4.5 h-4.5" />
               공지글쓰기
             </button>
           )}
@@ -80,7 +78,7 @@ export default function BoardPage() {
               onClick={handleWriteClick}
               className="flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm"
             >
-              <span className="material-symbols-outlined text-[18px]">edit</span>
+              <EditIcon className="w-4.5 h-4.5" />
               글쓰기
             </button>
           )}

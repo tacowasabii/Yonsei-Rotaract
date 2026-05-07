@@ -14,7 +14,7 @@ import { PATHS, BOARD_PATHS } from "@/routes/paths";
 import { useTogglePin } from "@/api/hooks/posts/useTogglePin";
 import { usePostLike } from "@/api/hooks/posts/usePostLike";
 import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
-import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon } from "@assets/icons";
+import { ChatBubbleIcon, FavoriteIcon, FavoriteFillIcon, ArrowBackIcon, LockIcon, ShareIcon } from "@assets/icons";
 import { useBoardType } from "@/hooks/useBoardType";
 import PostHeader from "./components/PostHeader";
 import CommentList from "./components/CommentList";
@@ -118,7 +118,7 @@ export default function BoardPostPage() {
           }
           className="flex items-center gap-1 hover:text-primary-container transition-colors font-semibold"
         >
-          <span className="material-symbols-outlined text-lg">arrow_back</span>
+          <ArrowBackIcon className="w-4.5 h-4.5" />
           {boardLabel}
         </button>
       </div>
@@ -161,12 +161,7 @@ export default function BoardPostPage() {
           </div>
           <div className="px-8 py-16 flex flex-col items-center gap-4 text-center">
             <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center">
-              <span
-                className="material-symbols-outlined text-3xl text-on-surface-variant"
-                style={{ fontVariationSettings: '"FILL" 1' }}
-              >
-                lock
-              </span>
+              <LockIcon className="w-8 h-8 text-on-surface-variant" />
             </div>
             <div>
               <p className="font-bold text-on-surface text-lg mb-1">
@@ -241,7 +236,7 @@ export default function BoardPostPage() {
             </div>
             <div className="flex items-center gap-2 text-sm text-on-surface-variant">
               <button className="hover:text-on-surface transition-colors flex items-center gap-1">
-                <span className="material-symbols-outlined text-base">share</span>
+                <ShareIcon className="w-4 h-4" />
                 공유
               </button>
               <span className="text-outline-variant">|</span>

@@ -25,3 +25,11 @@ export { default as VolunteerActivismIcon } from './volunteer_activism.svg?react
 export { default as DashboardIcon } from './dashboard.svg?react';
 export { default as PersonAddIcon } from './person_add.svg?react';
 export { default as GroupIcon } from './group.svg?react';
+export { default as SearchIcon } from './search.svg?react';
+export { default as ArrowBackIcon } from './arrow_back.svg?react';
+export { default as LockIcon } from './lock.svg?react';
+export { default as ShareIcon } from './share.svg?react';
+export { default as AddPhotoAlternateIcon } from './add_photo_alternate.svg?react';
+export { default as CheckCircleIcon } from './check_circle.svg?react';
+export { default as PublicIcon } from './public.svg?react';
+export { default as ChevronRightIcon } from './chevron_right.svg?react';

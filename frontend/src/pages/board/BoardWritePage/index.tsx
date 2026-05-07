@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { PersonIcon } from "@assets/icons";
+import { PersonIcon, ArrowBackIcon, AddPhotoAlternateIcon, CloseIcon, CheckCircleIcon, LockIcon, PublicIcon, KeepIcon } from "@assets/icons";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import { useAuth, useIsStaff } from "@/contexts/AuthContext";
@@ -142,7 +142,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
           }}
           className="flex items-center gap-1 hover:text-primary-container transition-colors font-semibold"
         >
-          <span className="material-symbols-outlined text-lg">arrow_back</span>
+          <ArrowBackIcon className="w-4.5 h-4.5" />
           {isEditMode ? "게시글로 돌아가기" : boardLabel}
         </button>
       </div>
@@ -208,7 +208,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
                       : "border-outline-variant/50 hover:border-primary-container/50 hover:bg-surface-container-low"
                   }`}
                 >
-                  <span className="material-symbols-outlined text-3xl text-on-surface-variant">add_photo_alternate</span>
+                  <AddPhotoAlternateIcon className="w-8 h-8 text-on-surface-variant" />
                   <p className="text-sm text-on-surface-variant text-center">클릭하거나 파일을 드래그해서 올려주세요</p>
                   <p className="text-xs text-on-surface-variant/60">JPG, PNG, GIF · 최대 5장</p>
                 </div>
@@ -232,7 +232,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
                         onClick={() => setExistingImageUrls((prev) => prev.filter((_, idx) => idx !== i))}
                         className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                       >
-                        <span className="material-symbols-outlined text-white text-xl">close</span>
+                        <CloseIcon className="w-5 h-5 text-white" />
                       </button>
                     </div>
                   ))}
@@ -243,7 +243,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
                         onClick={() => setNewImages((prev) => prev.filter((_, idx) => idx !== i))}
                         className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                       >
-                        <span className="material-symbols-outlined text-white text-xl">close</span>
+                        <CloseIcon className="w-5 h-5 text-white" />
                       </button>
                     </div>
                   ))}
@@ -315,7 +315,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
                     : "border-transparent bg-surface-container-low hover:bg-surface-container"
                 }`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor" className={isPinned ? "text-error" : "text-on-surface-variant"}><path d="M680-840v80h-40v327l-80-80v-247H400v87l-87-87-33-33v-47h400ZM480-40l-40-40v-240H240v-80l80-80v-46L56-792l56-56 736 736-58 56-264-264h-6v240l-40 40ZM354-400h92l-44-44-2-2-46 46Zm126-193Zm-78 149Z"/></svg>
+                <KeepIcon className={`w-5 h-5 ${isPinned ? "text-error" : "text-on-surface-variant"}`} />
                 <div>
                   <p className={`text-sm font-semibold ${isPinned ? "text-error" : "text-on-surface"}`}>
                     {isPinned ? "고정됨" : "고정 안 함"}
@@ -323,9 +323,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
                   <p className="text-xs text-on-surface-variant">중요 공지로 상단에 표시됩니다</p>
                 </div>
                 {isPinned && (
-                  <span className="material-symbols-outlined text-error text-lg ml-auto" style={{ fontVariationSettings: '"FILL" 1' }}>
-                    check_circle
-                  </span>
+                  <CheckCircleIcon className="w-4.5 h-4.5 text-error ml-auto" />
                 )}
               </button>
             </div>
@@ -335,7 +333,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
             <div className="bg-white rounded-2xl shadow-card px-6 py-5">
               <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">공개 범위</p>
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-primary-container bg-primary-fixed/20">
-                <span className="material-symbols-outlined text-xl text-primary-container">lock</span>
+                <LockIcon className="w-5 h-5 text-primary-container" />
                 <div>
                   <p className="text-sm font-semibold text-primary-container">회원만 공개</p>
                   <p className="text-xs text-on-surface-variant">
@@ -349,9 +347,9 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
               <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">공개 범위</p>
               <div className="space-y-2">
                 {([
-                  { value: "public", label: "전체 공개", desc: "누구나 볼 수 있어요", icon: "public" },
-                  { value: "members", label: "회원만 공개", desc: "로그인한 회원만 볼 수 있어요", icon: "lock" },
-                ] as { value: Visibility; label: string; desc: string; icon: string }[]).map((opt) => (
+                  { value: "public" as Visibility, label: "전체 공개", desc: "누구나 볼 수 있어요", Icon: PublicIcon },
+                  { value: "members" as Visibility, label: "회원만 공개", desc: "로그인한 회원만 볼 수 있어요", Icon: LockIcon },
+                ]).map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setVisibility(opt.value)}
@@ -361,17 +359,13 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
                         : "border-transparent bg-surface-container-low hover:bg-surface-container"
                     }`}
                   >
-                    <span className={`material-symbols-outlined text-xl ${visibility === opt.value ? "text-primary-container" : "text-on-surface-variant"}`}>
-                      {opt.icon}
-                    </span>
+                    <opt.Icon className={`w-5 h-5 ${visibility === opt.value ? "text-primary-container" : "text-on-surface-variant"}`} />
                     <div>
                       <p className={`text-sm font-semibold ${visibility === opt.value ? "text-primary-container" : "text-on-surface"}`}>{opt.label}</p>
                       <p className="text-xs text-on-surface-variant">{opt.desc}</p>
                     </div>
                     {visibility === opt.value && (
-                      <span className="material-symbols-outlined text-primary-container text-lg ml-auto" style={{ fontVariationSettings: '"FILL" 1' }}>
-                        check_circle
-                      </span>
+                      <CheckCircleIcon className="w-4.5 h-4.5 text-primary-container ml-auto" />
                     )}
                   </button>
                 ))}
