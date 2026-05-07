@@ -205,12 +205,12 @@ export default function AdminMembers() {
                           <button
                             onClick={() => handleStatusToggle(member.id, member.status as "active" | "inactive")}
                             disabled={updateStatus.isPending}
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-70 disabled:cursor-not-allowed ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}
+                            className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-70 disabled:cursor-not-allowed ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}
                           >
                             {member.status === "active" ? "활성" : "비활성"}
                           </button>
                         ) : (
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}>
+                          <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${member.status === "active" ? "bg-primary-fixed text-primary-container" : "bg-surface-container text-on-surface-variant"}`}>
                             {member.status === "active" ? "활성" : "비활성"}
                           </span>
                         )}

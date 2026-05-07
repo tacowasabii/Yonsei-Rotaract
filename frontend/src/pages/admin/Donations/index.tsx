@@ -1,5 +1,14 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { isAdminOrAbove } from "../shared";
 import { DeleteIcon } from "@assets/icons";
+
+type DonationConfirmAction = {
+  type: "approve" | "reject" | "delete-roster";
+  id: string;
+  name: string;
+} | null;
 
 interface DonationRecord {
   id: string;
@@ -128,10 +137,16 @@ function getYear(dateStr: string) {
 type Tab = "pending" | "rejected" | "roster";
 
 export default function AdminDonations() {
+  const { role } = useAuth();
+  const canManage = isAdminOrAbove(role);
+
   const [tab, setTab] = useState<Tab>("roster");
   const [pendingList, setPendingList] = useState(MOCK_PENDING);
   const [rejectedList, setRejectedList] = useState(MOCK_REJECTED);
   const [rosterList, setRosterList] = useState(MOCK_APPROVED);
+  const [confirmAction, setConfirmAction] = useState<DonationConfirmAction>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useOutsideClick(modalRef, () => setConfirmAction(null));
 
   const rosterYears = Array.from(
     new Set(rosterList.map((d) => getYear(d.approved_at!)))
@@ -158,20 +173,6 @@ export default function AdminDonations() {
     setRejectedList((prev) => [{ ...target, status: "rejected" as const }, ...prev]);
   }
 
-  function handleReapprove(id: string) {
-    const target = rejectedList.find((d) => d.id === id);
-    if (!target) return;
-    setRejectedList((prev) => prev.filter((d) => d.id !== id));
-    const approved = { ...target, status: "approved" as const, approved_at: new Date().toISOString() };
-    setRosterList((prev) => [approved, ...prev]);
-    const newYear = getYear(approved.approved_at!);
-    setSelectedYear(newYear);
-  }
-
-  function handleDeleteRejected(id: string) {
-    setRejectedList((prev) => prev.filter((d) => d.id !== id));
-  }
-
   function handleToggleHidden(id: string) {
     setRosterList((prev) =>
       prev.map((d) => (d.id === id ? { ...d, is_hidden: !d.is_hidden } : d))
@@ -180,6 +181,14 @@ export default function AdminDonations() {
 
   function handleDeleteRoster(id: string) {
     setRosterList((prev) => prev.filter((d) => d.id !== id));
+  }
+
+  function handleConfirm() {
+    if (!confirmAction) return;
+    if (confirmAction.type === "approve") handleApprove(confirmAction.id);
+    else if (confirmAction.type === "reject") handleReject(confirmAction.id);
+    else if (confirmAction.type === "delete-roster") handleDeleteRoster(confirmAction.id);
+    setConfirmAction(null);
   }
 
   const filteredRoster = rosterList.filter(
@@ -236,22 +245,22 @@ export default function AdminDonations() {
         <DonationTable
           list={pendingList}
           emptyMessage="대기 중인 신청이 없습니다"
-          actions={(d) => (
+          actions={(d) => canManage ? (
             <div className="flex items-center justify-center gap-2">
               <button
-                onClick={() => handleApprove(d.id)}
+                onClick={() => setConfirmAction({ type: "approve", id: d.id, name: d.profile.name })}
                 className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-fixed text-primary-container hover:bg-primary-container hover:text-white transition-all"
               >
                 승인
               </button>
               <button
-                onClick={() => handleReject(d.id)}
+                onClick={() => setConfirmAction({ type: "reject", id: d.id, name: d.profile.name })}
                 className="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-error/10 hover:text-error transition-all"
               >
                 거절
               </button>
             </div>
-          )}
+          ) : null}
         />
       )}
 
@@ -260,23 +269,50 @@ export default function AdminDonations() {
         <DonationTable
           list={rejectedList}
           emptyMessage="거절된 신청이 없습니다"
-          actions={(d) => (
-            <div className="flex items-center justify-center gap-2">
+          actions={() => null}
+        />
+      )}
+
+      {/* 확인 모달 */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div ref={modalRef} className="bg-surface-container-lowest rounded-3xl p-6 shadow-xl w-full max-w-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${confirmAction.type === "approve" ? "bg-primary-container/20" : "bg-error/10"}`}>
+                <span className={`material-symbols-outlined text-xl ${confirmAction.type === "approve" ? "text-primary-container" : "text-error"}`}>
+                  {confirmAction.type === "approve" ? "check_circle" : confirmAction.type === "reject" ? "cancel" : "delete"}
+                </span>
+              </div>
+              <h2 className="font-headline font-bold text-on-surface text-lg">
+                {confirmAction.type === "approve" ? "후원 승인" : confirmAction.type === "reject" ? "후원 거절" : "명단 삭제"}
+              </h2>
+            </div>
+            <p className="text-sm text-on-surface-variant mb-6">
+              <span className="font-bold text-on-surface">{confirmAction.name}</span>
+              {confirmAction.type === "approve" && "님의 후원 신청을 승인하시겠습니까?"}
+              {confirmAction.type === "reject" && "님의 후원 신청을 거절하시겠습니까?"}
+              {confirmAction.type === "delete-roster" && "님을 후원자 명단에서 삭제하시겠습니까?"}
+            </p>
+            <div className="flex gap-2 justify-end">
               <button
-                onClick={() => handleReapprove(d.id)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-fixed text-primary-container hover:bg-primary-container hover:text-white transition-all"
+                onClick={() => setConfirmAction(null)}
+                className="px-4 py-2 text-sm font-bold text-on-surface-variant rounded-full hover:bg-surface-container transition-colors"
               >
-                재승인
+                취소
               </button>
               <button
-                onClick={() => handleDeleteRejected(d.id)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-error/10 hover:text-error transition-all"
+                onClick={handleConfirm}
+                className={`px-5 py-2 text-sm font-bold rounded-full transition-all ${
+                  confirmAction.type === "approve"
+                    ? "bg-primary-container text-white hover:opacity-80"
+                    : "bg-error text-white hover:opacity-80"
+                }`}
               >
-                삭제
+                {confirmAction.type === "approve" ? "승인" : confirmAction.type === "reject" ? "거절" : "삭제"}
               </button>
             </div>
-          )}
-        />
+          </div>
+        </div>
       )}
 
       {/* 후원자 명단 탭 */}
@@ -307,17 +343,17 @@ export default function AdminDonations() {
             showApprovedAt
             showVisibility
             onToggleHidden={handleToggleHidden}
-            actions={(d) => (
+            actions={(d) => canManage ? (
               <div className="flex items-center justify-center">
                 <button
-                  onClick={() => handleDeleteRoster(d.id)}
+                  onClick={() => setConfirmAction({ type: "delete-roster", id: d.id, name: d.profile.name })}
                   className="p-1.5 rounded-lg text-on-surface-variant hover:bg-error/10 hover:text-error transition-all"
                   title="삭제"
                 >
                   <DeleteIcon className="w-4 h-4" />
                 </button>
               </div>
-            )}
+            ) : null}
           />
         </div>
       )}
@@ -412,11 +448,11 @@ function DonationTable({
                 </td>
                 <td className="px-4 py-3 text-center">
                   {d.is_anonymous ? (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+                    <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
                       익명
                     </span>
                   ) : (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-fixed text-primary-container">
+                    <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-fixed text-primary-container">
                       실명
                     </span>
                   )}
@@ -437,7 +473,7 @@ function DonationTable({
                   <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => onToggleHidden?.(d.id)}
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-70 ${
+                      className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full transition-all hover:opacity-70 ${
                         d.is_hidden
                           ? "bg-surface-container text-on-surface-variant"
                           : "bg-primary-fixed text-primary-container"

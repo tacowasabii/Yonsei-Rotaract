@@ -16,7 +16,7 @@ export default function RoleBadge({ role, showAll = false, variant = "light" }: 
   const colors = variant === "dark" ? ROLE_COLORS_DARK : ROLE_COLORS;
 
   return (
-    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${colors[role as AppRole]}`}>
+    <span className={`inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded ${colors[role as AppRole]}`}>
       {ROLE_LABELS[role as AppRole]}
     </span>
   );

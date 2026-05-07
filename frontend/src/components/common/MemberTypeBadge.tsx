@@ -8,7 +8,7 @@ export default function MemberTypeBadge({ memberType }: Props) {
   const isCurrent = memberType === "current";
 
   return (
-    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+    <span className={`inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded ${
       isCurrent
         ? "bg-secondary-fixed text-on-secondary-fixed"
         : "bg-tertiary-fixed text-on-tertiary-fixed-variant"
