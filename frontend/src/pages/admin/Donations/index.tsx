@@ -340,7 +340,11 @@ function DonationTable({
   onToggleHidden?: (id: string) => void;
   actions: (d: DonationRecord) => React.ReactNode;
 }) {
-  if (list.length === 0) {
+  const sorted = [...list].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+
+  if (sorted.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-2">
         <span className="material-symbols-outlined text-4xl">inbox</span>
@@ -384,7 +388,7 @@ function DonationTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10">
-            {list.map((d) => (
+            {sorted.map((d) => (
               <tr
                 key={d.id}
                 className="hover:bg-primary-fixed/10 transition-colors"
