@@ -1,6 +1,7 @@
 const GROUP_SIZE = 10;
 
-const btn = "w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-on-surface-variant hover:bg-surface-container-high disabled:opacity-30 disabled:cursor-not-allowed";
+const btn =
+  "w-9 h-9 flex items-center justify-center rounded-lg transition-colors text-on-surface-variant hover:bg-surface-container-high disabled:opacity-30 disabled:cursor-not-allowed";
 
 interface Props {
   page: number;
@@ -9,25 +10,26 @@ interface Props {
 }
 
 export default function Pagination({ page, totalPages, onChange }: Props) {
-  if (totalPages < 1) return null;
+  if (totalPages < 2) return null;
 
   const currentGroup = Math.ceil(page / GROUP_SIZE);
   const groupStart = (currentGroup - 1) * GROUP_SIZE + 1;
   const groupEnd = Math.min(currentGroup * GROUP_SIZE, totalPages);
-  const pages = Array.from({ length: groupEnd - groupStart + 1 }, (_, i) => groupStart + i);
+  const pages = Array.from(
+    { length: groupEnd - groupStart + 1 },
+    (_, i) => groupStart + i,
+  );
 
   const hasPrevGroup = currentGroup > 1;
   const hasNextGroup = currentGroup * GROUP_SIZE < totalPages;
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center justify-center gap-1.5">
       {/* 맨 처음 */}
-      <button
-        onClick={() => onChange(1)}
-        disabled={page === 1}
-        className={btn}
-      >
-        <span className="material-symbols-outlined text-xl">keyboard_double_arrow_left</span>
+      <button onClick={() => onChange(1)} disabled={page === 1} className={btn}>
+        <span className="material-symbols-outlined text-xl">
+          keyboard_double_arrow_left
+        </span>
       </button>
 
       {/* 이전 그룹 마지막 페이지 */}
@@ -68,7 +70,9 @@ export default function Pagination({ page, totalPages, onChange }: Props) {
         disabled={page === totalPages}
         className={btn}
       >
-        <span className="material-symbols-outlined text-xl">keyboard_double_arrow_right</span>
+        <span className="material-symbols-outlined text-xl">
+          keyboard_double_arrow_right
+        </span>
       </button>
     </div>
   );

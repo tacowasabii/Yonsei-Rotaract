@@ -6,10 +6,11 @@ import { ROLE_LABELS, assignableRoles, formatDate, formatPhone, isAdminOrAbove }
 import SortHeaderButton from "./components/SortHeaderButton";
 import RoleBadge from "@components/common/RoleBadge";
 import MemberTypeBadge from "@components/common/MemberTypeBadge";
+import Pagination from "@components/common/Pagination";
 
 type SortKey = "name" | "generation" | "admission_year";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 export default function AdminMembers() {
   const { role: viewerRole } = useAuth();
@@ -224,37 +225,7 @@ export default function AdminMembers() {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="p-2 rounded-lg text-on-surface-variant hover:bg-primary-fixed/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <span className="material-symbols-outlined text-xl">chevron_left</span>
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPage(p)}
-              className={`w-8 h-8 rounded-lg text-sm font-semibold transition-colors ${
-                p === page
-                  ? "bg-primary-container text-white"
-                  : "text-on-surface-variant hover:bg-primary-fixed/20"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="p-2 rounded-lg text-on-surface-variant hover:bg-primary-fixed/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <span className="material-symbols-outlined text-xl">chevron_right</span>
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   );
 }

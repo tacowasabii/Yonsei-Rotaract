@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 import { isAdminOrAbove } from "../shared";
 import { DeleteIcon } from "@assets/icons";
+import Pagination from "@components/common/Pagination";
 
 type DonationConfirmAction = {
   type: "approve" | "reject" | "delete-roster";
@@ -338,6 +339,7 @@ export default function AdminDonations() {
           )}
 
           <DonationTable
+            key={selectedYear}
             list={filteredRoster}
             emptyMessage={`${selectedYear}년 후원자 명단이 없습니다`}
             showApprovedAt
@@ -361,6 +363,8 @@ export default function AdminDonations() {
   );
 }
 
+const PAGE_SIZE = 15;
+
 function DonationTable({
   list,
   emptyMessage,
@@ -376,9 +380,12 @@ function DonationTable({
   onToggleHidden?: (id: string) => void;
   actions: (d: DonationRecord) => React.ReactNode;
 }) {
+  const [page, setPage] = useState(1);
   const sorted = [...list].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const paged = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (sorted.length === 0) {
     return (
@@ -390,6 +397,7 @@ function DonationTable({
   }
 
   return (
+    <div className="space-y-4">
     <div className="bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -424,7 +432,7 @@ function DonationTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10">
-            {sorted.map((d) => (
+            {paged.map((d) => (
               <tr
                 key={d.id}
                 className="hover:bg-primary-fixed/10 transition-colors"
@@ -489,6 +497,8 @@ function DonationTable({
           </tbody>
         </table>
       </div>
+    </div>
+    <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   );
 }

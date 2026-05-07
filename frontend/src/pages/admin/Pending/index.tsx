@@ -5,9 +5,12 @@ import { usePendingMembers, useRejectedMembers, useApproveMember, useRejectMembe
 import type { PendingMember, RejectedMember } from "@/api/types/member";
 import { formatDate, formatPhone, isAdminOrAbove } from "../shared";
 import MemberTypeBadge from "@components/common/MemberTypeBadge";
+import Pagination from "@components/common/Pagination";
 
 type Tab = "pending" | "rejected";
 type ConfirmAction = { type: "approve" | "reject"; id: string; name: string } | null;
+
+const PAGE_SIZE = 15;
 
 function PendingTable({
   members,
@@ -18,8 +21,13 @@ function PendingTable({
   canApprove: boolean;
   onAction?: (type: "approve" | "reject", id: string, name: string) => void;
 }) {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(members.length / PAGE_SIZE));
+  const paged = members.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
-    <div className="bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden">
+    <div className="space-y-4">
+      <div className="bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -35,7 +43,7 @@ function PendingTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10">
-            {members.map((p) => (
+            {paged.map((p) => (
               <tr key={p.id} className="hover:bg-primary-fixed/10 transition-colors">
                 <td className="px-5 py-3 text-xs text-on-surface-variant whitespace-nowrap">
                   {formatDate(p.created_at)}
@@ -82,6 +90,8 @@ function PendingTable({
           </tbody>
         </table>
       </div>
+    </div>
+    <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   );
 }
