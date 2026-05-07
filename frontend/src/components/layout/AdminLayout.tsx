@@ -3,13 +3,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers } from "@/api/hooks/profiles/usePendingMembers";
 import { PATHS } from "@/routes/paths";
 import RoleBadge from "@components/common/RoleBadge";
-import { VolunteerActivismIcon, DashboardIcon, PersonAddIcon, GroupIcon } from "@assets/icons";
+import { VolunteerActivismIcon, DashboardIcon, PersonAddIcon, GroupIcon, FlagIcon } from "@assets/icons";
 
 const navItems = [
   { to: PATHS.ADMIN,           label: "대시보드", icon: <DashboardIcon className="w-5 h-5" />,          end: true,  showBadge: false },
   { to: PATHS.ADMIN_PENDING,   label: "가입 신청", icon: <PersonAddIcon className="w-5 h-5" />,          end: false, showBadge: true  },
   { to: PATHS.ADMIN_MEMBERS,   label: "회원 관리", icon: <GroupIcon className="w-5 h-5" />,              end: false, showBadge: false },
   { to: PATHS.ADMIN_DONATIONS, label: "후원자 관리", icon: <VolunteerActivismIcon className="w-5 h-5" />,  end: false, showBadge: false },
+  { to: PATHS.ADMIN_REPORTS,   label: "신고 관리",  icon: <FlagIcon className="w-5 h-5" />,              end: false, showBadge: false },
 ];
 
 export default function AdminLayout() {

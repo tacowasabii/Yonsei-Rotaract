@@ -42,6 +42,7 @@ export const PATHS = {
   ADMIN_PENDING: "/admin/pending",
   ADMIN_MEMBERS: "/admin/members",
   ADMIN_DONATIONS: "/admin/donations",
+  ADMIN_REPORTS: "/admin/reports",
 } as const;
 
 export const BOARD_PATHS = {

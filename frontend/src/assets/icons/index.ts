@@ -33,3 +33,4 @@ export { default as AddPhotoAlternateIcon } from './add_photo_alternate.svg?reac
 export { default as CheckCircleIcon } from './check_circle.svg?react';
 export { default as PublicIcon } from './public.svg?react';
 export { default as ChevronRightIcon } from './chevron_right.svg?react';
+export { default as FlagIcon } from './flag.svg?react';
