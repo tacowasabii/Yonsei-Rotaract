@@ -130,36 +130,35 @@ export default function AdminDonations() {
           onPageChange={setPendingPage}
           loading={pendingQuery.isLoading}
           emptyMessage="대기 중인 신청이 없습니다"
-          actions={(d) =>
-            canManage ? (
-              <div className="flex items-center justify-center gap-2">
-                <button
-                  onClick={() =>
-                    setConfirmAction({
-                      type: "approve",
-                      id: d.id,
-                      name: d.profiles?.name ?? "알 수 없음",
-                    })
-                  }
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-fixed text-primary-container hover:bg-primary-container hover:text-white transition-all"
-                >
-                  승인
-                </button>
-                <button
-                  onClick={() =>
-                    setConfirmAction({
-                      type: "reject",
-                      id: d.id,
-                      name: d.profiles?.name ?? "알 수 없음",
-                    })
-                  }
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-error/10 hover:text-error transition-all"
-                >
-                  거절
-                </button>
-              </div>
-            ) : null
-          }
+          showActionsColumn={canManage}
+          actions={(d) => (
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() =>
+                  setConfirmAction({
+                    type: "approve",
+                    id: d.id,
+                    name: d.profiles?.name ?? "알 수 없음",
+                  })
+                }
+                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-fixed text-primary-container hover:bg-primary-container hover:text-white transition-all"
+              >
+                승인
+              </button>
+              <button
+                onClick={() =>
+                  setConfirmAction({
+                    type: "reject",
+                    id: d.id,
+                    name: d.profiles?.name ?? "알 수 없음",
+                  })
+                }
+                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-error/10 hover:text-error transition-all"
+              >
+                거절
+              </button>
+            </div>
+          )}
         />
       )}
 
@@ -172,6 +171,7 @@ export default function AdminDonations() {
           onPageChange={setRejectedPage}
           loading={rejectedQuery.isLoading}
           emptyMessage="거절된 신청이 없습니다"
+          showActionsColumn={false}
           actions={() => null}
         />
       )}
@@ -273,25 +273,24 @@ export default function AdminDonations() {
             onToggleHidden={(id, current) =>
               toggleMutation.mutate({ id, isHidden: !current })
             }
-            actions={(d) =>
-              canManage ? (
-                <div className="flex items-center justify-center">
-                  <button
-                    onClick={() =>
-                      setConfirmAction({
-                        type: "delete-roster",
-                        id: d.id,
-                        name: d.profiles?.name ?? "알 수 없음",
-                      })
-                    }
-                    className="p-1.5 rounded-lg text-on-surface-variant hover:bg-error/10 hover:text-error transition-all"
-                    title="삭제"
-                  >
-                    <DeleteIcon className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : null
-            }
+            showActionsColumn={canManage}
+            actions={(d) => (
+              <div className="flex items-center justify-center">
+                <button
+                  onClick={() =>
+                    setConfirmAction({
+                      type: "delete-roster",
+                      id: d.id,
+                      name: d.profiles?.name ?? "알 수 없음",
+                    })
+                  }
+                  className="p-1.5 rounded-lg text-on-surface-variant hover:bg-error/10 hover:text-error transition-all"
+                  title="삭제"
+                >
+                  <DeleteIcon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           />
         </div>
       )}
@@ -308,6 +307,7 @@ function DonationTable({
   emptyMessage,
   showApprovedAt = false,
   showVisibility = false,
+  showActionsColumn = false,
   onToggleHidden,
   actions,
 }: {
@@ -319,6 +319,7 @@ function DonationTable({
   emptyMessage: string;
   showApprovedAt?: boolean;
   showVisibility?: boolean;
+  showActionsColumn?: boolean;
   onToggleHidden?: (id: string, current: boolean) => void;
   actions: (d: DonationRecord) => React.ReactNode;
 }) {
@@ -373,7 +374,7 @@ function DonationTable({
                     공개 여부
                   </th>
                 )}
-                <th className="px-4 py-3" />
+                {showActionsColumn && <th className="px-4 py-3" />}
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/10">
@@ -433,7 +434,7 @@ function DonationTable({
                       </button>
                     </td>
                   )}
-                  <td className="px-4 py-3">{actions(d)}</td>
+                  {showActionsColumn && <td className="px-4 py-3">{actions(d)}</td>}
                 </tr>
               ))}
             </tbody>
