@@ -8,14 +8,17 @@ interface AlbumCreateModalProps {
   onClose: () => void;
 }
 
+const CATEGORIES = ["봉사활동", "대내활동", "대외활동", "버디활동", "기타"];
+
 export default function AlbumCreateModal({ onClose }: AlbumCreateModalProps) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState<Date | null>(null);
+  const [category, setCategory] = useState<string | null>(null);
   const [coverImages, setCoverImages] = useState<File[]>([]);
   const [sizeError, setSizeError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const canSubmit = title.trim().length > 0 && date !== null;
+  const canSubmit = title.trim().length > 0 && date !== null && category !== null;
 
   const handleFiles = async (files: FileList | null) => {
     if (!files) return;
@@ -67,6 +70,28 @@ export default function AlbumCreateModal({ onClose }: AlbumCreateModalProps) {
           날짜 <span className="text-red-400">*</span>
         </label>
         <DatePicker value={date} onChange={setDate} />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-semibold text-on-surface">
+          카테고리 <span className="text-red-400">*</span>
+        </label>
+        <div className="flex gap-2 flex-wrap">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setCategory(cat)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                category === cat
+                  ? "bg-primary-container text-white"
+                  : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col gap-1.5">

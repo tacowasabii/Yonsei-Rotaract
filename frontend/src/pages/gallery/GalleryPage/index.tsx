@@ -5,31 +5,32 @@ import PageHeader from "@components/layout/PageHeader";
 import Lightbox from "@components/common/Lightbox";
 import { PhotoLibraryIcon, AddPhotoAlternateIcon } from "@assets/icons";
 import { PATHS } from "@/routes/paths";
+import { CATEGORY_STYLES, CATEGORY_DEFAULT } from "@/constants/gallery";
 import AlbumCreateModal from "./AlbumCreateModal";
 
 const albums = [
-  { id: 1, title: "2025 대동제 봉사부스", date: "2025. 04", count: 24, category: "이벤트", color: "bg-primary-fixed/40", accent: "text-primary-container" },
-  { id: 2, title: "안산 연희동 벽화 봉사", date: "2025. 03", count: 38, category: "봉사활동", color: "bg-tertiary-fixed/40", accent: "text-tertiary-container" },
-  { id: 3, title: "OB/YB 연합 MT", date: "2025. 03", count: 56, category: "모임", color: "bg-secondary-fixed/40", accent: "text-on-secondary-fixed" },
-  { id: 4, title: "신촌 무료급식소 봉사", date: "2025. 02", count: 19, category: "봉사활동", color: "bg-primary-fixed/30", accent: "text-primary-container" },
+  { id: 1, title: "2025 대동제 봉사부스", date: "2025. 04", count: 24, category: "대외활동" },
+  { id: 2, title: "안산 연희동 벽화 봉사", date: "2025. 03", count: 38, category: "봉사활동" },
+  { id: 3, title: "OB/YB 연합 MT", date: "2025. 03", count: 56, category: "대내활동" },
+  { id: 4, title: "신촌 무료급식소 봉사", date: "2025. 02", count: 19, category: "봉사활동" },
 ];
 
 const photos = [
-  { id: 1, album: "OB/YB 연합 MT", category: "모임", color: "bg-secondary-fixed/30", size: "large" },
-  { id: 2, album: "안산 연희동 벽화 봉사", category: "봉사활동", color: "bg-tertiary-fixed/30", size: "small" },
-  { id: 3, album: "2025 대동제 봉사부스", category: "이벤트", color: "bg-primary-fixed/30", size: "small" },
-  { id: 4, album: "신촌 무료급식소 봉사", category: "봉사활동", color: "bg-primary-fixed/40", size: "small" },
-  { id: 5, album: "OB/YB 연합 MT", category: "모임", color: "bg-secondary-fixed/40", size: "medium" },
-  { id: 6, album: "안산 연희동 벽화 봉사", category: "봉사활동", color: "bg-tertiary-fixed/20", size: "small" },
-  { id: 7, album: "2025 대동제 봉사부스", category: "이벤트", color: "bg-primary-fixed/20", size: "large" },
-  { id: 8, album: "신촌 무료급식소 봉사", category: "봉사활동", color: "bg-tertiary-fixed/30", size: "small" },
-  { id: 9, album: "OB/YB 연합 MT", category: "모임", color: "bg-secondary-fixed/30", size: "small" },
-  { id: 10, album: "안산 연희동 벽화 봉사", category: "봉사활동", color: "bg-primary-fixed/30", size: "medium" },
-  { id: 11, album: "2025 대동제 봉사부스", category: "이벤트", color: "bg-primary-fixed/40", size: "small" },
-  { id: 12, album: "신촌 무료급식소 봉사", category: "봉사활동", color: "bg-tertiary-fixed/40", size: "small" },
+  { id: 1, album: "OB/YB 연합 MT", category: "대내활동", size: "large" },
+  { id: 2, album: "안산 연희동 벽화 봉사", category: "봉사활동", size: "small" },
+  { id: 3, album: "2025 대동제 봉사부스", category: "대외활동", size: "small" },
+  { id: 4, album: "신촌 무료급식소 봉사", category: "봉사활동", size: "small" },
+  { id: 5, album: "OB/YB 연합 MT", category: "대내활동", size: "medium" },
+  { id: 6, album: "안산 연희동 벽화 봉사", category: "봉사활동", size: "small" },
+  { id: 7, album: "2025 대동제 봉사부스", category: "대외활동", size: "large" },
+  { id: 8, album: "신촌 무료급식소 봉사", category: "봉사활동", size: "small" },
+  { id: 9, album: "OB/YB 연합 MT", category: "대내활동", size: "small" },
+  { id: 10, album: "안산 연희동 벽화 봉사", category: "봉사활동", size: "medium" },
+  { id: 11, album: "2025 대동제 봉사부스", category: "대외활동", size: "small" },
+  { id: 12, album: "신촌 무료급식소 봉사", category: "봉사활동", size: "small" },
 ];
 
-const categories = ["전체", "봉사활동", "이벤트", "모임"];
+const categories = ["전체", "봉사활동", "대내활동", "대외활동", "버디활동", "기타"];
 
 export default function GalleryPage() {
   const navigate = useNavigate();
@@ -95,19 +96,21 @@ export default function GalleryPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {albums.map((album) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {albums.map((album) => {
+              const { color, accent } = CATEGORY_STYLES[album.category] ?? CATEGORY_DEFAULT;
+              return (
               <div
                 key={album.id}
                 onClick={() => navigate(PATHS.GALLERY_ALBUM.replace(":id", String(album.id)))}
                 className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-card hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group"
               >
-                <div className={`h-52 ${album.color} relative flex items-center justify-center`}>
+                <div className={`h-52 ${color} relative flex items-center justify-center`}>
                   <div className="grid grid-cols-2 gap-2 p-4 w-full h-full">
                     {[0, 1, 2, 3].map((j) => (
                       <div
                         key={j}
-                        className={`rounded-xl ${j === 0 ? album.color : "bg-white/20"} flex items-center justify-center`}
+                        className={`rounded-xl ${j === 0 ? color : "bg-white/20"} flex items-center justify-center`}
                       >
                         <span className="material-symbols-outlined text-2xl text-on-surface-variant/30">image</span>
                       </div>
@@ -115,7 +118,7 @@ export default function GalleryPage() {
                   </div>
                   <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
                   <div className="absolute bottom-4 left-4">
-                    <span className={`text-xs font-bold ${album.accent} bg-white/80 px-2 py-0.5 rounded-full`}>
+                    <span className={`text-xs font-bold ${accent} bg-white/80 px-2 py-0.5 rounded-full`}>
                       {album.category}
                     </span>
                   </div>
@@ -130,7 +133,8 @@ export default function GalleryPage() {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )
       )}
@@ -166,21 +170,24 @@ export default function GalleryPage() {
             </div>
 
             <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-              {filteredPhotos.map((photo, i) => (
-                <div
-                  key={photo.id}
-                  onClick={() => setLightboxIndex(i)}
-                  className={`break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer group ${photo.color} ${
-                    photo.size === "large" ? "h-64" : photo.size === "medium" ? "h-48" : "h-36"
-                  } flex items-center justify-center`}
-                >
-                  <span className="material-symbols-outlined text-3xl text-on-surface-variant/30">image</span>
-                  <div className="absolute inset-0 bg-primary/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <span className="material-symbols-outlined text-white text-3xl mb-1">zoom_in</span>
-                    <p className="text-white text-xs font-semibold text-center px-2 leading-tight">{photo.album}</p>
+              {filteredPhotos.map((photo, i) => {
+                const { color } = CATEGORY_STYLES[photo.category] ?? CATEGORY_DEFAULT;
+                return (
+                  <div
+                    key={photo.id}
+                    onClick={() => setLightboxIndex(i)}
+                    className={`break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer group ${color} ${
+                      photo.size === "large" ? "h-64" : photo.size === "medium" ? "h-48" : "h-36"
+                    } flex items-center justify-center`}
+                  >
+                    <span className="material-symbols-outlined text-3xl text-on-surface-variant/30">image</span>
+                    <div className="absolute inset-0 bg-primary/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <span className="material-symbols-outlined text-white text-3xl mb-1">zoom_in</span>
+                      <p className="text-white text-xs font-semibold text-center px-2 leading-tight">{photo.album}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )
@@ -190,7 +197,10 @@ export default function GalleryPage() {
 
       {lightboxIndex !== null && (
         <Lightbox
-          photos={filteredPhotos}
+          photos={filteredPhotos.map((p) => ({
+            id: p.id,
+            color: (CATEGORY_STYLES[p.category] ?? CATEGORY_DEFAULT).color,
+          }))}
           initialIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
         />
