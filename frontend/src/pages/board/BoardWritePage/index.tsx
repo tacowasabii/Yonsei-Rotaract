@@ -321,20 +321,17 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
                 onClick={() => setIsPinned((prev) => !prev)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
                   isPinned
-                    ? "border-error bg-error/5"
+                    ? "border-primary-container bg-primary-fixed/20"
                     : "border-transparent bg-surface-container-low hover:bg-surface-container"
                 }`}
               >
-                <KeepIcon className={`w-5 h-5 ${isPinned ? "text-error" : "text-on-surface-variant"}`} />
+                <KeepIcon className={`w-5 h-5 ${isPinned ? "text-primary-container fill-current" : "text-on-surface-variant"}`} />
                 <div>
-                  <p className={`text-sm font-semibold ${isPinned ? "text-error" : "text-on-surface"}`}>
+                  <p className={`text-sm font-semibold ${isPinned ? "text-primary-container" : "text-on-surface"}`}>
                     {isPinned ? "고정됨" : "고정 안 함"}
                   </p>
                   <p className="text-xs text-on-surface-variant">중요 공지로 상단에 표시됩니다</p>
                 </div>
-                {isPinned && (
-                  <CheckCircleIcon className="w-4.5 h-4.5 text-error ml-auto" />
-                )}
               </button>
             </div>
           )}
