@@ -6,7 +6,7 @@ import Lightbox from "@components/common/Lightbox";
 import { PhotoLibraryIcon, AddPhotoAlternateIcon, SpinnerIcon, AddIcon } from "@assets/icons";
 import { PATHS } from "@/routes/paths";
 import { CATEGORY_STYLES, CATEGORY_DEFAULT } from "@/constants/gallery";
-import { useIsStaff } from "@/contexts/AuthContext";
+import { useIsStaff, useIsLoggedIn } from "@/contexts/AuthContext";
 import { useAlbums } from "@/api/hooks/gallery/useAlbums";
 import { useAllPhotos } from "@/api/hooks/gallery/useAllPhotos";
 import type { GalleryCategory } from "@/api/gallery";
@@ -16,6 +16,7 @@ const categories = ["전체", "봉사활동", "대내활동", "대외활동", "�
 
 export default function GalleryPage() {
   const navigate = useNavigate();
+  const isLoggedIn = useIsLoggedIn();
   const isStaff = useIsStaff();
   const [activeTab, setActiveTab] = useState<"albums" | "all">("albums");
   const [activeCategory, setActiveCategory] = useState<GalleryCategory | "전체">("전체");
@@ -45,7 +46,10 @@ export default function GalleryPage() {
           {(["albums", "all"] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                if (tab === "all" && !isLoggedIn) { navigate(PATHS.LOGIN); return; }
+                setActiveTab(tab);
+              }}
               className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
                 activeTab === tab
                   ? "bg-primary-container text-white"
@@ -103,7 +107,10 @@ export default function GalleryPage() {
               return (
                 <div
                   key={album.id}
-                  onClick={() => navigate(PATHS.GALLERY_ALBUM.replace(":id", album.id))}
+                  onClick={() => {
+                    if (!isLoggedIn) { navigate(PATHS.LOGIN); return; }
+                    navigate(PATHS.GALLERY_ALBUM.replace(":id", album.id));
+                  }}
                   className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-card hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group"
                 >
                   <div className={`h-52 ${color} relative flex items-center justify-center`}>

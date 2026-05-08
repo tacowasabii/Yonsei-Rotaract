@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PATHS } from "@/routes/paths";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
-import { FavoriteFillIcon, PersonIcon, AccountBalanceIcon, CheckIcon, ContentCopyIcon, VolunteerActivismIcon, SpinnerIcon } from "@assets/icons";
+import { FavoriteFillIcon, PersonIcon, AccountBalanceIcon, CheckIcon, ContentCopyIcon, VolunteerActivismIcon, SpinnerIcon, InboxIcon } from "@assets/icons";
 import DonationFormModal from "./components/DonationFormModal";
 import { usePublicDonations } from "@/api/hooks/donations/usePublicDonations";
 import { usePublicDonationYears } from "@/api/hooks/donations/usePublicDonationYears";
@@ -132,7 +132,7 @@ export default function DonatePage() {
         </div>
       ) : donations.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-2">
-          <span className="material-symbols-outlined text-4xl">inbox</span>
+          <InboxIcon className="w-9 h-9" />
           <p className="text-sm font-semibold">
             {currentYear ? `${currentYear}년 후원자가 없습니다` : "아직 등록된 후원자가 없습니다"}
           </p>
