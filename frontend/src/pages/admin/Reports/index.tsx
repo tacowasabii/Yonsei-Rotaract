@@ -3,45 +3,11 @@ import Pagination from "@components/common/Pagination";
 import ModalLayout from "@components/common/ModalLayout";
 import { formatDateTime } from "@/utils/date";
 import { CloseIcon } from "@assets/icons";
+import { useReports, useResolveReport, useRevertReport } from "@/api/hooks/reports/useReports";
+import { useIsAdmin } from "@/contexts/AuthContext";
+import type { ReportRow } from "@/api/reports";
 
 type Tab = "pending" | "resolved";
-type ReportStatus = "pending" | "resolved";
-
-interface MockReport {
-  id: string;
-  reporter: string;
-  title: string;
-  content: string;
-  created_at: string;
-  status: ReportStatus;
-}
-
-const initialReports: MockReport[] = [
-  {
-    id: "1",
-    reporter: "김민준",
-    title: "욕설 및 비하 발언",
-    content: "게시판에서 특정 사용자를 지속적으로 비하하는 댓글을 작성하고 있습니다.",
-    created_at: "2025-05-01T10:23:00Z",
-    status: "pending",
-  },
-  {
-    id: "2",
-    reporter: "이서연",
-    title: "허위 정보 게시",
-    content: "사실과 다른 동아리 관련 정보를 게시글로 올리고 있습니다.",
-    created_at: "2025-05-03T14:11:00Z",
-    status: "resolved",
-  },
-  {
-    id: "3",
-    reporter: "박지호",
-    title: "스팸성 게시물",
-    content: "동일한 내용의 게시글을 여러 게시판에 반복적으로 올리고 있습니다.",
-    created_at: "2025-05-05T09:47:00Z",
-    status: "pending",
-  },
-];
 
 const tabs: { key: Tab; label: string }[] = [
   { key: "pending",  label: "대기 중" },
@@ -53,31 +19,21 @@ const PAGE_SIZE = 15;
 export default function AdminReports() {
   const [tab, setTab] = useState<Tab>("pending");
   const [page, setPage] = useState(1);
-  const [reports, setReports] = useState<MockReport[]>(initialReports);
-  const [selected, setSelected] = useState<MockReport | null>(null);
+  const [selected, setSelected] = useState<ReportRow | null>(null);
+
+  const isAdmin = useIsAdmin();
+  const { data, isLoading } = useReports(tab, page);
+  const { mutate: resolve } = useResolveReport();
+  const { mutate: revert } = useRevertReport();
+
+  const reports = data?.data ?? [];
+  const totalPages = Math.ceil((data?.count ?? 0) / PAGE_SIZE);
 
   function handleTabChange(key: Tab) {
     setTab(key);
     setPage(1);
+    setSelected(null);
   }
-
-  function toggleStatus(id: string) {
-    setReports(prev =>
-      prev.map(r =>
-        r.id === id
-          ? { ...r, status: r.status === "pending" ? "resolved" : "pending" }
-          : r
-      )
-    );
-    setSelected(prev =>
-      prev ? { ...prev, status: prev.status === "pending" ? "resolved" : "pending" } : null
-    );
-  }
-
-  const filtered = reports.filter((r) => r.status === tab);
-
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -112,45 +68,55 @@ export default function AdminReports() {
               <th className="text-left px-5 py-3.5 text-xs font-bold text-on-surface-variant">신고자</th>
               <th className="text-left px-5 py-3.5 text-xs font-bold text-on-surface-variant">제목</th>
               <th className="text-left px-5 py-3.5 text-xs font-bold text-on-surface-variant">내용</th>
-              <th className="text-left px-5 py-3.5 text-xs font-bold text-on-surface-variant">접수일</th>
-              <th className="px-5 py-3.5" />
+              <th className="text-left px-5 py-3.5 text-xs font-bold text-on-surface-variant w-62.5">접수일</th>
+              {isAdmin && <th className="px-5 py-3.5 w-37.5" />}
             </tr>
           </thead>
           <tbody>
-            {paged.length === 0 ? (
+            {isLoading ? (
               <tr>
-                <td colSpan={4} className="text-center py-16 text-sm text-on-surface-variant">
+                <td colSpan={5} className="text-center py-16 text-sm text-on-surface-variant">
+                  불러오는 중...
+                </td>
+              </tr>
+            ) : reports.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text-center py-16 text-sm text-on-surface-variant">
                   신고 내역이 없습니다.
                 </td>
               </tr>
             ) : (
-              paged.map((r) => (
+              reports.map((r) => (
                 <tr
                   key={r.id}
                   onClick={() => setSelected(r)}
                   className="border-b border-outline-variant/20 last:border-0 hover:bg-surface-container/30 transition-colors cursor-pointer"
                 >
-                  <td className="px-5 py-4 text-sm font-semibold text-on-surface whitespace-nowrap">{r.reporter}</td>
+                  <td className="px-5 py-4 text-sm font-semibold text-on-surface whitespace-nowrap">
+                    {r.profiles?.name ?? "알 수 없음"}
+                  </td>
                   <td className="px-5 py-4 text-sm text-on-surface">{r.title}</td>
                   <td className="px-5 py-4 text-sm text-on-surface-variant max-w-xs truncate">{r.content}</td>
                   <td className="px-5 py-4 text-sm text-on-surface-variant whitespace-nowrap">{formatDateTime(r.created_at)}</td>
-                  <td className="px-5 py-4 text-right">
-                    {r.status === "pending" ? (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); toggleStatus(r.id); }}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-fixed text-primary-container hover:bg-primary-container hover:text-white transition-all"
-                      >
-                        처리 완료
-                      </button>
-                    ) : (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); toggleStatus(r.id); }}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors"
-                      >
-                        되돌리기
-                      </button>
-                    )}
-                  </td>
+                  {isAdmin && (
+                    <td className="px-5 py-4 text-right">
+                      {r.status === "pending" ? (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); resolve(r.id); }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-fixed text-primary-container hover:bg-primary-container hover:text-white transition-all"
+                        >
+                          처리 완료
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); revert(r.id); }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors"
+                        >
+                          되돌리기
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))
             )}
@@ -174,7 +140,7 @@ export default function AdminReports() {
           </div>
 
           <div className="flex gap-6 text-sm text-on-surface-variant">
-            <span>신고자: <strong className="text-on-surface">{selected.reporter}</strong></span>
+            <span>신고자: <strong className="text-on-surface">{selected.profiles?.name ?? "알 수 없음"}</strong></span>
             <span>접수일: <strong className="text-on-surface">{formatDateTime(selected.created_at)}</strong></span>
           </div>
 
@@ -190,7 +156,6 @@ export default function AdminReports() {
               <p className="text-sm text-on-surface whitespace-pre-wrap">{selected.content}</p>
             </div>
           </div>
-
         </ModalLayout>
       )}
     </div>
