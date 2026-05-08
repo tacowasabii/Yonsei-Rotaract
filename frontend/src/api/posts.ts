@@ -240,9 +240,13 @@ export async function deletePost(id: string): Promise<void> {
     }
   }
 
-  const { error } = await supabase.from("posts").delete().eq("id", id);
+  const { error } = await supabase
+    .from("posts")
+    .update({ is_deleted: true, deleted_at: new Date().toISOString(), image_urls: [] })
+    .eq("id", id);
   if (error) throw error;
 }
+
 
 export interface UpdatePostParams {
   title: string;

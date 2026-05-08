@@ -66,6 +66,9 @@ export async function updateComment(id: string, content: string): Promise<Commen
 }
 
 export async function deleteComment(id: string): Promise<void> {
-  const { error } = await supabase.from("comments").delete().eq("id", id);
+  const { error } = await supabase
+    .from("comments")
+    .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+    .eq("id", id);
   if (error) throw error;
 }
