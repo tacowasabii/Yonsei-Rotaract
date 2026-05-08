@@ -19,7 +19,8 @@ export async function fetchDonations(
     .range(from, to);
 
   if (error) throw error;
-  return { data: (data ?? []) as DonationRecord[], total: count ?? 0 };
+  const mapped = (data ?? []).map((d) => ({ ...d, profiles: Array.isArray(d.profiles) ? (d.profiles[0] ?? null) : d.profiles }));
+  return { data: mapped as DonationRecord[], total: count ?? 0 };
 }
 
 export async function fetchPublicDonations(year?: number): Promise<PublicDonation[]> {
@@ -38,7 +39,8 @@ export async function fetchPublicDonations(year?: number): Promise<PublicDonatio
 
   const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as PublicDonation[];
+  const mapped = (data ?? []).map((d) => ({ ...d, profiles: Array.isArray(d.profiles) ? (d.profiles[0] ?? null) : d.profiles }));
+  return mapped as PublicDonation[];
 }
 
 export async function fetchPublicDonationYears(): Promise<number[]> {
