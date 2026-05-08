@@ -7,6 +7,7 @@ import { usePendingMembers, useApproveMember, useRejectMember } from "@/api/hook
 import { PATHS } from "@/routes/paths";
 import { isAdminOrAbove } from "../shared";
 import StatCard from "./components/StatCard";
+import ConfirmModal from "@components/admin/ConfirmModal";
 
 type ConfirmAction = { type: "approve" | "reject"; id: string; name: string } | null;
 
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
   const rejectMember = useRejectMember();
 
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+  const isMutating = approveMember.isPending || rejectMember.isPending;
 
   function handleConfirm() {
     if (!confirmAction) return;
@@ -123,49 +125,22 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* 확인 모달 */}
       {confirmAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-xl w-full max-w-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${confirmAction.type === "approve" ? "bg-primary-container/20" : "bg-error/10"}`}>
-                <span className={`material-symbols-outlined text-xl ${confirmAction.type === "approve" ? "text-primary-container" : "text-error"}`}>
-                  {confirmAction.type === "approve" ? "check_circle" : "cancel"}
-                </span>
-              </div>
-              <h2 className="font-headline font-bold text-on-surface text-lg">
-                {confirmAction.type === "approve" ? "가입 승인" : "가입 거절"}
-              </h2>
-            </div>
-            <p className="text-sm text-on-surface-variant mb-6">
+        <ConfirmModal
+          title={confirmAction.type === "approve" ? "가입 승인" : "가입 거절"}
+          icon={confirmAction.type === "approve" ? "check_circle" : "cancel"}
+          isDestructive={confirmAction.type === "reject"}
+          confirmLabel={confirmAction.type === "approve" ? "승인" : "거절"}
+          message={
+            <>
               <span className="font-bold text-on-surface">{confirmAction.name}</span>님의 가입 신청을{" "}
               {confirmAction.type === "approve" ? "승인" : "거절"}하시겠습니까?
-            </p>
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setConfirmAction(null)}
-                disabled={approveMember.isPending || rejectMember.isPending}
-                className="px-4 py-2 text-sm font-bold text-on-surface-variant rounded-full hover:bg-surface-container transition-colors disabled:opacity-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={approveMember.isPending || rejectMember.isPending}
-                className={`flex items-center gap-1.5 px-5 py-2 text-sm font-bold rounded-full transition-all disabled:opacity-50 ${
-                  confirmAction.type === "approve"
-                    ? "bg-primary-container text-white hover:opacity-80"
-                    : "bg-error text-white hover:opacity-80"
-                }`}
-              >
-                {(approveMember.isPending || rejectMember.isPending) && (
-                  <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
-                )}
-                {confirmAction.type === "approve" ? "승인" : "거절"}
-              </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+          onConfirm={handleConfirm}
+          onClose={() => { if (!isMutating) setConfirmAction(null); }}
+          isPending={isMutating}
+        />
       )}
     </>
   );

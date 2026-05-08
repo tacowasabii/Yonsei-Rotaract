@@ -6,6 +6,7 @@ import { CloseIcon } from "@assets/icons";
 import { useReports, useResolveReport, useRevertReport } from "@/api/hooks/reports/useReports";
 import { useIsAdmin } from "@/contexts/AuthContext";
 import type { ReportRow } from "@/api/reports";
+import AdminTabBar from "@components/admin/AdminTabBar";
 
 type Tab = "pending" | "resolved";
 
@@ -43,22 +44,7 @@ export default function AdminReports() {
         <p className="text-sm text-on-surface-variant mt-1">접수된 신고 내역을 조회하고 처리합니다.</p>
       </div>
 
-      {/* 탭 */}
-      <div className="flex gap-1 bg-surface-container rounded-xl p-1 w-fit">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => handleTabChange(t.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-              tab === t.key
-                ? "bg-white text-on-surface shadow-sm"
-                : "text-on-surface-variant hover:text-on-surface"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <AdminTabBar tabs={tabs} activeTab={tab} onChange={handleTabChange} variant="segment" />
 
       {/* 테이블 */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
