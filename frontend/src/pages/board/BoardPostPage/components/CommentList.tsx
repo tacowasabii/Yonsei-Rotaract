@@ -74,9 +74,17 @@ export default function CommentList({
 
         return (
           <div key={comment.id} className="px-8 py-4 flex items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center shrink-0 mt-0.5">
-              <PersonIcon className="w-4 h-4 text-on-surface-variant" />
-            </div>
+            {!isAnon && (comment as Comment).profiles?.avatar_url ? (
+              <img
+                src={(comment as Comment).profiles!.avatar_url!}
+                alt={(comment as Comment).profiles?.name}
+                className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center shrink-0 mt-0.5">
+                <PersonIcon className="w-4 h-4 text-on-surface-variant" />
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-bold text-on-surface">{displayName}</span>
@@ -109,7 +117,7 @@ export default function CommentList({
                     value={editText}
                     onChange={(e) => onEditTextChange(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") onEditSave();
+                      if (e.key === "Enter" && !e.nativeEvent.isComposing) onEditSave();
                       if (e.key === "Escape") onEditCancel();
                     }}
                     className="flex-1 px-3 py-2 bg-surface-container-low rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-container/30 transition-all"

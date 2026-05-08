@@ -51,6 +51,7 @@ export interface Post {
     name: string;
     role: string;
     member_type?: string | null;
+    avatar_url: string | null;
   } | null;
   comments: Array<{ count: number }> | null;
   post_likes: Array<{ count: number }> | null;
@@ -193,7 +194,7 @@ export async function fetchAnonPost(id: string): Promise<AnonPost | null> {
 export async function fetchPost(id: string): Promise<Post> {
   const { data, error } = await supabase
     .from("posts")
-    .select("*, profiles!posts_author_id_fkey(name, role, member_type), comments(count), post_likes(count)")
+    .select("*, profiles!posts_author_id_fkey(name, role, member_type, avatar_url), comments(count), post_likes(count)")
     .eq("id", id)
     .single();
 

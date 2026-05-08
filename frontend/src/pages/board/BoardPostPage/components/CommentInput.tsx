@@ -20,7 +20,7 @@ export default function CommentInput({
   const navigate = useNavigate();
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") onSubmit();
+    if (e.key === "Enter" && !e.nativeEvent.isComposing) onSubmit();
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {

@@ -7,7 +7,7 @@ export interface Comment {
   content: string;
   created_at: string;
   updated_at: string;
-  profiles: { name: string } | null;
+  profiles: { name: string; avatar_url: string | null } | null;
 }
 
 export interface AnonComment {
@@ -30,7 +30,7 @@ export async function fetchAnonComments(postId: string): Promise<AnonComment[]> 
 export async function fetchComments(postId: string): Promise<Comment[]> {
   const { data, error } = await supabase
     .from("comments")
-    .select("*, profiles(name)")
+    .select("*, profiles(name, avatar_url)")
     .eq("post_id", postId)
     .order("created_at", { ascending: true });
 
@@ -46,7 +46,7 @@ export async function createComment(
   const { data, error } = await supabase
     .from("comments")
     .insert({ post_id: postId, author_id: authorId, content })
-    .select("*, profiles(name)")
+    .select("*, profiles(name, avatar_url)")
     .single();
 
   if (error) throw error;
@@ -58,7 +58,7 @@ export async function updateComment(id: string, content: string): Promise<Commen
     .from("comments")
     .update({ content })
     .eq("id", id)
-    .select("*, profiles(name)")
+    .select("*, profiles(name, avatar_url)")
     .single();
 
   if (error) throw error;

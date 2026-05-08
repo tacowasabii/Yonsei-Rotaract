@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { formatDateTime } from "@/utils/date";
 import RoleBadge from "@components/common/RoleBadge";
-import { EditIcon, DeleteIcon, KeepIcon, KeepOffIcon } from "@assets/icons";
+import { EditIcon, DeleteIcon, KeepIcon, KeepOffIcon, PersonIcon } from "@assets/icons";
 import type { Post, AnonPost } from "@/api/posts";
 import type { BoardType } from "@/hooks/useBoardType";
 import { BOARD_PATHS } from "@/routes/paths";
@@ -59,15 +59,30 @@ export default function PostHeader({
       </h1>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-end gap-1.5">
-          <span className="text-sm font-semibold text-on-surface">
-            {isAnon ? "익명" : (regularPost?.profiles?.name ?? "알 수 없음")}
-          </span>
-          {!isAnon && <RoleBadge role={regularPost?.profiles?.role} />}
-          <span className="text-xs text-on-surface-variant">·</span>
-          <span className="text-xs text-on-surface-variant">
-            {formatDateTime(post.created_at)}
-          </span>
+        <div className="flex items-center gap-2">
+          <div className="shrink-0">
+            {!isAnon && regularPost?.profiles?.avatar_url ? (
+              <img
+                src={regularPost.profiles.avatar_url}
+                alt={regularPost.profiles.name}
+                className="w-9 h-9 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center">
+                <PersonIcon className="w-5 h-5 text-on-surface-variant" />
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-semibold text-on-surface">
+              {isAnon ? "익명" : (regularPost?.profiles?.name ?? "알 수 없음")}
+            </span>
+            {!isAnon && <RoleBadge role={regularPost?.profiles?.role} />}
+            <span className="text-xs text-on-surface-variant">·</span>
+            <span className="text-xs text-on-surface-variant">
+              {formatDateTime(post.created_at)}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
