@@ -1,6 +1,57 @@
 import { supabase } from "@/lib/supabase";
 import type { Member, AlumniMember, PendingMember, RejectedMember, AppRole } from "./types/member";
 
+function compressAvatar(file: File): Promise<Blob> {
+  const MAX = 512;
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > MAX || height > MAX) {
+        if (width > height) { height = Math.round((height * MAX) / width); width = MAX; }
+        else { width = Math.round((width * MAX) / height); height = MAX; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("압축 실패"))),
+        "image/jpeg", 0.8
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("이미지 로드 실패")); };
+    img.src = url;
+  });
+}
+
+export async function uploadProfileImage(userId: string, file: File): Promise<string> {
+  const blob = await compressAvatar(file);
+  const path = `${userId}/${userId}.jpg`;
+  const { error: uploadError } = await supabase.storage
+    .from("profile-images")
+    .upload(path, blob, { upsert: true, contentType: "image/jpeg" });
+  if (uploadError) throw uploadError;
+  const { data: { publicUrl } } = supabase.storage.from("profile-images").getPublicUrl(path);
+  const urlWithTs = `${publicUrl}?t=${Date.now()}`;
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ avatar_url: urlWithTs })
+    .eq("id", userId);
+  if (updateError) throw updateError;
+  return urlWithTs;
+}
+
+export async function deleteProfileImage(userId: string): Promise<void> {
+  await supabase.storage.from("profile-images").remove([`${userId}/${userId}.jpg`]);
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar_url: null })
+    .eq("id", userId);
+  if (error) throw error;
+}
+
 export async function fetchMembers(): Promise<Member[]> {
   const { data, error } = await supabase
     .from("profiles")
@@ -86,7 +137,7 @@ export async function approveAllPendingMembers(): Promise<void> {
 export async function fetchMyFullProfile(userId: string): Promise<Member> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at, company, job_title, is_company_public, marketing_agree")
+    .select("id, name, email, phone, member_type, admission_year, department, generation, role, status, created_at, company, job_title, is_company_public, marketing_agree, avatar_url")
     .eq("id", userId)
     .single();
   if (error) throw error;

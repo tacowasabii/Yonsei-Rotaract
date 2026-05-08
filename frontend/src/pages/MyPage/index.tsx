@@ -1,10 +1,13 @@
+import { useRef, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMyProfile } from "@/api/hooks/profiles/useMyProfile";
+import { useMyProfile, useUploadProfileImage, useDeleteProfileImage } from "@/api/hooks/profiles/useMyProfile";
 import { useUnreadCount } from "@/api/hooks/messages/useMessages";
 import { PATHS } from "@/routes/paths";
 import RoleBadge from "@components/common/RoleBadge";
 import MemberTypeBadge from "@components/common/MemberTypeBadge";
+import { AddAPhotoIcon, DeleteIcon, PersonIcon } from "@assets/icons";
+import DeleteConfirmModal from "@components/common/DeleteConfirmModal";
 
 const NAV_ITEMS = [
   { label: "내 정보",    to: PATHS.MYPAGE,          icon: "manage_accounts", end: true  },
@@ -16,8 +19,27 @@ export default function MyPageLayout() {
   const { user } = useAuth();
   const { data: profile, isLoading } = useMyProfile(user?.id);
   const { data: unreadCount = 0 } = useUnreadCount(user?.id);
+  const uploadImage = useUploadProfileImage();
+  const deleteImage = useDeleteProfileImage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+    e.target.value = "";
+    uploadImage.mutate({ userId: user.id, file });
+  }
+
+  function handleDeleteConfirm() {
+    if (!user?.id) return;
+    deleteImage.mutate({ userId: user.id }, { onSuccess: () => setShowDeleteModal(false) });
+  }
+
+  const avatarBusy = uploadImage.isPending || deleteImage.isPending;
 
   return (
+    <>
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 pt-12 pb-24 md:pb-12">
       <div className="flex gap-6 items-start">
         {/* 왼쪽 사이드바 */}
@@ -26,13 +48,59 @@ export default function MyPageLayout() {
           <div className="bg-surface-container-lowest rounded-2xl shadow-card p-5">
             {isLoading || !profile ? (
               <div className="flex flex-col items-center gap-3">
-                <div className="h-16 w-16 rounded-full bg-surface-container animate-pulse" />
+                <div className="h-20 w-20 rounded-full bg-surface-container animate-pulse" />
                 <div className="h-4 w-24 rounded-full bg-surface-container animate-pulse" />
               </div>
             ) : (
               <div className="flex flex-col items-center text-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center">
-                  <span className="text-2xl font-black text-white">{profile.name.charAt(0)}</span>
+                <div className="relative">
+                  {profile.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt={profile.name}
+                      className="w-20 h-20 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-outline-variant flex items-center justify-center">
+                      <PersonIcon className="w-14 h-14 text-white" />
+                    </div>
+                  )}
+                  {profile.avatar_url ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteModal(true)}
+                        disabled={avatarBusy}
+                        className="absolute -bottom-0.5 -left-0.5 w-5 h-5 rounded-full bg-error text-white flex items-center justify-center shadow-md hover:opacity-90 disabled:opacity-50 transition-opacity"
+                      >
+                        <DeleteIcon className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={avatarBusy}
+                        className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-outline text-white flex items-center justify-center shadow-md hover:opacity-90 disabled:opacity-50 transition-opacity"
+                      >
+                        <AddAPhotoIcon className="w-3 h-3" />
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={avatarBusy}
+                      className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-outline text-white flex items-center justify-center shadow-md hover:opacity-90 disabled:opacity-50 transition-opacity"
+                    >
+                      <AddAPhotoIcon className="w-3 h-3" />
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
                 </div>
                 <div>
                   <h1 className="text-base font-black font-headline text-on-surface">{profile.name}</h1>
@@ -78,5 +146,16 @@ export default function MyPageLayout() {
         </main>
       </div>
     </div>
+
+      {showDeleteModal && (
+        <DeleteConfirmModal
+          title="프로필 사진 삭제"
+          description="삭제한 사진은 복구할 수 없습니다. 정말 삭제하시겠습니까?"
+          isPending={deleteImage.isPending}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
+    </>
   );
 }

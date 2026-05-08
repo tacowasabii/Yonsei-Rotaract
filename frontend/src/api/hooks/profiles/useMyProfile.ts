@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchMyFullProfile, updateMyPhone, updateMyMemberType, updatePassword, updateMarketingAgree } from "../../profiles";
+import { fetchMyFullProfile, updateMyPhone, updateMyMemberType, updatePassword, updateMarketingAgree, uploadProfileImage, deleteProfileImage } from "../../profiles";
 import type { Member } from "../../types/member";
 
 export function useMyProfile(userId: string | undefined) {
@@ -43,6 +43,27 @@ export function useUpdateMarketingAgree() {
   return useMutation({
     mutationFn: ({ userId, value }: { userId: string; value: boolean }) =>
       updateMarketingAgree(userId, value),
+    onSuccess: (_data, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: ["my-profile", userId] });
+    },
+  });
+}
+
+export function useUploadProfileImage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, file }: { userId: string; file: File }) =>
+      uploadProfileImage(userId, file),
+    onSuccess: (_data, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: ["my-profile", userId] });
+    },
+  });
+}
+
+export function useDeleteProfileImage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId }: { userId: string }) => deleteProfileImage(userId),
     onSuccess: (_data, { userId }) => {
       queryClient.invalidateQueries({ queryKey: ["my-profile", userId] });
     },
