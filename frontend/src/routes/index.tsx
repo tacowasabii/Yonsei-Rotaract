@@ -47,29 +47,40 @@ export const router = createBrowserRouter([
       { path: PATHS.ALUMNI, element: <AlumniPage /> },
       { path: PATHS.GALLERY,element: <GalleryPage /> },
       {
-        path: PATHS.MYPAGE,
-        element: <MyPageLayout />,
+        element: <ProtectedRoute />,
         children: [
-          { index: true,    element: <MyProfile /> },
-          { path: "posts",    element: <MyPosts /> },
-          { path: "messages", element: <MyMessages /> },
+          {
+            path: PATHS.MYPAGE,
+            element: <MyPageLayout />,
+            children: [
+              { index: true,    element: <MyProfile /> },
+              { path: "posts",    element: <MyPosts /> },
+              { path: "messages", element: <MyMessages /> },
+            ],
+          },
         ],
       },
 
       // 게시판
-      { path: PATHS.BOARD,             element: <Navigate to={PATHS.BOARD_FREE} replace /> },
-      { path: PATHS.BOARD_FREE,        element: <BoardPage /> },
-      { path: PATHS.BOARD_FREE_WRITE,  element: <BoardWritePage /> },
-      { path: PATHS.BOARD_FREE_POST,   element: <BoardPostPage /> },
-      { path: PATHS.BOARD_FREE_EDIT,   element: <BoardWritePage /> },
-      { path: PATHS.BOARD_PROMO,       element: <BoardPage /> },
-      { path: PATHS.BOARD_PROMO_WRITE, element: <BoardWritePage /> },
-      { path: PATHS.BOARD_PROMO_POST,  element: <BoardPostPage /> },
-      { path: PATHS.BOARD_PROMO_EDIT,  element: <BoardWritePage /> },
-      { path: PATHS.BOARD_ANON,        element: <BoardPage /> },
-      { path: PATHS.BOARD_ANON_WRITE,  element: <BoardWritePage /> },
-      { path: PATHS.BOARD_ANON_POST,   element: <BoardPostPage /> },
-      { path: PATHS.BOARD_ANON_EDIT,   element: <BoardWritePage /> },
+      { path: PATHS.BOARD,           element: <Navigate to={PATHS.BOARD_FREE} replace /> },
+      { path: PATHS.BOARD_FREE,      element: <BoardPage /> },
+      { path: PATHS.BOARD_FREE_POST, element: <BoardPostPage /> },
+      { path: PATHS.BOARD_PROMO,     element: <BoardPage /> },
+      { path: PATHS.BOARD_PROMO_POST,element: <BoardPostPage /> },
+      { path: PATHS.BOARD_ANON,      element: <BoardPage /> },
+      { path: PATHS.BOARD_ANON_POST, element: <BoardPostPage /> },
+      // 게시판 글쓰기/수정 (로그인 필요)
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: PATHS.BOARD_FREE_WRITE,  element: <BoardWritePage /> },
+          { path: PATHS.BOARD_FREE_EDIT,   element: <BoardWritePage /> },
+          { path: PATHS.BOARD_PROMO_WRITE, element: <BoardWritePage /> },
+          { path: PATHS.BOARD_PROMO_EDIT,  element: <BoardWritePage /> },
+          { path: PATHS.BOARD_ANON_WRITE,  element: <BoardWritePage /> },
+          { path: PATHS.BOARD_ANON_EDIT,   element: <BoardWritePage /> },
+        ],
+      },
 
       // 공지사항 목록 (누구나 접근 가능)
       { path: PATHS.NOTICE, element: <NoticePage /> },
