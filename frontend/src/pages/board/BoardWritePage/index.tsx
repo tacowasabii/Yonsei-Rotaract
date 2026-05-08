@@ -289,8 +289,18 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
           <div className="bg-white rounded-2xl shadow-card px-6 py-5">
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">작성자</p>
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-primary-fixed flex items-center justify-center shrink-0">
-                <PersonIcon className="w-5 h-5 text-primary-container" />
+              <div className="shrink-0">
+                {(boardType === "free" || boardType === "promo") && !isAnon && profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile.name}
+                    className="w-11 h-11 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-11 h-11 rounded-full bg-primary-fixed flex items-center justify-center">
+                    <PersonIcon className="w-5 h-5 text-primary-container" />
+                  </div>
+                )}
               </div>
               <div>
                 <div className="flex items-center gap-1.5">

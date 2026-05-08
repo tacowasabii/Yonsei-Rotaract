@@ -60,19 +60,21 @@ export default function PostHeader({
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="shrink-0">
-            {!isAnon && regularPost?.profiles?.avatar_url ? (
-              <img
-                src={regularPost.profiles.avatar_url}
-                alt={regularPost.profiles.name}
-                className="w-9 h-9 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center">
-                <PersonIcon className="w-5 h-5 text-on-surface-variant" />
-              </div>
-            )}
-          </div>
+          {!isNoticeBoard && (
+            <div className="shrink-0">
+              {!isAnon && regularPost?.profiles?.avatar_url ? (
+                <img
+                  src={regularPost.profiles.avatar_url}
+                  alt={regularPost.profiles.name}
+                  className="w-9 h-9 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center">
+                  <PersonIcon className="w-5 h-5 text-on-surface-variant" />
+                </div>
+              )}
+            </div>
+          )}
           <div className="flex items-center gap-1.5">
             <span className="text-sm font-semibold text-on-surface">
               {isAnon ? "익명" : (regularPost?.profiles?.name ?? "알 수 없음")}
