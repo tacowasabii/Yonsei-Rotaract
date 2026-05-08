@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import Lightbox from "@components/common/Lightbox";
-import { PhotoLibraryIcon, AddPhotoAlternateIcon, SpinnerIcon } from "@assets/icons";
+import { PhotoLibraryIcon, AddPhotoAlternateIcon, SpinnerIcon, AddIcon } from "@assets/icons";
 import { PATHS } from "@/routes/paths";
 import { CATEGORY_STYLES, CATEGORY_DEFAULT } from "@/constants/gallery";
 import { useIsStaff } from "@/contexts/AuthContext";
@@ -61,7 +61,7 @@ export default function GalleryPage() {
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold bg-primary-container text-white hover:opacity-90 active:scale-95 transition-all"
           >
-            <span className="material-symbols-outlined text-base">add</span>
+            <AddIcon className="w-4 h-4" />
             새 앨범
           </button>
         )}
@@ -87,7 +87,7 @@ export default function GalleryPage() {
                 onClick={() => setShowCreateModal(true)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-container text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
               >
-                <span className="material-symbols-outlined text-lg">add</span>
+                <AddIcon className="w-5 h-5" />
                 새 앨범 만들기
               </button>
             )}

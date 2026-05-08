@@ -38,3 +38,4 @@ export { default as AddAPhotoIcon } from './add_a_photo.svg?react';
 export { default as CalendarMonthIcon } from './calendar_month.svg?react';
 export { default as DownloadIcon } from './download.svg?react';
 export { default as SpinnerIcon } from './spinner.svg?react';
+export { default as AddIcon } from './add.svg?react';

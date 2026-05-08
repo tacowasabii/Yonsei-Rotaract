@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import Lightbox from "@components/common/Lightbox";
-import { ArrowBackIcon, AddPhotoAlternateIcon, DownloadIcon, DeleteIcon, SpinnerIcon } from "@assets/icons";
+import { ArrowBackIcon, AddPhotoAlternateIcon, DownloadIcon, DeleteIcon, SpinnerIcon, AddIcon } from "@assets/icons";
 import { PATHS } from "@/routes/paths";
 import { MAX_PHOTOS, MAX_SIZE_MB, MAX_SIZE_BYTES } from "@/utils/image";
 import { useIsStaff } from "@/contexts/AuthContext";
@@ -200,7 +200,7 @@ export default function AlbumDetailPage() {
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-container text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
             >
-              <span className="material-symbols-outlined text-lg">add</span>
+              <AddIcon className="w-5 h-5" />
               사진 추가하기
             </button>
           )}
