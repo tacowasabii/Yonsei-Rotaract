@@ -63,13 +63,13 @@ export default function Navbar() {
 
             {/* 게시판 드롭다운 */}
             <div className="relative group">
-              <button className={`font-headline font-bold tracking-tight transition-colors hover:text-primary-container group-hover:text-primary-container ${
+              <Link to={PATHS.BOARD_FREE} className={`font-headline font-bold tracking-tight transition-colors hover:text-primary-container group-hover:text-primary-container ${
                   isBoardActive
                     ? "text-primary-container border-b-2 border-primary-container pb-1"
                     : "text-slate-500"
                 }`}>
                 게시판
-              </button>
+              </Link>
               <div className="absolute top-4 left-1/2 -translate-x-1/2 pt-3 hidden group-hover:block">
                 <div className="bg-white rounded-2xl shadow-lg border border-slate-100 py-1.5 min-w-30 overflow-hidden">
                   {boardLinks.map((link) => (

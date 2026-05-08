@@ -138,7 +138,7 @@ export default function AdminReports() {
                     {r.status === "pending" ? (
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleStatus(r.id); }}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:opacity-90 transition-opacity"
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-fixed text-primary-container hover:bg-primary-container hover:text-white transition-all"
                       >
                         처리 완료
                       </button>

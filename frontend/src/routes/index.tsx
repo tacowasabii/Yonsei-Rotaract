@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "./Layout";
 import ProtectedRoute from "./ProtectedRoute";
 import { PATHS } from "./paths";
@@ -57,7 +57,7 @@ export const router = createBrowserRouter([
       },
 
       // 게시판
-      { path: PATHS.BOARD,             element: <BoardPage /> },
+      { path: PATHS.BOARD,             element: <Navigate to={PATHS.BOARD_FREE} replace /> },
       { path: PATHS.BOARD_FREE,        element: <BoardPage /> },
       { path: PATHS.BOARD_FREE_WRITE,  element: <BoardWritePage /> },
       { path: PATHS.BOARD_FREE_POST,   element: <BoardPostPage /> },

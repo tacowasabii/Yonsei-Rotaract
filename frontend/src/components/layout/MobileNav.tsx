@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const navItems = [
   { icon: "campaign", label: "소식", to: "/news" },
-  { icon: "forum", label: "게시판", to: "/board" },
+  { icon: "forum", label: "게시판", to: "/board/free" },
   { icon: "school", label: "선배님", to: "/alumni" },
   { icon: "notifications", label: "공지", to: "/notice" },
   { icon: "photo_library", label: "사진첩", to: "/gallery" },
