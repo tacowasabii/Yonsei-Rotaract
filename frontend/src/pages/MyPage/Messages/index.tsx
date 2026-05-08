@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SpinnerIcon } from "@assets/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   useReceivedMessages,
@@ -80,7 +81,7 @@ export default function MyMessages() {
         <div className="bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <SpinnerIcon className="w-8 h-8 text-primary animate-spin" />
             </div>
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">

@@ -1,4 +1,5 @@
 import ModalLayout from "@components/common/ModalLayout";
+import { SpinnerIcon } from "@assets/icons";
 
 interface Props {
   title: string;
@@ -31,7 +32,7 @@ export default function DeleteConfirmModal({ title, description, isPending, onCo
           disabled={isPending}
           className="flex items-center gap-1.5 px-5 py-2 text-sm font-bold rounded-full bg-error text-white hover:opacity-80 transition-all disabled:opacity-50"
         >
-          {isPending && <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+          {isPending && <SpinnerIcon className="w-3.5 h-3.5 animate-spin" />}
           {isPending ? "삭제 중..." : "삭제"}
         </button>
       </div>

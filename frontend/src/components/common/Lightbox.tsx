@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { CloseIcon } from "@assets/icons";
 
 interface LightboxProps {
-  photos: { id: number; color: string }[];
+  photos: { id: string; url: string }[];
   initialIndex: number;
   onClose: () => void;
 }
@@ -54,13 +54,12 @@ export default function Lightbox({ photos, initialIndex, onClose }: LightboxProp
         </button>
       )}
 
-      <div
-        className={`${photos[index].color} rounded-2xl flex items-center justify-center`}
-        style={{ width: "min(80vw, 640px)", height: "min(70vh, 480px)" }}
+      <img
+        src={photos[index].url}
+        alt={`사진 ${index + 1}`}
+        className="max-w-[80vw] max-h-[80vh] object-contain rounded-2xl"
         onClick={(e) => e.stopPropagation()}
-      >
-        <span className="material-symbols-outlined text-6xl text-on-surface-variant/20">image</span>
-      </div>
+      />
 
       {photos.length > 1 && (
         <button

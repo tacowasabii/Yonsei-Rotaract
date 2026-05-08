@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { SpinnerIcon } from "@assets/icons";
 import { useForm, useWatch } from "react-hook-form";
 import { useSignup } from "@/api/hooks/auth/useSignup";
 import { PATHS } from "@/routes/paths";
@@ -224,9 +225,7 @@ export default function SignupPage() {
               }`}
             >
               {signupMutation.isPending && (
-                <span className="material-symbols-outlined text-sm animate-spin">
-                  progress_activity
-                </span>
+                <SpinnerIcon className="w-4 h-4 animate-spin" />
               )}
               {signupMutation.isPending ? "처리 중..." : "가입하기"}
             </button>

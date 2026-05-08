@@ -1,22 +1,26 @@
 import { useState, useRef } from "react";
 import ModalLayout from "@components/common/ModalLayout";
 import DatePicker from "@components/common/DatePicker";
-import { AddPhotoAlternateIcon, CloseIcon } from "@assets/icons";
+import { AddPhotoAlternateIcon, CloseIcon, SpinnerIcon } from "@assets/icons";
 import { MAX_PHOTOS, MAX_SIZE_MB, MAX_SIZE_BYTES, compressImage } from "@/utils/image";
+import { useCreateAlbum } from "@/api/hooks/gallery/useCreateAlbum";
+import type { GalleryCategory } from "@/api/gallery";
 
 interface AlbumCreateModalProps {
   onClose: () => void;
 }
 
-const CATEGORIES = ["봉사활동", "대내활동", "대외활동", "버디활동", "기타"];
+const CATEGORIES: GalleryCategory[] = ["봉사활동", "대내활동", "대외활동", "버디활동", "기타"];
 
 export default function AlbumCreateModal({ onClose }: AlbumCreateModalProps) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState<Date | null>(null);
-  const [category, setCategory] = useState<string | null>(null);
+  const [category, setCategory] = useState<GalleryCategory | null>(null);
   const [coverImages, setCoverImages] = useState<File[]>([]);
   const [sizeError, setSizeError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const createAlbum = useCreateAlbum();
 
   const canSubmit = title.trim().length > 0 && date !== null && category !== null;
 
@@ -34,9 +38,11 @@ export default function AlbumCreateModal({ onClose }: AlbumCreateModalProps) {
   };
 
   const handleSubmit = () => {
-    if (!canSubmit) return;
-    // TODO: API 연동
-    onClose();
+    if (!canSubmit || !date || !category) return;
+    createAlbum.mutate(
+      { title: title.trim(), date, category, photos: coverImages },
+      { onSuccess: onClose }
+    );
   };
 
   return (
@@ -116,6 +122,11 @@ export default function AlbumCreateModal({ onClose }: AlbumCreateModalProps) {
         {sizeError && (
           <p className="text-xs text-red-400 bg-red-50 px-3 py-2 rounded-lg">{sizeError}</p>
         )}
+        {createAlbum.isError && (
+          <p className="text-xs text-red-400 bg-red-50 px-3 py-2 rounded-lg">
+            앨범 생성에 실패했어요. 다시 시도해주세요.
+          </p>
+        )}
         <input
           ref={fileInputRef}
           type="file"
@@ -144,15 +155,19 @@ export default function AlbumCreateModal({ onClose }: AlbumCreateModalProps) {
       <div className="flex justify-end gap-2 pt-1">
         <button
           onClick={onClose}
-          className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all"
+          disabled={createAlbum.isPending}
+          className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all disabled:opacity-40"
         >
           취소
         </button>
         <button
           onClick={handleSubmit}
-          disabled={!canSubmit}
-          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-primary-container text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          disabled={!canSubmit || createAlbum.isPending}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-primary-container text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
+          {createAlbum.isPending && (
+            <SpinnerIcon className="w-4 h-4 animate-spin" />
+          )}
           앨범 만들기
         </button>
       </div>

@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PATHS } from "@/routes/paths";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
-import { FavoriteFillIcon, PersonIcon, AccountBalanceIcon, CheckIcon, ContentCopyIcon, VolunteerActivismIcon } from "@assets/icons";
+import { FavoriteFillIcon, PersonIcon, AccountBalanceIcon, CheckIcon, ContentCopyIcon, VolunteerActivismIcon, SpinnerIcon } from "@assets/icons";
 import DonationFormModal from "./components/DonationFormModal";
 import { usePublicDonations } from "@/api/hooks/donations/usePublicDonations";
 import { usePublicDonationYears } from "@/api/hooks/donations/usePublicDonationYears";
@@ -128,7 +128,7 @@ export default function DonatePage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20 text-on-surface-variant">
-          <span className="material-symbols-outlined text-3xl animate-spin">progress_activity</span>
+          <SpinnerIcon className="w-8 h-8 animate-spin" />
         </div>
       ) : donations.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-2">

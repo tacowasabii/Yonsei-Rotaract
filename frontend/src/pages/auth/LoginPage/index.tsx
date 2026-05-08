@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "@/api/hooks/auth/useLogin";
+import { SpinnerIcon } from "@assets/icons";
 import { PATHS } from "@/routes/paths";
 
 export default function LoginPage() {
@@ -122,9 +123,7 @@ export default function LoginPage() {
               }`}
             >
               {loginMutation.isPending && (
-                <span className="material-symbols-outlined text-sm animate-spin">
-                  progress_activity
-                </span>
+                <SpinnerIcon className="w-4 h-4 animate-spin" />
               )}
               {loginMutation.isPending ? "로그인 중..." : "로그인"}
             </button>

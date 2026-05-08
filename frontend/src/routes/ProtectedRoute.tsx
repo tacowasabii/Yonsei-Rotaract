@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { SpinnerIcon } from "@assets/icons";
 import type { AppRole } from "@/contexts/AuthContext";
 import { PATHS } from "./paths";
 
@@ -20,9 +21,7 @@ export default function ProtectedRoute({ requiredRole = "user" }: Props) {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center py-32">
-        <span className="material-symbols-outlined text-4xl text-primary-container animate-spin">
-          progress_activity
-        </span>
+        <SpinnerIcon className="w-10 h-10 text-primary-container animate-spin" />
       </div>
     );
   }

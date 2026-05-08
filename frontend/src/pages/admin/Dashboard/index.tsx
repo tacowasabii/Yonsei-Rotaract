@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { PersonIcon } from "@assets/icons";
+import { PersonIcon, SpinnerIcon } from "@assets/icons";
 import { useMembers } from "@/api/hooks/profiles/useMembers";
 import { usePendingMembers, useApproveMember, useRejectMember } from "@/api/hooks/profiles/usePendingMembers";
 import { PATHS } from "@/routes/paths";
@@ -71,8 +71,8 @@ export default function AdminDashboard() {
           </div>
           <div className="space-y-3">
             {pendingLoading ? (
-              <div className="flex items-center justify-center py-6 text-on-surface-variant">
-                <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+              <div className="flex items-center justify-center py-6 text-on-surface-variant gap-2">
+                <SpinnerIcon className="w-5 h-5 animate-spin" />
                 불러오는 중...
               </div>
             ) : pendingMembers.length === 0 ? (

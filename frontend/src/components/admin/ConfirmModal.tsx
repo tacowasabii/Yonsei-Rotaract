@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { SpinnerIcon } from "@assets/icons";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 
 interface ConfirmModalProps {
@@ -63,7 +64,7 @@ export default function ConfirmModal({
             }`}
           >
             {isPending && (
-              <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+              <SpinnerIcon className="w-4 h-4 animate-spin" />
             )}
             {confirmLabel}
           </button>

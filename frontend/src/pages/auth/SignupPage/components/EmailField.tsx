@@ -7,6 +7,7 @@ import type {
 import type { SignupFormValues } from "../types";
 import { inputClass, errorClass } from "./fieldStyles";
 import { sendEmailOtp, verifyEmailOtpCode } from "@/api/auth";
+import { SpinnerIcon } from "@assets/icons";
 
 type Props = {
   register: UseFormRegister<SignupFormValues>;
@@ -123,9 +124,7 @@ export function EmailField({
           className="px-4 h-11 bg-primary-fixed text-primary-container text-sm font-bold rounded-xl hover:bg-primary-fixed/70 transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
         >
           {sending && (
-            <span className="material-symbols-outlined text-sm animate-spin">
-              progress_activity
-            </span>
+            <SpinnerIcon className="w-4 h-4 animate-spin" />
           )}
           {sending ? "발송 중..." : otpSent ? "재발송" : "인증번호 발송"}
         </button>
@@ -155,9 +154,7 @@ export function EmailField({
               className="px-4 h-11 bg-primary-container text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
               {verifying && (
-                <span className="material-symbols-outlined text-sm animate-spin">
-                  progress_activity
-                </span>
+                <SpinnerIcon className="w-4 h-4 animate-spin" />
               )}
               {verifying ? "확인 중..." : "확인"}
             </button>

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { PersonIcon, ArrowBackIcon, AddPhotoAlternateIcon, CloseIcon, CheckCircleIcon, LockIcon, PublicIcon, KeepIcon } from "@assets/icons";
+import { PersonIcon, ArrowBackIcon, AddPhotoAlternateIcon, CloseIcon, CheckCircleIcon, LockIcon, PublicIcon, KeepIcon, SpinnerIcon } from "@assets/icons";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import { useAuth, useIsStaff } from "@/contexts/AuthContext";
@@ -31,7 +31,7 @@ export default function BoardWritePage() {
     return (
       <PageLayout>
         <div className="flex justify-center py-20">
-          <span className="w-8 h-8 border-2 border-primary-container/30 border-t-primary-container rounded-full animate-spin" />
+          <SpinnerIcon className="w-8 h-8 text-primary-container animate-spin" />
         </div>
       </PageLayout>
     );
@@ -278,7 +278,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
               disabled={!canSubmit}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-primary-container text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {isPending && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              {isPending && <SpinnerIcon className="w-4 h-4 animate-spin" />}
               {isPending ? (isEditMode ? "저장 중..." : "등록 중...") : (isEditMode ? "저장하기" : "등록하기")}
             </button>
           </div>
