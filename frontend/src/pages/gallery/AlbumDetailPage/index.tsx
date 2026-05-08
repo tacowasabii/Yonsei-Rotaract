@@ -1,37 +1,11 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
-import { ArrowBackIcon, AddPhotoAlternateIcon, CloseIcon, DownloadIcon, DeleteIcon } from "@assets/icons";
+import Lightbox from "@components/common/Lightbox";
+import { ArrowBackIcon, AddPhotoAlternateIcon, DownloadIcon, DeleteIcon } from "@assets/icons";
 import { PATHS } from "@/routes/paths";
+import { MAX_PHOTOS, MAX_SIZE_MB, MAX_SIZE_BYTES, compressImage } from "@/utils/image";
 
-const MAX_PHOTOS = 30;
-const MAX_SIZE_MB = 5;
-const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-const MAX_DIMENSION = 1280;
-
-function compressImage(file: File): Promise<File> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const { width, height } = img;
-      const scale = Math.min(1, MAX_DIMENSION / Math.max(width, height));
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.round(width * scale);
-      canvas.height = Math.round(height * scale);
-      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(
-        (blob) => resolve(blob ? new File([blob], file.name, { type: "image/jpeg" }) : file),
-        "image/jpeg",
-        0.75
-      );
-    };
-    img.src = url;
-  });
-}
-
-// 목 앨범 데이터
 const MOCK_ALBUMS = [
   { id: 1, title: "2025 대동제 봉사부스", date: "2025. 04", color: "bg-primary-fixed/40", accent: "text-primary-container" },
   { id: 2, title: "안산 연희동 벽화 봉사", date: "2025. 03", color: "bg-tertiary-fixed/40", accent: "text-tertiary-container" },
@@ -39,7 +13,6 @@ const MOCK_ALBUMS = [
   { id: 4, title: "신촌 무료급식소 봉사", date: "2025. 02", color: "bg-primary-fixed/30", accent: "text-primary-container" },
 ];
 
-// 목 사진 데이터 (앨범 id별)
 const MOCK_PHOTOS: Record<number, { id: number; color: string; size: "large" | "medium" | "small" }[]> = {
   1: [
     { id: 1, color: "bg-primary-fixed/40", size: "large" },
@@ -67,75 +40,6 @@ const MOCK_PHOTOS: Record<number, { id: number; color: string; size: "large" | "
   ],
   4: [],
 };
-
-interface LightboxProps {
-  photos: { id: number; color: string }[];
-  initialIndex: number;
-  onClose: () => void;
-}
-
-function Lightbox({ photos, initialIndex, onClose }: LightboxProps) {
-  const [index, setIndex] = useState(initialIndex);
-
-  const prev = useCallback(() => setIndex((i) => (i - 1 + photos.length) % photos.length), [photos.length]);
-  const next = useCallback(() => setIndex((i) => (i + 1) % photos.length), [photos.length]);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "ArrowRight") next();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [onClose, prev, next]);
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={onClose}>
-      {/* 닫기 */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-      >
-        <CloseIcon className="w-5 h-5 text-white" />
-      </button>
-
-      {/* 카운터 */}
-      <span className="absolute top-5 left-1/2 -translate-x-1/2 text-white/60 text-sm font-semibold">
-        {index + 1} / {photos.length}
-      </span>
-
-      {/* 이전 */}
-      {photos.length > 1 && (
-        <button
-          onClick={(e) => { e.stopPropagation(); prev(); }}
-          className="absolute left-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-        >
-          <span className="material-symbols-outlined text-white">chevron_left</span>
-        </button>
-      )}
-
-      {/* 사진 */}
-      <div
-        className={`${photos[index].color} rounded-2xl flex items-center justify-center`}
-        style={{ width: "min(80vw, 640px)", height: "min(70vh, 480px)" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <span className="material-symbols-outlined text-6xl text-on-surface-variant/20">image</span>
-      </div>
-
-      {/* 다음 */}
-      {photos.length > 1 && (
-        <button
-          onClick={(e) => { e.stopPropagation(); next(); }}
-          className="absolute right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-        >
-          <span className="material-symbols-outlined text-white">chevron_right</span>
-        </button>
-      )}
-    </div>
-  );
-}
 
 export default function AlbumDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -209,16 +113,12 @@ export default function AlbumDetailPage() {
   };
 
   const handlePhotoClick = (photoId: number, index: number) => {
-    if (selectMode) {
-      toggleSelect(photoId);
-    } else {
-      setLightboxIndex(index);
-    }
+    if (selectMode) toggleSelect(photoId);
+    else setLightboxIndex(index);
   };
 
   return (
     <PageLayout>
-      {/* 뒤로가기 */}
       <div className="flex items-center gap-2 mb-6 text-sm text-on-surface-variant">
         <button
           onClick={() => navigate(PATHS.GALLERY)}
@@ -299,7 +199,6 @@ export default function AlbumDetailPage() {
         <p className="text-xs text-red-400 bg-red-50 px-3 py-2 rounded-lg mb-4">{sizeError}</p>
       )}
 
-      {/* 사진 그리드 or 빈 상태 */}
       {photos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 gap-5">
           <div className="w-20 h-20 rounded-2xl bg-primary-fixed/30 flex items-center justify-center">
@@ -333,7 +232,6 @@ export default function AlbumDetailPage() {
               >
                 <span className="material-symbols-outlined text-3xl text-on-surface-variant/30">image</span>
 
-                {/* 일반 모드 호버 */}
                 {!selectMode && (
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center">
                     <span className="material-symbols-outlined text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -342,20 +240,14 @@ export default function AlbumDetailPage() {
                   </div>
                 )}
 
-                {/* 선택 모드 체크박스 */}
                 {selectMode && (
                   <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                    isSelected
-                      ? "bg-primary-container border-primary-container"
-                      : "bg-white/80 border-white/80"
+                    isSelected ? "bg-primary-container border-primary-container" : "bg-white/80 border-white/80"
                   }`}>
-                    {isSelected && (
-                      <span className="material-symbols-outlined text-white text-sm">check</span>
-                    )}
+                    {isSelected && <span className="material-symbols-outlined text-white text-sm">check</span>}
                   </div>
                 )}
 
-                {/* 선택 모드 오버레이 */}
                 {selectMode && isSelected && (
                   <div className="absolute inset-0 bg-primary-container/20" />
                 )}
