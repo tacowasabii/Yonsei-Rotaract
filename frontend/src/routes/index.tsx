@@ -9,6 +9,7 @@ import NewsPage from "@pages/NewsPage";
 import NoticePage from "@pages/NoticePage";
 import AlumniPage from "@pages/AlumniPage";
 import GalleryPage from "@pages/GalleryPage";
+import GalleryAlbumPage from "@pages/GalleryPage/AlbumDetailPage";
 import MyPageLayout from "@pages/MyPage";
 import MyProfile   from "@pages/MyPage/Profile";
 import MyPosts     from "@pages/MyPage/Posts";
@@ -45,7 +46,8 @@ export const router = createBrowserRouter([
       { path: PATHS.HOME,   element: <HomePage /> },
       { path: PATHS.NEWS,   element: <NewsPage /> },
       { path: PATHS.ALUMNI, element: <AlumniPage /> },
-      { path: PATHS.GALLERY,element: <GalleryPage /> },
+      { path: PATHS.GALLERY,       element: <GalleryPage /> },
+      { path: PATHS.GALLERY_ALBUM, element: <GalleryAlbumPage /> },
       {
         element: <ProtectedRoute />,
         children: [

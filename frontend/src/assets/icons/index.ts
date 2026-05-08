@@ -36,3 +36,4 @@ export { default as ChevronRightIcon } from './chevron_right.svg?react';
 export { default as FlagIcon } from './flag.svg?react';
 export { default as AddAPhotoIcon } from './add_a_photo.svg?react';
 export { default as CalendarMonthIcon } from './calendar_month.svg?react';
+export { default as DownloadIcon } from './download.svg?react';

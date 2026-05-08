@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import PageLayout from "@components/layout/PageLayout";
 import PageHeader from "@components/layout/PageHeader";
 import ModalLayout from "@components/common/ModalLayout";
@@ -360,11 +361,77 @@ function AlbumCreateModal({ onClose }: AlbumCreateModalProps) {
   );
 }
 
+interface LightboxProps {
+  photos: { id: number; color: string }[];
+  initialIndex: number;
+  onClose: () => void;
+}
+
+function Lightbox({ photos, initialIndex, onClose }: LightboxProps) {
+  const [index, setIndex] = useState(initialIndex);
+
+  const prev = useCallback(() => setIndex((i) => (i - 1 + photos.length) % photos.length), [photos.length]);
+  const next = useCallback(() => setIndex((i) => (i + 1) % photos.length), [photos.length]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose, prev, next]);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={onClose}>
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+      >
+        <CloseIcon className="w-5 h-5 text-white" />
+      </button>
+
+      <span className="absolute top-5 left-1/2 -translate-x-1/2 text-white/60 text-sm font-semibold">
+        {index + 1} / {photos.length}
+      </span>
+
+      {photos.length > 1 && (
+        <button
+          onClick={(e) => { e.stopPropagation(); prev(); }}
+          className="absolute left-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        >
+          <span className="material-symbols-outlined text-white">chevron_left</span>
+        </button>
+      )}
+
+      <div
+        className={`${photos[index].color} rounded-2xl flex items-center justify-center`}
+        style={{ width: "min(80vw, 640px)", height: "min(70vh, 480px)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <span className="material-symbols-outlined text-6xl text-on-surface-variant/20">image</span>
+      </div>
+
+      {photos.length > 1 && (
+        <button
+          onClick={(e) => { e.stopPropagation(); next(); }}
+          className="absolute right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        >
+          <span className="material-symbols-outlined text-white">chevron_right</span>
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function GalleryPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"albums" | "all">("albums");
   const [activeCategory, setActiveCategory] = useState("전체");
   const [hoveredPhoto, setHoveredPhoto] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const filteredPhotos =
     activeCategory === "전체"
@@ -419,6 +486,7 @@ export default function GalleryPage() {
             {albums.map((album) => (
               <div
                 key={album.id}
+                onClick={() => navigate(`/gallery/${album.id}`)}
                 className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-card hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group"
               >
                 {/* Album Cover */}
@@ -481,9 +549,10 @@ export default function GalleryPage() {
             </div>
 
             <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-              {filteredPhotos.map((photo) => (
+              {filteredPhotos.map((photo, i) => (
                 <div
                   key={photo.id}
+                  onClick={() => setLightboxIndex(i)}
                   className={`break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer group ${photo.color} ${
                     photo.size === "large" ? "h-64" : photo.size === "medium" ? "h-48" : "h-36"
                   } flex items-center justify-center`}
@@ -514,6 +583,14 @@ export default function GalleryPage() {
 
       {showCreateModal && (
         <AlbumCreateModal onClose={() => setShowCreateModal(false)} />
+      )}
+
+      {lightboxIndex !== null && (
+        <Lightbox
+          photos={filteredPhotos}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
     </PageLayout>
   );

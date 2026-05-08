@@ -8,6 +8,7 @@ export const PATHS = {
   NOTICE_EDIT: "/notice/:id/edit",
   ALUMNI: "/alumni",
   GALLERY: "/gallery",
+  GALLERY_ALBUM: "/gallery/:id",
   MYPAGE: "/mypage",
   MYPAGE_POSTS: "/mypage/posts",
   MYPAGE_MESSAGES: "/mypage/messages",
