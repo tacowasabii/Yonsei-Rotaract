@@ -78,10 +78,10 @@ export async function createAlbum(
   return fetchAlbum(albumId);
 }
 
-export async function softDeleteAlbum(albumId: string): Promise<void> {
+export async function deleteAlbum(albumId: string): Promise<void> {
   const { error } = await supabase
     .from("albums")
-    .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+    .delete()
     .eq("id", albumId);
   if (error) throw error;
 }
