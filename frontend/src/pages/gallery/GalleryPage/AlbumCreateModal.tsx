@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import ModalLayout from "@components/common/ModalLayout";
-import DatePicker from "@components/common/DatePicker";
+import MonthPicker from "@components/common/MonthPicker";
 import { AddPhotoAlternateIcon, CloseIcon, SpinnerIcon } from "@assets/icons";
 import { MAX_PHOTOS, MAX_SIZE_MB, MAX_SIZE_BYTES, compressImage } from "@/utils/image";
 import { useCreateAlbum } from "@/api/hooks/gallery/useCreateAlbum";
@@ -73,9 +73,9 @@ export default function AlbumCreateModal({ onClose }: AlbumCreateModalProps) {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-semibold text-on-surface">
-          날짜 <span className="text-red-400">*</span>
+          활동 월 <span className="text-red-400">*</span>
         </label>
-        <DatePicker value={date} onChange={setDate} />
+        <MonthPicker value={date} onChange={setDate} />
       </div>
 
       <div className="flex flex-col gap-1.5">

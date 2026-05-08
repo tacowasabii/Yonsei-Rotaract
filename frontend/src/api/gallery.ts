@@ -61,7 +61,7 @@ export async function createAlbum(
     .from("albums")
     .insert({
       title: params.title,
-      date: params.date.toISOString().slice(0, 10),
+      date: `${params.date.getFullYear()}-${String(params.date.getMonth() + 1).padStart(2, "0")}`,
       category: params.category,
       created_by: createdBy,
     })

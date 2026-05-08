@@ -96,10 +96,8 @@ export default function AlbumDetailPage() {
     else setLightboxIndex(index);
   };
 
-  const dateLabel = new Date(album.date).toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-  });
+  const [y, m] = album.date.split("-");
+  const dateLabel = `${y}. ${parseInt(m)}.`;
 
   return (
     <PageLayout>

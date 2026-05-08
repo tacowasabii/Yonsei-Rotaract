@@ -100,10 +100,8 @@ export default function GalleryPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {albums.map((album) => {
               const { color, accent } = CATEGORY_STYLES[album.category] ?? CATEGORY_DEFAULT;
-              const dateLabel = new Date(album.date).toLocaleDateString("ko-KR", {
-                year: "numeric",
-                month: "2-digit",
-              });
+              const [y, m] = album.date.split("-");
+              const dateLabel = `${y}. ${parseInt(m)}.`;
               return (
                 <div
                   key={album.id}
@@ -167,38 +165,38 @@ export default function GalleryPage() {
 
       {/* 전체 사진 */}
       {activeTab === "all" && (
-        photosLoading ? (
-          <div className="flex justify-center py-24">
-            <SpinnerIcon className="w-8 h-8 animate-spin" />
+        <>
+          <div className="flex gap-2 flex-wrap mb-6">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                  activeCategory === cat
+                    ? "bg-primary-container text-white"
+                    : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
-        ) : allPhotos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="w-20 h-20 rounded-2xl bg-primary-fixed/30 flex items-center justify-center">
-              <AddPhotoAlternateIcon className="w-10 h-10 text-primary-container/60" />
-            </div>
-            <div className="text-center">
-              <p className="font-semibold text-on-surface">등록된 사진이 없어요</p>
-              <p className="text-sm text-on-surface-variant mt-1">앨범을 만들고 사진을 추가해보세요.</p>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="flex gap-2 flex-wrap mb-6">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
-                    activeCategory === cat
-                      ? "bg-primary-container text-white"
-                      : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
 
+          {photosLoading ? (
+            <div className="flex justify-center py-24">
+              <SpinnerIcon className="w-8 h-8 animate-spin" />
+            </div>
+          ) : filteredPhotos.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 gap-4">
+              <div className="w-20 h-20 rounded-2xl bg-primary-fixed/30 flex items-center justify-center">
+                <AddPhotoAlternateIcon className="w-10 h-10 text-primary-container/60" />
+              </div>
+              <div className="text-center">
+                <p className="font-semibold text-on-surface">등록된 사진이 없어요</p>
+                <p className="text-sm text-on-surface-variant mt-1">앨범을 만들고 사진을 추가해보세요.</p>
+              </div>
+            </div>
+          ) : (
             <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
               {filteredPhotos.map((photo, i) => (
                 <div
@@ -214,8 +212,8 @@ export default function GalleryPage() {
                 </div>
               ))}
             </div>
-          </>
-        )
+          )}
+        </>
       )}
 
       {showCreateModal && <AlbumCreateModal onClose={() => setShowCreateModal(false)} />}
