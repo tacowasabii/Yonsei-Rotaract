@@ -54,6 +54,16 @@ export default function Footer() {
                   신고하기
                 </button>
               </li>
+              <li>
+                <a
+                  href="https://forms.gle/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-on-surface-variant hover:text-primary-container text-sm transition-colors"
+                >
+                  버그 리포팅
+                </a>
+              </li>
             </ul>
           </div>
           <div className="space-y-3">
