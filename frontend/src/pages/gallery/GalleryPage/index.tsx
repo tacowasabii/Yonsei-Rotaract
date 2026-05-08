@@ -107,24 +107,34 @@ export default function GalleryPage() {
                   className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-card hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group"
                 >
                   <div className={`h-52 ${color} relative flex items-center justify-center`}>
-                    <div className="grid grid-cols-2 gap-2 p-4 w-full h-full">
-                      {[0, 1, 2, 3].map((j) => (
-                        <div
-                          key={j}
-                          className={`rounded-xl overflow-hidden ${!album.cover_urls[j] ? "bg-white/20 flex items-center justify-center" : ""}`}
-                        >
-                          {album.cover_urls[j] ? (
-                            <img
-                              src={album.cover_urls[j]}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="material-symbols-outlined text-2xl text-on-surface-variant/30">image</span>
-                          )}
+                    {(() => {
+                      const urls = album.cover_urls;
+                      const n = urls.length;
+                      const itemClass = (i: number) => {
+                        if (n <= 1) return "col-span-2 row-span-2";
+                        if (n === 2) return "row-span-2";
+                        if (n === 3 && i === 2) return "col-span-2";
+                        return "";
+                      };
+                      const slots: (string | null)[] = n === 0 ? [null] : urls.slice(0, 4);
+                      return (
+                        <div className="grid grid-cols-2 grid-rows-2 gap-2 p-4 w-full h-full">
+                          {slots.map((url, j) => (
+                            <div
+                              key={j}
+                              className={`rounded-xl overflow-hidden ${itemClass(j)} ${!url ? "bg-white/20 flex items-center justify-center" : ""}`}
+                            >
+                              {url ? (
+                                <img src={url} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="material-symbols-outlined text-2xl text-on-surface-variant/30">image</span>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })()}
+
                     <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
                     <div className="absolute bottom-4 left-4">
                       <span className={`text-xs font-bold ${accent} bg-white/80 px-2 py-0.5 rounded-full`}>

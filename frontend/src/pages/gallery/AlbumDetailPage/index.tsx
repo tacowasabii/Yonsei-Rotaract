@@ -179,7 +179,7 @@ export default function AlbumDetailPage() {
         accept="image/*"
         multiple
         className="hidden"
-        onChange={(e) => handleFiles(e.target.files)}
+        onChange={(e) => { handleFiles(e.target.files); e.currentTarget.value = ""; }}
       />
 
       {sizeError && (
@@ -198,11 +198,17 @@ export default function AlbumDetailPage() {
           {isStaff && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-container text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
+              disabled={uploadPhotos.isPending}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-container text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <AddIcon className="w-5 h-5" />
-              사진 추가하기
+              {uploadPhotos.isPending
+                ? <SpinnerIcon className="w-5 h-5 animate-spin" />
+                : <AddIcon className="w-5 h-5" />}
+              {uploadPhotos.isPending ? "업로드 중..." : "사진 추가하기"}
             </button>
+          )}
+          {uploadPhotos.error && (
+            <p className="text-xs text-red-400">{uploadPhotos.error instanceof Error ? uploadPhotos.error.message : "업로드에 실패했어요."}</p>
           )}
         </div>
       ) : (
