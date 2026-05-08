@@ -58,6 +58,7 @@ export default function MyProfile() {
   const [success, setSuccess] = useState(false);
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [showInfoPopover, setShowInfoPopover] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
@@ -130,6 +131,7 @@ export default function MyProfile() {
         currentPw: "",
       });
       setSuccess(true);
+      setIsEditing(false);
       setTimeout(() => setSuccess(false), 2000);
     } catch {
       setError("currentPw", { message: "저장에 실패했습니다. 다시 시도해주세요." });
@@ -233,160 +235,218 @@ export default function MyProfile() {
         </div>
 
         {/* 정보 수정 */}
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="bg-surface-container-lowest rounded-2xl shadow-card divide-y divide-outline-variant/10">
-            {/* 연락처 */}
-            <div className="px-6 py-5">
-              <label className="text-xs font-bold text-on-surface-variant block mb-2">
-                연락처 <span className="text-error ml-0.5">*</span>
-              </label>
-              <input
-                type="tel"
-                {...register("phone", {
-                  required: "연락처를 입력해주세요.",
-                  pattern: {
-                    value: /^01[0-9]\d{7,8}$/,
-                    message: "올바른 연락처를 입력해주세요.",
-                  },
-                })}
-                placeholder="01012345678"
-                className={inputCls(!!errors.phone)}
-              />
-              <FieldError message={errors.phone?.message} />
+        {!isEditing ? (
+          <div className="bg-surface-container-lowest rounded-2xl shadow-card px-6 py-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xs font-bold text-on-surface-variant">추가 정보</h2>
+              <button
+                type="button"
+                onClick={() => setIsEditing(true)}
+                className="text-xs font-semibold text-primary-container hover:opacity-70 transition-opacity"
+              >
+                수정
+              </button>
             </div>
+            <div className="space-y-3">
+              <InfoRow label="연락처" value={profile.phone || "-"} />
+              {isAlumni && (
+                <>
+                  <InfoRow label="소속" value={profile.company || "-"} />
+                  <InfoRow label="직함" value={profile.job_title || "-"} />
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs font-semibold text-on-surface-variant w-14 shrink-0">
+                      공개 여부
+                    </span>
+                    <span className="text-sm text-on-surface">
+                      {profile.is_company_public ? "공개" : "비공개"}
+                    </span>
+                  </div>
+                </>
+              )}
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-semibold text-on-surface-variant w-14 shrink-0">
+                  비밀번호
+                </span>
+                <span className="text-sm text-on-surface">••••••••</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="bg-surface-container-lowest rounded-2xl shadow-card divide-y divide-outline-variant/10">
+              {/* 연락처 */}
+              <div className="px-6 py-5">
+                <label className="text-xs font-bold text-on-surface-variant block mb-2">
+                  연락처 <span className="text-error ml-0.5">*</span>
+                </label>
+                <input
+                  type="tel"
+                  {...register("phone", {
+                    required: "연락처를 입력해주세요.",
+                    pattern: {
+                      value: /^01[0-9]\d{7,8}$/,
+                      message: "올바른 연락처를 입력해주세요.",
+                    },
+                  })}
+                  placeholder="01012345678"
+                  className={inputCls(!!errors.phone)}
+                />
+                <FieldError message={errors.phone?.message} />
+              </div>
 
-            {/* 회사 정보 (졸업생만) */}
-            {isAlumni && (
+              {/* 회사 정보 (졸업생만) */}
+              {isAlumni && (
+                <div className="px-6 py-5 space-y-3">
+                  <label className="text-xs font-bold text-on-surface-variant block">
+                    회사 정보
+                  </label>
+                  <div>
+                    <label className="text-xs font-semibold text-on-surface-variant block mb-1">
+                      소속{companyPublic && <span className="text-error ml-1">*</span>}
+                    </label>
+                    <input
+                      type="text"
+                      {...register("company", {
+                        validate: (v) => {
+                          if (companyPublic && !v.trim()) return "공개 시 소속을 입력해주세요.";
+                          return true;
+                        },
+                      })}
+                      placeholder="회사, 병원, 법률사무소 등"
+                      className={inputCls(!!errors.company)}
+                    />
+                    <FieldError message={errors.company?.message} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-on-surface-variant block mb-1">
+                      직함{" "}
+                      <span className="font-normal text-on-surface-variant/60">(선택)</span>
+                    </label>
+                    <input
+                      type="text"
+                      {...register("jobTitle")}
+                      placeholder="마케팅팀, 개발자, 개인 사업 등 자유롭게 입력해주세요"
+                      className={inputCls(false)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <div>
+                      <p className="text-sm font-semibold text-on-surface">공개 여부</p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">
+                        선배님 페이지에 회사 정보를 공개합니다
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={companyPublic}
+                      onClick={() => setValue("companyPublic", !companyPublic)}
+                      className={`w-12 h-7 rounded-full transition-colors relative shrink-0 ${companyPublic ? "bg-primary-container" : "bg-surface-container-highest"}`}
+                    >
+                      <span
+                        className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${companyPublic ? "translate-x-5" : "translate-x-0"}`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* 비밀번호 변경 (선택) */}
               <div className="px-6 py-5 space-y-3">
                 <label className="text-xs font-bold text-on-surface-variant block">
-                  회사 정보
+                  비밀번호 변경{" "}
+                  <span className="font-normal text-on-surface-variant/60">(선택)</span>
                 </label>
                 <div>
                   <label className="text-xs font-semibold text-on-surface-variant block mb-1">
-                    소속{companyPublic && <span className="text-error ml-1">*</span>}
+                    새 비밀번호
                   </label>
                   <input
-                    type="text"
-                    {...register("company", {
+                    type="password"
+                    {...register("newPw", {
                       validate: (v) => {
-                        if (companyPublic && !v.trim()) return "공개 시 소속을 입력해주세요.";
+                        if (!v) return true;
+                        if (v.length < 8) return "8자 이상이어야 합니다.";
+                        if (!PW_PATTERN.test(v))
+                          return "영문, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.";
                         return true;
                       },
                     })}
-                    placeholder="회사, 병원, 법률사무소 등"
-                    className={inputCls(!!errors.company)}
+                    placeholder="변경 시에만 입력 (8자 이상)"
+                    className={inputCls(!!errors.newPw)}
                   />
-                  <FieldError message={errors.company?.message} />
+                  <FieldError message={errors.newPw?.message} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-on-surface-variant block mb-1">
-                    직함{" "}
-                    <span className="font-normal text-on-surface-variant/60">(선택)</span>
+                    새 비밀번호 확인
                   </label>
                   <input
-                    type="text"
-                    {...register("jobTitle")}
-                    placeholder="마케팅팀, 개발자, 개인 사업 등 자유롭게 입력해주세요"
-                    className={inputCls(false)}
+                    type="password"
+                    {...register("confirmPw", {
+                      validate: (v) => {
+                        const pw = getValues("newPw");
+                        if (!pw) return true;
+                        return v === pw || "새 비밀번호가 일치하지 않습니다.";
+                      },
+                    })}
+                    placeholder="새 비밀번호를 다시 입력"
+                    className={inputCls(!!errors.confirmPw)}
                   />
+                  <FieldError message={errors.confirmPw?.message} />
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <div>
-                    <p className="text-sm font-semibold text-on-surface">공개 여부</p>
-                    <p className="text-xs text-on-surface-variant mt-0.5">
-                      선배님 페이지에 회사 정보를 공개합니다
-                    </p>
-                  </div>
+              </div>
+
+              {/* 현재 비밀번호 + 저장/취소 */}
+              <div className="px-6 py-5 space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-on-surface-variant block mb-2">
+                    현재 비밀번호 확인
+                  </label>
+                  <input
+                    type="password"
+                    {...register("currentPw", {
+                      required: "현재 비밀번호를 입력해주세요.",
+                    })}
+                    placeholder="저장하려면 현재 비밀번호를 입력하세요"
+                    className={inputCls(!!errors.currentPw)}
+                  />
+                  <FieldError message={errors.currentPw?.message} />
+                </div>
+                {success && (
+                  <p className="text-xs text-primary-container">저장되었습니다.</p>
+                )}
+                <div className="flex gap-2">
                   <button
                     type="button"
-                    role="switch"
-                    aria-checked={companyPublic}
-                    onClick={() => setValue("companyPublic", !companyPublic)}
-                    className={`w-12 h-7 rounded-full transition-colors relative shrink-0 ${companyPublic ? "bg-primary-container" : "bg-surface-container-highest"}`}
+                    onClick={() => {
+                      reset({
+                        phone: profile.phone ?? "",
+                        company: profile.company ?? "",
+                        jobTitle: profile.job_title ?? "",
+                        companyPublic: profile.is_company_public ?? true,
+                        newPw: "",
+                        confirmPw: "",
+                        currentPw: "",
+                      });
+                      setIsEditing(false);
+                    }}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-surface-container text-on-surface-variant hover:opacity-70 transition-all"
                   >
-                    <span
-                      className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${companyPublic ? "translate-x-5" : "translate-x-0"}`}
-                    />
+                    취소
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-primary-container text-white hover:opacity-90 disabled:opacity-50 transition-all"
+                  >
+                    {saving ? "저장 중..." : "저장"}
                   </button>
                 </div>
               </div>
-            )}
-
-            {/* 비밀번호 변경 (선택) */}
-            <div className="px-6 py-5 space-y-3">
-              <label className="text-xs font-bold text-on-surface-variant block">
-                비밀번호 변경{" "}
-                <span className="font-normal text-on-surface-variant/60">(선택)</span>
-              </label>
-              <div>
-                <label className="text-xs font-semibold text-on-surface-variant block mb-1">
-                  새 비밀번호
-                </label>
-                <input
-                  type="password"
-                  {...register("newPw", {
-                    validate: (v) => {
-                      if (!v) return true;
-                      if (v.length < 8) return "8자 이상이어야 합니다.";
-                      if (!PW_PATTERN.test(v))
-                        return "영문, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다.";
-                      return true;
-                    },
-                  })}
-                  placeholder="변경 시에만 입력 (8자 이상)"
-                  className={inputCls(!!errors.newPw)}
-                />
-                <FieldError message={errors.newPw?.message} />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-on-surface-variant block mb-1">
-                  새 비밀번호 확인
-                </label>
-                <input
-                  type="password"
-                  {...register("confirmPw", {
-                    validate: (v) => {
-                      const pw = getValues("newPw");
-                      if (!pw) return true;
-                      return v === pw || "새 비밀번호가 일치하지 않습니다.";
-                    },
-                  })}
-                  placeholder="새 비밀번호를 다시 입력"
-                  className={inputCls(!!errors.confirmPw)}
-                />
-                <FieldError message={errors.confirmPw?.message} />
-              </div>
             </div>
-
-            {/* 현재 비밀번호 + 저장 */}
-            <div className="px-6 py-5 space-y-3">
-              <div>
-                <label className="text-xs font-bold text-on-surface-variant block mb-2">
-                  현재 비밀번호 확인
-                </label>
-                <input
-                  type="password"
-                  {...register("currentPw", {
-                    required: "현재 비밀번호를 입력해주세요.",
-                  })}
-                  placeholder="저장하려면 현재 비밀번호를 입력하세요"
-                  className={inputCls(!!errors.currentPw)}
-                />
-                <FieldError message={errors.currentPw?.message} />
-              </div>
-              {success && (
-                <p className="text-xs text-primary-container">저장되었습니다.</p>
-              )}
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full py-2.5 rounded-xl text-sm font-bold bg-primary-container text-white hover:opacity-90 disabled:opacity-50 transition-all"
-              >
-                {saving ? "저장 중..." : "저장"}
-              </button>
-            </div>
-          </div>
-        </form>
+          </form>
+        )}
       </div>
 
       {showTypeModal && (
