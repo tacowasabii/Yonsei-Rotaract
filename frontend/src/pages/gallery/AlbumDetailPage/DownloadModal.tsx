@@ -34,7 +34,8 @@ export default function DownloadModal({ count, isPending, progress, onConfirm, o
         </div>
       ) : (
         <p className="text-sm text-on-surface-variant mb-6">
-          선택한 <span className="font-semibold text-on-surface">{count}장</span>을 다운로드합니다.
+          선택한 <span className="font-semibold text-on-surface">{count}장</span>을{" "}
+          {count === 1 ? "다운로드합니다." : "압축 파일(.zip)로 다운로드합니다."}
         </p>
       )}
 
