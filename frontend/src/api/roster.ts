@@ -27,3 +27,13 @@ export async function insertRosterMembers(members: RosterInsert[]): Promise<void
   const { error } = await supabase.from("active_member_roster").insert(members);
   if (error) throw error;
 }
+
+export async function updateRosterMember(id: string, data: Partial<RosterInsert>): Promise<void> {
+  const { error } = await supabase.from("active_member_roster").update(data).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteRosterMember(id: string): Promise<void> {
+  const { error } = await supabase.from("active_member_roster").delete().eq("id", id);
+  if (error) throw error;
+}
