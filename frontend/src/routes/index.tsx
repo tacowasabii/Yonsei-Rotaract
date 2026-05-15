@@ -34,6 +34,7 @@ import AdminPending from "@pages/admin/Pending";
 import AdminMembers from "@pages/admin/Members";
 import AdminDonations from "@pages/admin/Donations";
 import AdminReports from "@pages/admin/Reports";
+import AdminRoster from "@pages/admin/Roster";
 
 // 후원
 import DonatePage from "@pages/DonatePage";
@@ -129,6 +130,7 @@ export const router = createBrowserRouter([
           { path: "members",   element: <AdminMembers /> },
           { path: "donations", element: <AdminDonations /> },
           { path: "reports",   element: <AdminReports /> },
+          { path: "roster",    element: <AdminRoster /> },
         ],
       },
     ],

@@ -44,6 +44,7 @@ export const PATHS = {
   ADMIN_MEMBERS: "/admin/members",
   ADMIN_DONATIONS: "/admin/donations",
   ADMIN_REPORTS: "/admin/reports",
+  ADMIN_ROSTER: "/admin/roster",
 } as const;
 
 export const BOARD_PATHS = {
