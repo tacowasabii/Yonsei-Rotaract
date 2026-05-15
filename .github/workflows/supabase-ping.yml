@@ -1,0 +1,28 @@
+name: Supabase Ping
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping 운영 DB
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://hsilxvjhhnoeecovwtus.supabase.co/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_PROD_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PROD_ANON_KEY }}")
+          echo "운영 DB HTTP Status: $STATUS"
+          if [ "$STATUS" != "200" ]; then exit 1; fi
+
+      - name: Ping 개발 DB
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://jnnggfhymhausvummeku.supabase.co/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_DEV_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_DEV_ANON_KEY }}")
+          echo "개발 DB HTTP Status: $STATUS"
+          if [ "$STATUS" != "200" ]; then exit 1; fi
