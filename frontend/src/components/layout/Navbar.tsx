@@ -100,7 +100,7 @@ export default function Navbar() {
               <div className="sm:hidden">
                 <button
                   onClick={handleSignOut}
-                  className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+                  className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   로그아웃
                 </button>
@@ -109,7 +109,7 @@ export default function Navbar() {
                 {isAdmin && (
                   <Link
                     to={PATHS.ADMIN}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
                   >
                     <ManageAccountsIcon className="w-4 h-4" />
                     관리자
@@ -117,14 +117,14 @@ export default function Navbar() {
                 )}
                 <Link
                   to={PATHS.MYPAGE}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
                 >
                   <PersonIcon className="w-4 h-4" />
                   마이페이지
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+                  className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   로그아웃
                 </button>
@@ -134,20 +134,20 @@ export default function Navbar() {
             <>
               <Link
                 to={PATHS.LOGIN}
-                className="sm:hidden px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+                className="sm:hidden px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
               >
                 로그인
               </Link>
               <div className="hidden sm:flex items-center gap-2">
                 <Link
                   to={PATHS.LOGIN}
-                  className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+                  className="px-4 py-1.5 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   로그인
                 </Link>
                 <Link
                   to={PATHS.SIGNUP}
-                  className="px-4 py-1.5 rounded-full text-sm font-bold bg-linear-to-br from-primary to-primary-container text-white shadow-lg hover:opacity-90 active:scale-95 transition-all"
+                  className="px-4 py-1.5 rounded-full text-sm font-bold bg-linear-to-br from-primary to-primary-container text-white shadow-lg hover:opacity-90 transition-colors"
                 >
                   회원가입
                 </Link>
