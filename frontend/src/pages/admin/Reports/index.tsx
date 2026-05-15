@@ -47,18 +47,19 @@ export default function AdminReports() {
       <AdminTabBar tabs={tabs} activeTab={tab} onChange={handleTabChange} variant="segment" />
 
       {/* 테이블 */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-        <table className="w-full">
+      <div className="bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-max text-sm">
           <thead>
-            <tr className="border-b border-outline-variant/30 bg-surface-container/50">
-              <th className="text-left px-5 py-3.5 text-xs font-bold text-on-surface-variant">신고자</th>
-              <th className="text-left px-5 py-3.5 text-xs font-bold text-on-surface-variant">제목</th>
-              <th className="text-left px-5 py-3.5 text-xs font-bold text-on-surface-variant">내용</th>
-              <th className="text-left px-5 py-3.5 text-xs font-bold text-on-surface-variant w-62.5">접수일</th>
-              {isAdmin && <th className="px-5 py-3.5 w-37.5" />}
+            <tr className="border-b border-outline-variant/20 bg-surface-container/50">
+              <th className="text-left px-5 py-3 text-xs font-bold text-on-surface-variant whitespace-nowrap">신고자</th>
+              <th className="text-left px-5 py-3 text-xs font-bold text-on-surface-variant whitespace-nowrap">제목</th>
+              <th className="text-left px-5 py-3 text-xs font-bold text-on-surface-variant whitespace-nowrap">내용</th>
+              <th className="text-left px-5 py-3 text-xs font-bold text-on-surface-variant whitespace-nowrap">접수일</th>
+              {isAdmin && <th className="px-5 py-3" />}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-outline-variant/10">
             {isLoading ? (
               <tr>
                 <td colSpan={5} className="text-center py-16 text-sm text-on-surface-variant">
@@ -76,16 +77,16 @@ export default function AdminReports() {
                 <tr
                   key={r.id}
                   onClick={() => setSelected(r)}
-                  className="border-b border-outline-variant/20 last:border-0 hover:bg-surface-container/30 transition-colors cursor-pointer"
+                  className="hover:bg-primary-fixed/10 transition-colors cursor-pointer"
                 >
-                  <td className="px-5 py-4 text-sm font-semibold text-on-surface whitespace-nowrap">
+                  <td className="px-4 py-2.5 font-semibold text-on-surface whitespace-nowrap">
                     {r.profiles?.name ?? "알 수 없음"}
                   </td>
-                  <td className="px-5 py-4 text-sm text-on-surface">{r.title}</td>
-                  <td className="px-5 py-4 text-sm text-on-surface-variant max-w-xs truncate">{r.content}</td>
-                  <td className="px-5 py-4 text-sm text-on-surface-variant whitespace-nowrap">{formatDateTime(r.created_at)}</td>
+                  <td className="px-4 py-2.5 text-on-surface">{r.title}</td>
+                  <td className="px-4 py-2.5 text-on-surface-variant max-w-xs truncate">{r.content}</td>
+                  <td className="px-4 py-2.5 text-on-surface-variant whitespace-nowrap">{formatDateTime(r.created_at)}</td>
                   {isAdmin && (
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-4 py-2.5 text-right">
                       {r.status === "pending" ? (
                         <button
                           onClick={(e) => { e.stopPropagation(); resolve(r.id); }}
@@ -108,6 +109,7 @@ export default function AdminReports() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       <Pagination page={page} totalPages={totalPages} onChange={setPage} />
