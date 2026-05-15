@@ -11,7 +11,7 @@ import {
 import type { RosterInsert } from "@/api/roster";
 import LoadingState from "@components/admin/LoadingState";
 import ConfirmModal from "@components/admin/ConfirmModal";
-import { EditIcon, DeleteIcon } from "@assets/icons";
+import { EditIcon, DeleteIcon, UploadFileIcon } from "@assets/icons";
 import { formatPhone } from "@pages/admin/shared";
 
 type ParsedRow = {
@@ -264,9 +264,7 @@ export default function AdminRoster() {
               </>
             ) : (
               <>
-                <span className="material-symbols-outlined text-base">
-                  upload_file
-                </span>
+                <UploadFileIcon className="w-4 h-4" />
                 엑셀 업로드
               </>
             )}

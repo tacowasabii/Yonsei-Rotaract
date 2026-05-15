@@ -3,15 +3,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePendingMembers } from "@/api/hooks/profiles/usePendingMembers";
 import { PATHS } from "@/routes/paths";
 import RoleBadge from "@components/common/RoleBadge";
-import { VolunteerActivismIcon, DashboardIcon, PersonAddIcon, GroupIcon, FlagIcon, ManageAccountsIcon } from "@assets/icons";
+import { VolunteerActivismIcon, DashboardIcon, PersonAddIcon, GroupIcon, FlagIcon, ManageAccountsIcon, ArrowBackIcon, LogoutIcon } from "@assets/icons";
 
 const navItems = [
   { to: PATHS.ADMIN,           label: "대시보드", icon: <DashboardIcon className="w-5 h-5" />,          end: true,  showBadge: false },
   { to: PATHS.ADMIN_PENDING,   label: "가입 신청", icon: <PersonAddIcon className="w-5 h-5" />,          end: false, showBadge: true  },
   { to: PATHS.ADMIN_MEMBERS,   label: "회원 관리", icon: <GroupIcon className="w-5 h-5" />,              end: false, showBadge: false },
+  { to: PATHS.ADMIN_ROSTER,    label: "부원 명단",  icon: <ManageAccountsIcon className="w-5 h-5" />,    end: false, showBadge: false },
   { to: PATHS.ADMIN_DONATIONS, label: "후원자 관리", icon: <VolunteerActivismIcon className="w-5 h-5" />,  end: false, showBadge: false },
   { to: PATHS.ADMIN_REPORTS,   label: "신고 관리",  icon: <FlagIcon className="w-5 h-5" />,              end: false, showBadge: false },
-  { to: PATHS.ADMIN_ROSTER,    label: "부원 명단", icon: <ManageAccountsIcon className="w-5 h-5" />, end: false, showBadge: false },
 ];
 
 export default function AdminLayout() {
@@ -83,14 +83,14 @@ export default function AdminLayout() {
             to={PATHS.HOME}
             className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-white/60 hover:bg-white/10 hover:text-white transition-all"
           >
-            <span className="material-symbols-outlined text-base">arrow_back</span>
+            <ArrowBackIcon className="w-4 h-4" />
             메인 사이트로
           </Link>
           <button
             onClick={handleSignOut}
             className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-white/60 hover:bg-white/10 hover:text-white transition-all"
           >
-            <span className="material-symbols-outlined text-base">logout</span>
+            <LogoutIcon className="w-4 h-4" />
             로그아웃
           </button>
         </div>
