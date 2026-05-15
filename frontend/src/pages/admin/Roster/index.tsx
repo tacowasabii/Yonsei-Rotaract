@@ -1,11 +1,12 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import * as XLSX from "xlsx";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, useIsAdmin } from "@/contexts/AuthContext";
 import {
   useRoster,
   useInsertRoster,
   useUpdateRoster,
   useDeleteRoster,
+  useDeleteRosterByGeneration,
 } from "@/api/hooks/roster/useRoster";
 import type { RosterInsert } from "@/api/roster";
 import LoadingState from "@components/admin/LoadingState";
@@ -73,10 +74,12 @@ const inputCls =
 
 export default function AdminRoster() {
   const { profile } = useAuth();
+  const isAdmin = useIsAdmin();
   const { data: roster = [], isLoading } = useRoster();
   const insertRoster = useInsertRoster();
   const updateRoster = useUpdateRoster();
   const deleteRoster = useDeleteRoster();
+  const deleteRosterBulk = useDeleteRosterByGeneration();
 
   // 업로드
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -101,6 +104,9 @@ export default function AdminRoster() {
     id: string;
     name: string;
   } | null>(null);
+
+  // 전체 삭제 모달 ("전체" or 기수 문자열)
+  const [bulkDeleteTarget, setBulkDeleteTarget] = useState<string | null>(null);
 
   // 성공 후 3초 뒤 idle 복귀
   useEffect(() => {
@@ -227,6 +233,7 @@ export default function AdminRoster() {
           </p>
         </div>
 
+        {isAdmin && (
         <div className="flex items-center gap-3 shrink-0">
           {uploadStatus === "success" && (
             <span className="text-xs text-green-600 font-semibold flex items-center gap-1">
@@ -272,6 +279,7 @@ export default function AdminRoster() {
             onChange={handleInputChange}
           />
         </div>
+        )}
       </div>
 
       {/* 명단 */}
@@ -315,12 +323,23 @@ export default function AdminRoster() {
             ))}
           </div>
 
-          <p className="text-xs text-on-surface-variant">
-            총{" "}
-            <span className="font-semibold text-on-surface">
-              {displayedMembers.length}명
-            </span>
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-on-surface-variant">
+              총{" "}
+              <span className="font-semibold text-on-surface">
+                {displayedMembers.length}명
+              </span>
+            </p>
+            {isAdmin && (
+              <button
+                onClick={() => setBulkDeleteTarget(selectedGen)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-error hover:bg-error/10 transition-all"
+              >
+                <DeleteIcon className="w-3.5 h-3.5" />
+                {selectedGen === "전체" ? "전체 삭제" : `${selectedGen} 전체 삭제`}
+              </button>
+            )}
+          </div>
 
           <div className="bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden">
             <div className="overflow-x-auto">
@@ -412,14 +431,13 @@ export default function AdminRoster() {
                           <input
                             type="text"
                             value={editForm.phone}
-                            onChange={(e) =>
-                              setEditForm((f) => ({
-                                ...f,
-                                phone: e.target.value,
-                              }))
-                            }
+                            onChange={(e) => {
+                              const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
+                              setEditForm((f) => ({ ...f, phone: digits }));
+                            }}
                             className={inputCls}
-                            placeholder="010-0000-0000"
+                            placeholder="01000000000"
+                            maxLength={11}
                           />
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
@@ -462,7 +480,7 @@ export default function AdminRoster() {
                           {formatPhone(m.phone)}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="flex items-center gap-1 justify-end">
+                          {isAdmin && <div className="flex items-center gap-1 justify-end">
                             <button
                               onClick={() => startEdit(m)}
                               className="p-1 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
@@ -479,7 +497,7 @@ export default function AdminRoster() {
                             >
                               <DeleteIcon className="w-4 h-4" />
                             </button>
-                          </div>
+                          </div>}
                         </td>
                       </tr>
                     ),
@@ -502,6 +520,34 @@ export default function AdminRoster() {
           onConfirm={handleConfirmDelete}
           onClose={() => setDeleteTarget(null)}
           isPending={deleteRoster.isPending}
+        />
+      )}
+
+      {/* 전체 삭제 확인 모달 */}
+      {bulkDeleteTarget && (
+        <ConfirmModal
+          title={bulkDeleteTarget === "전체" ? "전체 삭제" : `${bulkDeleteTarget} 전체 삭제`}
+          message={
+            bulkDeleteTarget === "전체"
+              ? "명단 전체를 삭제합니다. 이 작업은 되돌릴 수 없습니다."
+              : `${bulkDeleteTarget} 부원 전체를 삭제합니다. 이 작업은 되돌릴 수 없습니다.`
+          }
+          icon="delete"
+          isDestructive
+          confirmLabel="전체 삭제"
+          onConfirm={() => {
+            deleteRosterBulk.mutate(
+              bulkDeleteTarget === "전체" ? null : bulkDeleteTarget,
+              {
+                onSuccess: () => {
+                  setBulkDeleteTarget(null);
+                  setSelectedGen("전체");
+                },
+              },
+            );
+          }}
+          onClose={() => setBulkDeleteTarget(null)}
+          isPending={deleteRosterBulk.isPending}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchRoster, insertRosterMembers, updateRosterMember, deleteRosterMember } from "../../roster";
+import { fetchRoster, insertRosterMembers, updateRosterMember, deleteRosterMember, deleteRosterByGeneration } from "../../roster";
 import type { RosterInsert } from "../../roster";
 
 const rosterQueryKey = ["admin-roster"] as const;
@@ -36,6 +36,16 @@ export function useDeleteRoster() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteRosterMember(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: rosterQueryKey });
+    },
+  });
+}
+
+export function useDeleteRosterByGeneration() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (generation: string | null) => deleteRosterByGeneration(generation),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: rosterQueryKey });
     },

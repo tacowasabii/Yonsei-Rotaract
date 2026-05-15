@@ -37,3 +37,9 @@ export async function deleteRosterMember(id: string): Promise<void> {
   const { error } = await supabase.from("active_member_roster").delete().eq("id", id);
   if (error) throw error;
 }
+
+export async function deleteRosterByGeneration(generation: string | null): Promise<void> {
+  const query = supabase.from("active_member_roster").delete();
+  const { error } = await (generation ? query.eq("generation", generation) : query.not("id", "is", null));
+  if (error) throw error;
+}
