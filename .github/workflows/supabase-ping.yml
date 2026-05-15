@@ -12,7 +12,7 @@ jobs:
       - name: Ping 운영 DB
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "https://hsilxvjhhnoeecovwtus.supabase.co/rest/v1/" \
+            "https://hsilxvjhhnoeecovwtus.supabase.co/rest/v1/posts?limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_PROD_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PROD_ANON_KEY }}")
           echo "운영 DB HTTP Status: $STATUS"
@@ -21,7 +21,7 @@ jobs:
       - name: Ping 개발 DB
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "https://jnnggfhymhausvummeku.supabase.co/rest/v1/" \
+            "https://jnnggfhymhausvummeku.supabase.co/rest/v1/posts?limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_DEV_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_DEV_ANON_KEY }}")
           echo "개발 DB HTTP Status: $STATUS"
