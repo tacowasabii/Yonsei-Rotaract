@@ -1,5 +1,4 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import * as XLSX from "xlsx";
 import { useAuth, useIsAdmin } from "@/contexts/AuthContext";
 import {
   useRoster,
@@ -11,66 +10,13 @@ import {
 import type { RosterInsert } from "@/api/roster";
 import LoadingState from "@components/admin/LoadingState";
 import ConfirmModal from "@components/admin/ConfirmModal";
-import { EditIcon, DeleteIcon, UploadFileIcon } from "@assets/icons";
-import { formatPhone } from "@pages/admin/shared";
-
-type ParsedRow = {
-  department: string;
-  name: string;
-  student_id: string;
-  phone: string;
-  generation: string;
-};
-
-type EditForm = {
-  department: string;
-  name: string;
-  student_id: string;
-  phone: string;
-  generation: string; // 숫자만 (예: "54.5", "58")
-};
+import { UploadFileIcon } from "@assets/icons";
+import { parseExcel } from "./utils";
+import RosterTable, { type EditForm } from "./components/RosterTable";
 
 type UploadStatus = "idle" | "loading" | "success" | "error";
 
-function parseStudentId(raw: unknown): string {
-  if (raw === null || raw === undefined || raw === "") return "";
-  const num = Number(raw);
-  if (!isNaN(num) && isFinite(num)) return Math.round(num).toString();
-  return String(raw);
-}
-
-function parseExcel(file: File): Promise<ParsedRow[]> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target!.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
-          defval: "",
-        });
-        const parsed: ParsedRow[] = rows
-          .map((row) => ({
-            department: String(row["소속분과"] ?? "").trim(),
-            name: String(row["이름"] ?? "").trim(),
-            student_id: parseStudentId(row["학번"]),
-            phone: String(row["전화번호"] ?? "").replace(/\D/g, ""),
-            generation: String(row["기수"] ?? "").trim(),
-          }))
-          .filter((r) => r.name && r.generation);
-        resolve(parsed);
-      } catch {
-        reject(new Error("엑셀 파일을 파싱할 수 없습니다."));
-      }
-    };
-    reader.onerror = () => reject(new Error("파일을 읽을 수 없습니다."));
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-const inputCls =
-  "w-full px-2 py-1 bg-surface-container rounded-lg text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-container/30";
+const parseGenNum = (g: string) => parseFloat(g.replace("기", "")) || 0;
 
 export default function AdminRoster() {
   const { profile } = useAuth();
@@ -81,15 +27,12 @@ export default function AdminRoster() {
   const deleteRoster = useDeleteRoster();
   const deleteRosterBulk = useDeleteRosterByGeneration();
 
-  // 업로드
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
   const [uploadMessage, setUploadMessage] = useState<string>("");
 
-  // 뷰 필터
   const [selectedGen, setSelectedGen] = useState<string>("전체");
 
-  // 인라인 수정
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditForm>({
     department: "",
@@ -99,16 +42,9 @@ export default function AdminRoster() {
     generation: "",
   });
 
-  // 삭제 모달
-  const [deleteTarget, setDeleteTarget] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
-
-  // 전체 삭제 모달 ("전체" or 기수 문자열)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [bulkDeleteTarget, setBulkDeleteTarget] = useState<string | null>(null);
 
-  // 성공 후 3초 뒤 idle 복귀
   useEffect(() => {
     if (uploadStatus !== "success") return;
     const timer = setTimeout(() => setUploadStatus("idle"), 3000);
@@ -128,9 +64,7 @@ export default function AdminRoster() {
         const rows = await parseExcel(file);
         if (rows.length === 0) {
           setUploadStatus("error");
-          setUploadMessage(
-            "유효한 데이터가 없습니다. 파일 형식을 확인해주세요.",
-          );
+          setUploadMessage("유효한 데이터가 없습니다. 파일 형식을 확인해주세요.");
           return;
         }
         const members: RosterInsert[] = rows.map((r) => ({
@@ -155,14 +89,11 @@ export default function AdminRoster() {
     [profile, insertRoster],
   );
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
-    e.target.value = "";
-  };
+  function handleEditFormChange(field: keyof EditForm, value: string) {
+    setEditForm((f) => ({ ...f, [field]: value }));
+  }
 
-  // 수정 시작
-  function startEdit(m: (typeof roster)[number]) {
+  function handleStartEdit(m: (typeof roster)[number]) {
     setEditingId(m.id);
     setEditForm({
       department: m.department,
@@ -173,7 +104,6 @@ export default function AdminRoster() {
     });
   }
 
-  // 수정 저장
   function handleSaveEdit() {
     if (!editingId) return;
     updateRoster.mutate(
@@ -191,7 +121,6 @@ export default function AdminRoster() {
     );
   }
 
-  // 삭제 확인
   function handleConfirmDelete() {
     if (!deleteTarget) return;
     deleteRoster.mutate(deleteTarget.id, {
@@ -199,8 +128,6 @@ export default function AdminRoster() {
     });
   }
 
-  // 기수 정렬 (내림차순)
-  const parseGenNum = (g: string) => parseFloat(g.replace("기", "")) || 0;
   const grouped = roster.reduce<Record<string, typeof roster>>((acc, m) => {
     if (!acc[m.generation]) acc[m.generation] = [];
     acc[m.generation].push(m);
@@ -210,14 +137,11 @@ export default function AdminRoster() {
     (a, b) => parseGenNum(b) - parseGenNum(a),
   );
 
-  const sortMembers = (list: typeof roster) =>
-    [...list].sort((a, b) => {
+  const displayedMembers = [...(selectedGen === "전체" ? roster : (grouped[selectedGen] ?? []))].sort(
+    (a, b) => {
       const diff = parseGenNum(b.generation) - parseGenNum(a.generation);
       return diff !== 0 ? diff : a.name.localeCompare(b.name, "ko");
-    });
-
-  const displayedMembers = sortMembers(
-    selectedGen === "전체" ? roster : (grouped[selectedGen] ?? []),
+    },
   );
 
   return (
@@ -234,49 +158,50 @@ export default function AdminRoster() {
         </div>
 
         {isAdmin && (
-        <div className="flex items-center gap-3 shrink-0">
-          {uploadStatus === "success" && (
-            <span className="text-xs text-green-600 font-semibold flex items-center gap-1">
-              <span className="material-symbols-outlined text-base">
-                check_circle
+          <div className="flex items-center gap-3 shrink-0">
+            {uploadStatus === "success" && (
+              <span className="text-xs text-green-600 font-semibold flex items-center gap-1">
+                <span className="material-symbols-outlined text-base">check_circle</span>
+                {uploadMessage}
               </span>
-              {uploadMessage}
-            </span>
-          )}
-          {uploadStatus === "error" && (
-            <span className="text-xs text-error font-semibold flex items-center gap-1">
-              <span className="material-symbols-outlined text-base">error</span>
-              {uploadMessage}
-            </span>
-          )}
-
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadStatus === "loading"}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-primary-container text-white hover:opacity-90 disabled:opacity-50 transition-all"
-          >
-            {uploadStatus === "loading" ? (
-              <>
-                <span className="material-symbols-outlined text-base animate-spin">
-                  progress_activity
-                </span>
-                업로드 중...
-              </>
-            ) : (
-              <>
-                <UploadFileIcon className="w-4 h-4" />
-                엑셀 업로드
-              </>
             )}
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".xlsx,.xls"
-            className="hidden"
-            onChange={handleInputChange}
-          />
-        </div>
+            {uploadStatus === "error" && (
+              <span className="text-xs text-error font-semibold flex items-center gap-1">
+                <span className="material-symbols-outlined text-base">error</span>
+                {uploadMessage}
+              </span>
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadStatus === "loading"}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-primary-container text-white hover:opacity-90 disabled:opacity-50 transition-all"
+            >
+              {uploadStatus === "loading" ? (
+                <>
+                  <span className="material-symbols-outlined text-base animate-spin">
+                    progress_activity
+                  </span>
+                  업로드 중...
+                </>
+              ) : (
+                <>
+                  <UploadFileIcon className="w-4 h-4" />
+                  엑셀 업로드
+                </>
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFile(file);
+                e.target.value = "";
+              }}
+            />
+          </div>
         )}
       </div>
 
@@ -333,181 +258,27 @@ export default function AdminRoster() {
                 onClick={() => setBulkDeleteTarget(selectedGen)}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-error hover:bg-error/10 transition-all"
               >
-                <DeleteIcon className="w-3.5 h-3.5" />
+                <span className="material-symbols-outlined text-sm">delete</span>
                 {selectedGen === "전체" ? "전체 삭제" : `${selectedGen} 전체 삭제`}
               </button>
             )}
           </div>
 
-          <div className="bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-max text-sm">
-                <thead>
-                  <tr className="border-b border-outline-variant/20 bg-surface-container/50">
-                    <th className="text-left px-5 py-3 text-xs font-bold text-on-surface-variant whitespace-nowrap">
-                      기수
-                    </th>
-                    <th className="text-left px-5 py-3 text-xs font-bold text-on-surface-variant whitespace-nowrap">
-                      이름
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant whitespace-nowrap">
-                      소속분과
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant whitespace-nowrap">
-                      학번
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-bold text-on-surface-variant whitespace-nowrap">
-                      전화번호
-                    </th>
-                    <th className="px-4 py-3" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/10">
-                  {displayedMembers.map((m) =>
-                    editingId === m.id ? (
-                      <tr key={m.id} className="bg-primary-fixed/5">
-                        <td className="px-5 py-2">
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="number"
-                              step="0.5"
-                              value={editForm.generation}
-                              onChange={(e) =>
-                                setEditForm((f) => ({
-                                  ...f,
-                                  generation: e.target.value,
-                                }))
-                              }
-                              className="w-16 px-2 py-1 bg-surface-container rounded-lg text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-container/30"
-                              placeholder="58"
-                            />
-                            <span className="text-sm text-on-surface-variant">
-                              기
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-2">
-                          <input
-                            type="text"
-                            value={editForm.name}
-                            onChange={(e) =>
-                              setEditForm((f) => ({
-                                ...f,
-                                name: e.target.value,
-                              }))
-                            }
-                            className={inputCls}
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="text"
-                            value={editForm.department}
-                            onChange={(e) =>
-                              setEditForm((f) => ({
-                                ...f,
-                                department: e.target.value,
-                              }))
-                            }
-                            className={inputCls}
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="text"
-                            value={editForm.student_id}
-                            onChange={(e) =>
-                              setEditForm((f) => ({
-                                ...f,
-                                student_id: e.target.value,
-                              }))
-                            }
-                            className={inputCls}
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="text"
-                            value={editForm.phone}
-                            onChange={(e) => {
-                              const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
-                              setEditForm((f) => ({ ...f, phone: digits }));
-                            }}
-                            className={inputCls}
-                            placeholder="01000000000"
-                            maxLength={11}
-                          />
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={handleSaveEdit}
-                              disabled={updateRoster.isPending}
-                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary-container text-white hover:opacity-90 disabled:opacity-50 whitespace-nowrap"
-                            >
-                              저장
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              disabled={updateRoster.isPending}
-                              className="px-2.5 py-1 rounded-lg text-xs font-semibold text-on-surface-variant hover:bg-surface-container whitespace-nowrap"
-                            >
-                              취소
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      <tr
-                        key={m.id}
-                        className="hover:bg-primary-fixed/10 transition-colors"
-                      >
-                        <td className="px-5 py-3 text-sm text-on-surface-variant whitespace-nowrap">
-                          {m.generation}
-                        </td>
-                        <td className="px-5 py-3 font-semibold text-on-surface whitespace-nowrap">
-                          {m.name}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-on-surface-variant whitespace-nowrap">
-                          {m.department}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-on-surface-variant whitespace-nowrap">
-                          {m.student_id}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-on-surface-variant whitespace-nowrap">
-                          {formatPhone(m.phone)}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          {isAdmin && <div className="flex items-center gap-1 justify-end">
-                            <button
-                              onClick={() => startEdit(m)}
-                              className="p-1 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
-                              title="수정"
-                            >
-                              <EditIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() =>
-                                setDeleteTarget({ id: m.id, name: m.name })
-                              }
-                              className="p-1 rounded-lg text-on-surface-variant hover:text-error hover:bg-error/10"
-                              title="삭제"
-                            >
-                              <DeleteIcon className="w-4 h-4" />
-                            </button>
-                          </div>}
-                        </td>
-                      </tr>
-                    ),
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <RosterTable
+            members={displayedMembers}
+            isAdmin={isAdmin}
+            editingId={editingId}
+            editForm={editForm}
+            updatePending={updateRoster.isPending}
+            onStartEdit={handleStartEdit}
+            onCancelEdit={() => setEditingId(null)}
+            onSaveEdit={handleSaveEdit}
+            onEditFormChange={handleEditFormChange}
+            onDeleteTarget={setDeleteTarget}
+          />
         </div>
       )}
 
-      {/* 삭제 확인 모달 */}
       {deleteTarget && (
         <ConfirmModal
           title="부원 삭제"
@@ -521,7 +292,6 @@ export default function AdminRoster() {
         />
       )}
 
-      {/* 전체 삭제 확인 모달 */}
       {bulkDeleteTarget && (
         <ConfirmModal
           title={bulkDeleteTarget === "전체" ? "전체 삭제" : `${bulkDeleteTarget} 전체 삭제`}
