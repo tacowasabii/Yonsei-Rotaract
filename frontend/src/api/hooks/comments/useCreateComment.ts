@@ -7,9 +7,9 @@ export function useCreateComment(postId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (content: string) => {
+    mutationFn: ({ content, parentId }: { content: string; parentId?: string }) => {
       if (!user) throw new Error("로그인이 필요합니다.");
-      return createComment(user.id, postId, content);
+      return createComment(user.id, postId, content, parentId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });

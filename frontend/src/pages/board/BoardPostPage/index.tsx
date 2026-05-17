@@ -58,6 +58,8 @@ export default function BoardPostPage() {
   const [editingId, setEditingId]         = useState<string | null>(null);
   const [editText, setEditText]           = useState("");
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+  const [replyingToId, setReplyingToId]   = useState<string | null>(null);
+  const [replyText, setReplyText]         = useState("");
 
   const isAuthor = isAnon
     ? (anonPost?.is_mine ?? false)
@@ -66,7 +68,16 @@ export default function BoardPostPage() {
   function handleCreateComment() {
     const trimmed = commentText.trim();
     if (!trimmed) return;
-    createComment(trimmed, { onSuccess: () => setCommentText("") });
+    createComment({ content: trimmed }, { onSuccess: () => setCommentText("") });
+  }
+
+  function handleReplySubmit() {
+    const trimmed = replyText.trim();
+    if (!trimmed || !replyingToId) return;
+    createComment(
+      { content: trimmed, parentId: replyingToId },
+      { onSuccess: () => { setReplyText(""); setReplyingToId(null); } },
+    );
   }
 
   function handleEditStart(commentId: string, content: string) {
@@ -257,6 +268,13 @@ export default function BoardPostPage() {
             onEditCancel={handleEditCancel}
             onEditTextChange={setEditText}
             onDeleteClick={setDeletingCommentId}
+            replyingToId={replyingToId}
+            replyText={replyText}
+            isCreatingReply={isCreating}
+            onReplyStart={setReplyingToId}
+            onReplyCancel={() => { setReplyingToId(null); setReplyText(""); }}
+            onReplyTextChange={setReplyText}
+            onReplySubmit={handleReplySubmit}
           />
 
           <CommentInput
