@@ -38,7 +38,7 @@ export default function PostHeader({
   }
 
   return (
-    <div className="px-8 pt-8 pb-6 border-b border-surface-container">
+    <div className="px-4 md:px-8 pt-6 md:pt-8 pb-5 md:pb-6 border-b border-surface-container">
       <div className="flex items-center gap-2 mb-3">
         <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-fixed text-primary-container">
           {boardLabel}
@@ -54,11 +54,11 @@ export default function PostHeader({
         <span className="text-xs text-on-surface-variant">#{post.post_number}</span>
       </div>
 
-      <h1 className="text-2xl font-black text-on-surface font-headline leading-snug mb-4">
+      <h1 className="text-xl md:text-2xl font-black text-on-surface font-headline leading-snug mb-4">
         {post.title}
       </h1>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-y-2">
         <div className="flex items-center gap-2">
           {!isNoticeBoard && (
             <div className="shrink-0">

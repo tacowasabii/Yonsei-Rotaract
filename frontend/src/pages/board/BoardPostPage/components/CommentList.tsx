@@ -183,7 +183,7 @@ export default function CommentList({
     return (
       <div className="divide-y divide-surface-container">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="px-8 py-4 animate-pulse flex gap-3">
+          <div key={i} className="px-4 md:px-8 py-4 animate-pulse flex gap-3">
             <div className="w-9 h-9 rounded-full bg-surface-container shrink-0" />
             <div className="flex-1 space-y-2 pt-1">
               <div className="h-3 bg-surface-container rounded w-20" />
@@ -198,7 +198,7 @@ export default function CommentList({
 
   if (comments.length === 0) {
     return (
-      <div className="px-8 py-10 text-center text-sm text-on-surface-variant">
+      <div className="px-4 md:px-8 py-10 text-center text-sm text-on-surface-variant">
         아직 댓글이 없습니다.
       </div>
     );
@@ -233,7 +233,7 @@ export default function CommentList({
         const isReplying = replyingToId === comment.id;
 
         return (
-          <div key={comment.id} className="px-8 py-4">
+          <div key={comment.id} className="px-4 md:px-8 py-4">
             <CommentItem
               comment={comment}
               {...sharedItemProps}
@@ -244,7 +244,7 @@ export default function CommentList({
 
             {/* 기존 답글 목록 */}
             {replies.length > 0 && (
-              <div className="ml-12 mt-3 space-y-3 border-l-2 border-surface-container pl-4">
+              <div className="ml-8 md:ml-12 mt-3 space-y-3 border-l-2 border-surface-container pl-4">
                 {replies.map((reply) => (
                   <CommentItem key={reply.id} comment={reply} {...sharedItemProps} />
                 ))}
@@ -253,7 +253,7 @@ export default function CommentList({
 
             {/* 인라인 답글 입력창 */}
             {isReplying && (
-              <div className="ml-12 mt-3 flex gap-2">
+              <div className="ml-8 md:ml-12 mt-3 flex gap-2">
                 <input
                   type="text"
                   value={replyText}

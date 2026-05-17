@@ -149,7 +149,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5 items-start">
         <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-          <div className="px-8 pt-7 pb-5 border-b border-surface-container flex items-center gap-3">
+          <div className="px-4 md:px-8 pt-5 md:pt-7 pb-5 border-b border-surface-container flex items-center gap-3">
             <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-fixed text-primary-container">
               {boardLabel}
             </span>
@@ -163,7 +163,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
             </h1>
           </div>
 
-          <div className="px-8 py-6 space-y-5">
+          <div className="px-4 md:px-8 py-5 md:py-6 space-y-5">
             {/* 제목 */}
             <div>
               <input
@@ -259,7 +259,7 @@ function WriteForm({ existingPost, isEditMode, boardType, boardLabel, isAnon, is
             )}
           </div>
 
-          <div className="px-8 pb-7 flex justify-end gap-3">
+          <div className="px-4 md:px-8 pb-5 md:pb-7 flex justify-end gap-3">
             <button
               onClick={() => {
                 if (isEditMode && id) {

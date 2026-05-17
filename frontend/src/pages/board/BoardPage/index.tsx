@@ -52,8 +52,8 @@ export default function BoardPage() {
     <PageLayout>
       <PageHeader iconNode={<ForumIcon />} title={boardLabel} subtitle={boardDesc} />
 
-      <div className="flex items-center justify-between gap-4 mb-5">
-        <div className="relative w-full max-w-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <div className="relative w-full sm:max-w-sm">
           <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" />
           <input
             type="text"
@@ -87,7 +87,7 @@ export default function BoardPage() {
 
       <div className="bg-surface-container-low rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full table-fixed border-separate border-spacing-y-0.5">
+          <table className="w-full border-separate border-spacing-y-0.5">
             <thead>
               <tr className="bg-surface-container text-on-surface-variant text-sm font-semibold">
                 <th className="py-4 px-4 text-center w-16">번호</th>
@@ -104,7 +104,7 @@ export default function BoardPage() {
                   className="bg-secondary-fixed/30 hover:bg-secondary-fixed/50 transition-colors cursor-pointer"
                 >
                   <td className="py-4 px-4 text-center">
-                    <span className="bg-primary-container text-white px-2 py-0.5 rounded text-[10px] font-bold">공지</span>
+                    <span className="bg-primary-container text-white px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap">공지</span>
                   </td>
                   <td className="py-4 px-4 font-bold text-primary-container max-w-0">
                     <div className="flex items-center gap-2 min-w-0">

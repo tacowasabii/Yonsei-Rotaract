@@ -206,7 +206,7 @@ export default function BoardPostPage() {
           />
 
           {/* 본문 */}
-          <div className="px-8 py-8 min-h-37.5">
+          <div className="px-4 md:px-8 py-6 md:py-8 min-h-37.5">
             <p className="text-on-surface leading-relaxed whitespace-pre-line text-[15px]">
               {resolvedPost.content}
             </p>
@@ -225,7 +225,7 @@ export default function BoardPostPage() {
           </div>
 
           {/* 액션 바 */}
-          <div className="px-8 py-4 flex items-center justify-between">
+          <div className="px-4 md:px-8 py-4 flex items-center justify-between">
             <div className="flex items-center gap-5">
               <button
                 onClick={handleLikeClick}

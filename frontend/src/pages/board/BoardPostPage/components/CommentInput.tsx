@@ -32,7 +32,7 @@ export default function CommentInput({
   }
 
   return (
-    <div className="px-8 py-5 bg-surface-container-low border-t border-surface-container">
+    <div className="px-4 md:px-8 py-5 bg-surface-container-low border-t border-surface-container">
       {isLoggedIn ? (
         <div className="flex gap-3">
           <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center shrink-0">
